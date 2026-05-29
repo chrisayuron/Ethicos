@@ -263,6 +263,7 @@
             font-weight: 600;
         }
 
+        /* Modal Login */
         .modal {
             display: none;
             position: fixed;
@@ -270,7 +271,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -278,7 +279,7 @@
 
         .modal-content {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 30px;
+            padding: 35px;
             border-radius: 28px;
             width: 90%;
             max-width: 400px;
@@ -288,12 +289,34 @@
         .modal-content h2 {
             margin-bottom: 20px;
             color: #f39c12;
+            text-align: center;
         }
 
-        .modal-content input {
+        .modal-content .login-icon {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
+            padding-right: 45px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
@@ -301,29 +324,60 @@
             font-size: 14px;
         }
 
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
+        .password-wrapper input:focus {
+            outline: none;
+            border-color: #e94560;
         }
 
-        .modal-save, .modal-cancel {
-            flex: 1;
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .toggle-password:hover {
+            color: #f39c12;
+        }
+
+        .modal-login-btn {
+            width: 100%;
             padding: 12px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
             border: none;
             border-radius: 30px;
+            color: white;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
+            margin-top: 10px;
         }
 
-        .modal-save {
-            background: #27ae60;
-            color: white;
+        .modal-login-btn:hover {
+            transform: scale(1.02);
         }
 
         .modal-cancel {
-            background: #7f8c8d;
-            color: white;
+            width: 100%;
+            padding: 10px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 15px;
+            text-align: center;
         }
 
         @media (max-width: 1100px) {
@@ -436,35 +490,42 @@
 <!-- Modal Login -->
 <div id="loginModal" class="modal">
     <div class="modal-content">
-        <h2><i class="fas fa-user-shield"></i> Acceso Docente</h2>
-        <input type="email" id="loginEmail" placeholder="Correo electrónico">
-        <input type="password" id="loginPassword" placeholder="Contraseña">
-        <div class="modal-buttons">
-            <button class="modal-save" id="doLoginBtn">Ingresar</button>
-            <button class="modal-cancel" id="closeLoginModalBtn">Cancelar</button>
+        <div class="login-icon">🏹🛡️</div>
+        <h2>Ética en Acción</h2>
+        <div class="input-group">
+            <label>📧 Correo electrónico</label>
+            <input type="email" id="loginEmail" placeholder="profesor@etica.com">
         </div>
-        <div id="loginError" style="color: #e74c3c; font-size: 12px; margin-top: 10px;"></div>
+        <div class="input-group">
+            <label>🔒 Contraseña</label>
+            <div class="password-wrapper">
+                <input type="password" id="loginPassword" placeholder="••••••">
+                <button type="button" class="toggle-password" id="togglePasswordBtn">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+        <button class="modal-login-btn" id="doLoginBtn">Ingresar al Dashboard</button>
+        <button class="modal-cancel" id="closeLoginModalBtn">Cancelar</button>
+        <div id="loginError" class="error-message"></div>
     </div>
 </div>
 
-<!-- Configuración de Firebase inyectada por Vercel -->
+<!-- Configuración de Firebase (directa) -->
 <script>
-    // Esta variable será inyectada por Vercel en tiempo de ejecución
-    const firebaseConfig = typeof __FIREBASE_CONFIG !== 'undefined' ? __FIREBASE_CONFIG : {
-        apiKey: "TU_API_KEY_LOCAL",
+    const firebaseConfig = {
+        apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
         authDomain: "ethicos-a9a66.firebaseapp.com",
         projectId: "ethicos-a9a66",
         storageBucket: "ethicos-a9a66.firebasestorage.app",
         messagingSenderId: "1038796710548",
         appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
     };
-    console.log('🔥 Configuración de Firebase cargada');
-    
-    // Guardar en window para acceso global
+    console.log("🔥 Configuración cargada");
     window.firebaseConfig = firebaseConfig;
 </script>
 
-<!-- Firebase SDKs (modular) -->
+<!-- Firebase SDKs -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -472,39 +533,54 @@
     const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
     
-    window.auth = auth;
-    console.log('🔥 Firebase Auth conectado');
+    console.log("🔥 Firebase conectado");
     
     // Elementos
-    const loginBtn = document.getElementById("mostrarLoginBtn");
     const loginModal = document.getElementById("loginModal");
-    const closeModalBtn = document.getElementById("closeLoginModalBtn");
+    const mostrarLoginBtn = document.getElementById("mostrarLoginBtn");
+    const closeLoginModalBtn = document.getElementById("closeLoginModalBtn");
     const doLoginBtn = document.getElementById("doLoginBtn");
     const loginEmail = document.getElementById("loginEmail");
     const loginPassword = document.getElementById("loginPassword");
     const loginError = document.getElementById("loginError");
+    const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+    
+    // Mostrar/ocultar contraseña
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener("click", () => {
+            const type = loginPassword.getAttribute("type") === "password" ? "text" : "password";
+            loginPassword.setAttribute("type", type);
+            const icon = togglePasswordBtn.querySelector("i");
+            if (type === "text") {
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        });
+    }
     
     // Verificar si ya está logueado
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            console.log("✅ Usuario ya logueado:", user.email);
             window.location.href = "dashboard.html";
         }
     });
     
-    loginBtn.onclick = () => {
+    mostrarLoginBtn.onclick = () => {
         loginModal.style.display = "flex";
         loginError.textContent = "";
         loginPassword.value = "";
     };
     
-    closeModalBtn.onclick = () => {
+    closeLoginModalBtn.onclick = () => {
         loginModal.style.display = "none";
     };
     
     doLoginBtn.onclick = async () => {
         const email = loginEmail.value.trim();
-        const password = loginPassword.value.trim();
+        const password = loginPassword.value;
         
         if (!email || !password) {
             loginError.textContent = "Ingresa correo y contraseña";
@@ -512,22 +588,25 @@
         }
         
         loginError.textContent = "Iniciando sesión...";
+        loginError.style.color = "#f39c12";
         
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            // Login exitoso - redirigir al dashboard
             window.location.href = "dashboard.html";
         } catch (error) {
-            console.error("Error de login:", error);
+            console.error("Error:", error);
             if (error.code === 'auth/user-not-found') {
                 loginError.textContent = "Usuario no encontrado. Verifica tus datos.";
             } else if (error.code === 'auth/wrong-password') {
                 loginError.textContent = "Contraseña incorrecta";
             } else if (error.code === 'auth/invalid-email') {
                 loginError.textContent = "Correo inválido";
+            } else if (error.code === 'auth/api-key-not-valid') {
+                loginError.textContent = "Error de API key. Contacta al administrador.";
             } else {
                 loginError.textContent = "Error: " + error.message;
             }
+            loginError.style.color = "#e74c3c";
         }
     };
     

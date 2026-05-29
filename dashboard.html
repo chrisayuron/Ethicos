@@ -20,6 +20,121 @@
             color: #f1f5f9;
         }
 
+        /* Pantalla de login */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 32px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #e94560;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #f39c12;
+        }
+
+        .login-card p {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .login-icon {
+            text-align: center;
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            width: 100%;
+            padding: 12px;
+            padding-right: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .password-wrapper input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .toggle-password:hover {
+            color: #f39c12;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        /* Dashboard (oculto inicialmente) */
+        .dashboard-container {
+            display: none;
+        }
+
         .header-dashboard {
             background: linear-gradient(90deg, #1a1a2e, #16213e);
             padding: 15px 30px;
@@ -130,7 +245,6 @@
             transform: scale(1.02);
         }
 
-        /* Gráfico de puntuaciones */
         .chart-section {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 24px;
@@ -212,7 +326,6 @@
             color: #94a3b8;
         }
 
-        /* Grid de tribus */
         .tribes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -618,36 +731,65 @@
 </head>
 <body>
 
-<div class="header-dashboard">
-    <div class="logo">
-        <span class="logo-icon">🏹</span>
-        <h1>GESTIÓN DE TRIBUS - ÉTICA</h1>
-        <span class="logo-icon">🛡️</span>
+<!-- Pantalla de Login -->
+<div id="loginContainer" class="login-container">
+    <div class="login-card">
+        <div class="login-icon">🏹🛡️</div>
+        <h2>Ética en Acción</h2>
+        <p>Acceso para docentes</p>
+        
+        <div class="input-group">
+            <label>📧 Correo electrónico</label>
+            <input type="email" id="loginEmail" placeholder="profesor@etica.com">
+        </div>
+        
+        <div class="input-group">
+            <label>🔒 Contraseña</label>
+            <div class="password-wrapper">
+                <input type="password" id="loginPassword" placeholder="••••••">
+                <button type="button" class="toggle-password" id="togglePasswordBtn">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+        
+        <button class="login-btn" id="doLoginBtn">INGRESAR AL DASHBOARD</button>
+        <div id="loginError" class="error-message"></div>
     </div>
-    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
 </div>
 
-<div class="courses-nav" id="coursesNav"></div>
-
-<div class="main-content">
-    <div class="course-header">
-        <div class="course-title">📚 <span id="selectedGrade">6°</span></div>
-        <button class="add-tribe-btn" id="addTribeBtn">
-            <i class="fas fa-plus"></i> CREAR NUEVA TRIBU
-        </button>
+<!-- Dashboard (inicialmente oculto) -->
+<div id="dashboardContainer" class="dashboard-container">
+    <div class="header-dashboard">
+        <div class="logo">
+            <span class="logo-icon">🏹</span>
+            <h1>GESTIÓN DE TRIBUS - ÉTICA</h1>
+            <span class="logo-icon">🛡️</span>
+        </div>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
     </div>
 
-    <!-- Gráfico de puntuaciones -->
-    <div class="chart-section" id="chartSection">
-        <div class="chart-title">
-            <i class="fas fa-chart-bar"></i> COMPARATIVA DE PUNTUACIONES
-        </div>
-        <div id="chartContainer" class="chart-container">
-            <div class="loading">Cargando gráfico...</div>
-        </div>
-    </div>
+    <div class="courses-nav" id="coursesNav"></div>
 
-    <div id="tribesContainer" class="tribes-grid"></div>
+    <div class="main-content">
+        <div class="course-header">
+            <div class="course-title">📚 <span id="selectedGrade">6°</span></div>
+            <button class="add-tribe-btn" id="addTribeBtn">
+                <i class="fas fa-plus"></i> CREAR NUEVA TRIBU
+            </button>
+        </div>
+
+        <div class="chart-section" id="chartSection">
+            <div class="chart-title">
+                <i class="fas fa-chart-bar"></i> COMPARATIVA DE PUNTUACIONES
+            </div>
+            <div id="chartContainer" class="chart-container">
+                <div class="loading">Cargando gráfico...</div>
+            </div>
+        </div>
+
+        <div id="tribesContainer" class="tribes-grid"></div>
+    </div>
 </div>
 
 <!-- Modal para crear/editar tribu -->
@@ -670,10 +812,9 @@
     </div>
 </div>
 
-<!-- Configuración de Firebase (mismo patrón que la trivia) -->
 <script>
-    // Esta variable será inyectada por Vercel en tiempo de ejecución
-    const firebaseConfig = typeof __FIREBASE_CONFIG !== 'undefined' ? __FIREBASE_CONFIG : {
+    // ==================== CONFIGURACIÓN DE FIREBASE (DIRECTA) ====================
+    const firebaseConfig = {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
         authDomain: "ethicos-a9a66.firebaseapp.com",
         projectId: "ethicos-a9a66",
@@ -681,41 +822,114 @@
         messagingSenderId: "1038796710548",
         appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
     };
-    
-    console.log('🔥 Configuración de Firebase cargada');
-    window.firebaseConfig = firebaseConfig;
-</script>
 
-<!-- Firebase SDKs y lógica principal -->
-<script type="module">
+    console.log("🔥 Configuración de Firebase:", firebaseConfig);
+
+    // Elementos de UI
+    const loginContainer = document.getElementById("loginContainer");
+    const dashboardContainer = document.getElementById("dashboardContainer");
+    const loginEmail = document.getElementById("loginEmail");
+    const loginPassword = document.getElementById("loginPassword");
+    const doLoginBtn = document.getElementById("doLoginBtn");
+    const loginError = document.getElementById("loginError");
+    const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // ==================== FUNCIONES DE UI ====================
+    function showDashboard() {
+        loginContainer.style.display = "none";
+        dashboardContainer.style.display = "block";
+    }
+
+    function showLogin() {
+        loginContainer.style.display = "flex";
+        dashboardContainer.style.display = "none";
+    }
+
+    // Mostrar/ocultar contraseña
+    togglePasswordBtn.addEventListener("click", () => {
+        const type = loginPassword.getAttribute("type") === "password" ? "text" : "password";
+        loginPassword.setAttribute("type", type);
+        const icon = togglePasswordBtn.querySelector("i");
+        if (type === "text") {
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    });
+
+    // ==================== FIREBASE INIT ====================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
     import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
     
-    const app = initializeApp(window.firebaseConfig);
+    const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     
-    console.log('🔥 Firebase conectado correctamente');
+    console.log("🔥 Firebase inicializado");
     
-    // Verificar autenticación
+    // Verificar estado de autenticación
     onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            window.location.href = "index.html";
-        } else {
+        if (user) {
             console.log("✅ Usuario autenticado:", user.email);
+            showDashboard();
+            initDashboard();
+        } else {
+            console.log("❌ Usuario no autenticado");
+            showLogin();
         }
     });
     
-    // Datos de cursos
-    const courseNames = { 6: "6°", 7: "7°", 8: "8°", 9: "9°", 10: "10°", 11: "11°" };
-    const rolesDisponibles = ["Líder", "Comunicador", "Artesano", "Guardián", "Explorador", "Guerrero"];
+    // Login
+    doLoginBtn.addEventListener("click", async () => {
+        const email = loginEmail.value.trim();
+        const password = loginPassword.value;
+        
+        if (!email || !password) {
+            loginError.textContent = "Ingresa correo y contraseña";
+            return;
+        }
+        
+        loginError.textContent = "Iniciando sesión...";
+        loginError.style.color = "#f39c12";
+        
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            loginError.textContent = "";
+        } catch (error) {
+            console.error("Error:", error);
+            if (error.code === 'auth/user-not-found') {
+                loginError.textContent = "Usuario no encontrado. Verifica tus datos.";
+            } else if (error.code === 'auth/wrong-password') {
+                loginError.textContent = "Contraseña incorrecta";
+            } else if (error.code === 'auth/invalid-email') {
+                loginError.textContent = "Correo inválido";
+            } else if (error.code === 'auth/api-key-not-valid') {
+                loginError.textContent = "Error de API key. Contacta al administrador.";
+            } else {
+                loginError.textContent = "Error: " + error.message;
+            }
+            loginError.style.color = "#e74c3c";
+        }
+    });
     
+    // Logout
+    logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        showLogin();
+    });
+    
+    // ==================== LÓGICA DEL DASHBOARD ====================
     let currentGrade = 6;
     let editingTribeId = null;
     let tempImageData = null;
     
-    // Funciones de Firestore
+    const courseNames = { 6: "6°", 7: "7°", 8: "8°", 9: "9°", 10: "10°", 11: "11°" };
+    const rolesDisponibles = ["Líder", "Comunicador", "Artesano", "Guardián", "Explorador", "Guerrero"];
+    
     async function getTribes(grade) {
         try {
             const tribesRef = collection(db, "tribes");
@@ -727,7 +941,7 @@
             });
             return tribes.sort((a, b) => a.name.localeCompare(b.name));
         } catch (error) {
-            console.error("Error al obtener tribus:", error);
+            console.error("Error:", error);
             return [];
         }
     }
@@ -760,8 +974,7 @@
         const tribeDoc = await getDoc(tribeRef);
         if (tribeDoc.exists()) {
             const currentPoints = tribeDoc.data().points || 0;
-            const newPoints = Math.max(0, currentPoints + value);
-            await updateDoc(tribeRef, { points: newPoints });
+            await updateDoc(tribeRef, { points: Math.max(0, currentPoints + value) });
         }
     }
     
@@ -769,15 +982,209 @@
         await updateDoc(doc(db, "tribes", tribeId), { members: members });
     }
     
-    // Renderizado de cursos
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    async function renderChart() {
+        const container = document.getElementById("chartContainer");
+        if (!container) return;
+        
+        try {
+            const tribes = await getTribes(currentGrade);
+            if (tribes.length === 0) {
+                container.innerHTML = '<div class="empty-chart"><i class="fas fa-chart-simple"></i><p>Crea tribus para ver la comparativa</p></div>';
+                return;
+            }
+            
+            const sortedTribes = [...tribes].sort((a, b) => (b.points || 0) - (a.points || 0));
+            const maxPoints = Math.max(...sortedTribes.map(t => t.points || 0), 1);
+            
+            let html = '';
+            for (const tribe of sortedTribes) {
+                const points = tribe.points || 0;
+                const percentage = maxPoints > 0 ? (points / maxPoints) * 100 : 0;
+                const barWidth = Math.max(percentage, 5);
+                html += `
+                    <div class="chart-bar-item">
+                        <div class="chart-tribe-name" title="${escapeHtml(tribe.name)}">${escapeHtml(tribe.name)}</div>
+                        <div class="chart-bar-wrapper">
+                            <div class="chart-bar">
+                                <div class="chart-bar-fill" style="width: ${barWidth}%;">${points > 0 && barWidth > 15 ? points : ''}</div>
+                            </div>
+                            <div class="chart-points">${points} pts</div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        } catch (error) {
+            console.error("Error:", error);
+            container.innerHTML = '<div class="empty-chart">Error al cargar el gráfico</div>';
+        }
+    }
+    
+    async function renderTribes() {
+        const container = document.getElementById("tribesContainer");
+        container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
+        
+        try {
+            const tribes = await getTribes(currentGrade);
+            if (tribes.length === 0) {
+                container.innerHTML = `<div class="empty-message"><i class="fas fa-users"></i><h3>Todavía no hay tribus</h3><p>Haz clic en "Crear Nueva Tribu"</p></div>`;
+                return;
+            }
+            
+            container.innerHTML = tribes.map(tribe => {
+                const points = tribe.points || 0;
+                const percent = Math.min(100, (points / 500) * 100);
+                const uniqueId = tribe.id.replace(/[^a-zA-Z0-9]/g, '');
+                return `
+                    <div class="tribe-card">
+                        <div class="tribe-emblema">${tribe.imageData ? `<img src="${tribe.imageData}">` : `<div class="tribe-emblema-placeholder">🛡️</div>`}</div>
+                        <div class="tribe-header">
+                            <div class="tribe-name">${escapeHtml(tribe.name)}</div>
+                            ${tribe.warCry ? `<div class="tribe-war-cry">⚡ "${escapeHtml(tribe.warCry)}"</div>` : ''}
+                        </div>
+                        <div class="score-section">
+                            <div class="score-label">🏆 PUNTUACIÓN 🏆</div>
+                            <div class="score-value"><span>⭐</span><span id="points_${tribe.id}">${points}</span><span>🏅</span></div>
+                            <div class="progress-bar-container"><div class="progress-bar" style="width: ${percent}%;"></div></div>
+                            <div class="score-buttons">
+                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',5)">+5</button>
+                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',10)">+10</button>
+                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',20)">+20</button>
+                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-5)">-5</button>
+                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-10)">-10</button>
+                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-20)">-20</button>
+                            </div>
+                            <div class="score-custom">
+                                <input type="number" id="customPoints_${uniqueId}" placeholder="Cantidad" value="0" step="1">
+                                <button onclick="window.applyCustomPoints('${tribe.id}', '${uniqueId}')">➕ Aplicar</button>
+                            </div>
+                        </div>
+                        <div class="members-section">
+                            <h4>👥 INTEGRANTES (${(tribe.members || []).length})</h4>
+                            ${(tribe.members || []).map((m, idx) => `
+                                <div class="member-item">
+                                    <div class="member-info"><span class="member-name">${escapeHtml(m.name)}</span><span class="member-role">${escapeHtml(m.role)}</span></div>
+                                    <div class="member-actions">
+                                        <button class="edit-member" onclick="window.openEditMemberModal('${tribe.id}',${idx})"><i class="fas fa-edit"></i></button>
+                                        <button class="delete-member" onclick="window.deleteMember('${tribe.id}',${idx})"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="add-member-form">
+                            <input type="text" id="newMemberName_${tribe.id}" placeholder="Nuevo integrante">
+                            <select id="newMemberRole_${tribe.id}">${rolesDisponibles.map(r => `<option value="${r}">${r}</option>`).join('')}</select>
+                            <button onclick="window.addMember('${tribe.id}')">➕</button>
+                        </div>
+                        <div class="tribe-actions">
+                            <button class="edit-tribe" onclick="window.openEditTribeModal('${tribe.id}')">✏️ Editar Tribu</button>
+                            <button class="delete-tribe" onclick="window.confirmDeleteTribe('${tribe.id}')">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error("Error:", error);
+            container.innerHTML = `<div class="empty-message"><p>❌ Error al cargar datos</p></div>`;
+        }
+    }
+    
+    // Funciones globales para los botones
+    window.addPoints = async (tribeId, delta) => {
+        await updatePoints(tribeId, delta);
+        await renderTribes();
+        await renderChart();
+    };
+    
+    window.applyCustomPoints = async (tribeId, uniqueId) => {
+        const input = document.getElementById(`customPoints_${uniqueId}`);
+        const value = parseInt(input.value);
+        if (isNaN(value)) { alert("Número válido"); return; }
+        if (value === 0) { alert("El valor no puede ser 0"); return; }
+        await addCustomPoints(tribeId, value);
+        await renderTribes();
+        await renderChart();
+    };
+    
+    window.addMember = async (tribeId) => {
+        const name = document.getElementById(`newMemberName_${tribeId}`).value.trim();
+        const role = document.getElementById(`newMemberRole_${tribeId}`).value;
+        if (!name) { alert("Ingresa el nombre"); return; }
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (tribe) {
+            await updateMember(tribeId, [...(tribe.members || []), { name, role }]);
+            await renderTribes();
+            await renderChart();
+        }
+        document.getElementById(`newMemberName_${tribeId}`).value = '';
+    };
+    
+    window.deleteMember = async (tribeId, idx) => {
+        if (!confirm("¿Eliminar este integrante?")) return;
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (tribe) {
+            const newMembers = (tribe.members || []).filter((_, i) => i !== idx);
+            await updateMember(tribeId, newMembers);
+            await renderTribes();
+            await renderChart();
+        }
+    };
+    
+    window.openEditMemberModal = async (tribeId, idx) => {
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (!tribe) return;
+        const m = tribe.members[idx];
+        const newName = prompt("Editar nombre:", m.name);
+        if (newName && newName.trim()) {
+            const newRole = prompt(`Rol actual: ${m.role}\nRoles: ${rolesDisponibles.join(", ")}`, m.role);
+            if (newRole && rolesDisponibles.includes(newRole)) {
+                const newMembers = [...tribe.members];
+                newMembers[idx] = { name: newName.trim(), role: newRole };
+                await updateMember(tribeId, newMembers);
+                await renderTribes();
+                await renderChart();
+            } else if (newRole) alert("Rol no válido");
+        }
+    };
+    
+    window.openEditTribeModal = async (tribeId) => {
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (!tribe) return;
+        editingTribeId = tribeId;
+        tempImageData = tribe.imageData || null;
+        document.getElementById("tribeName").value = tribe.name;
+        document.getElementById("tribeWarCry").value = tribe.warCry || "";
+        document.getElementById("imagePreview").innerHTML = tribe.imageData ? `<img src="${tribe.imageData}">` : `<div class="tribe-emblema-placeholder">🏹</div>`;
+        document.getElementById("modalTitle").innerHTML = "✏️ Editar Tribu ✏️";
+        document.getElementById("tribeModal").style.display = "flex";
+    };
+    
+    window.confirmDeleteTribe = async (tribeId) => {
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (tribe && confirm(`¿Eliminar "${tribe.name}"?`)) {
+            await deleteTribe(tribeId);
+            await renderTribes();
+            await renderChart();
+        }
+    };
+    
     function renderCoursesNav() {
         const container = document.getElementById("coursesNav");
-        container.innerHTML = Object.keys(courseNames).map(grade => `
-            <button class="course-btn ${parseInt(grade) === currentGrade ? 'active' : ''}" data-grade="${grade}">
-                ${courseNames[grade]}
-            </button>
+        container.innerHTML = Object.keys(courseNames).map(g => `
+            <button class="course-btn ${parseInt(g) === currentGrade ? 'active' : ''}" data-grade="${g}">${courseNames[g]}</button>
         `).join('');
-        
         document.querySelectorAll(".course-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 currentGrade = parseInt(btn.dataset.grade);
@@ -789,351 +1196,56 @@
         });
     }
     
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
-    // Renderizar gráfico de puntuaciones
-    async function renderChart() {
-        const container = document.getElementById("chartContainer");
-        if (!container) return;
-        
-        try {
-            const tribes = await getTribes(currentGrade);
-            
-            if (tribes.length === 0) {
-                container.innerHTML = '<div class="empty-chart"><i class="fas fa-chart-simple"></i><p>Crea tribus para ver la comparativa de puntuaciones</p></div>';
-                return;
-            }
-            
-            // Ordenar por puntos (mayor a menor)
-            const sortedTribes = [...tribes].sort((a, b) => (b.points || 0) - (a.points || 0));
-            const maxPoints = Math.max(...sortedTribes.map(t => t.points || 0), 1);
-            
-            let html = '';
-            for (const tribe of sortedTribes) {
-                const points = tribe.points || 0;
-                const percentage = maxPoints > 0 ? (points / maxPoints) * 100 : 0;
-                const barWidth = Math.max(percentage, 5); // mínimo 5% para visibilidad
-                
-                html += `
-                    <div class="chart-bar-item">
-                        <div class="chart-tribe-name" title="${escapeHtml(tribe.name)}">
-                            ${tribe.logo || '🏹'} ${escapeHtml(tribe.name)}
-                        </div>
-                        <div class="chart-bar-wrapper">
-                            <div class="chart-bar">
-                                <div class="chart-bar-fill" style="width: ${barWidth}%;">
-                                    ${points > 0 && barWidth > 15 ? points : ''}
-                                </div>
-                            </div>
-                            <div class="chart-points">${points} pts</div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            container.innerHTML = html;
-        } catch (error) {
-            console.error("Error renderizando gráfico:", error);
-            container.innerHTML = '<div class="empty-chart">Error al cargar el gráfico</div>';
-        }
-    }
-    
-    // Renderizar tribus
-    async function renderTribes() {
-        const container = document.getElementById("tribesContainer");
-        container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando tribus...</div>';
-        
-        try {
-            const tribes = await getTribes(currentGrade);
-            
-            if (tribes.length === 0) {
-                container.innerHTML = `<div class="empty-message">
-                    <i class="fas fa-users"></i>
-                    <h3>Todavía no hay tribus en este curso</h3>
-                    <p>Haz clic en "Crear Nueva Tribu" para comenzar</p>
-                </div>`;
-                return;
-            }
-            
-            container.innerHTML = tribes.map(tribe => {
-                const points = tribe.points || 0;
-                const maxPoints = 500;
-                const percent = Math.min(100, (points / maxPoints) * 100);
-                const uniqueId = tribe.id.replace(/[^a-zA-Z0-9]/g, '');
-                
-                return `
-                    <div class="tribe-card" data-tribe-id="${tribe.id}">
-                        <div class="tribe-emblema">
-                            ${tribe.imageData ? 
-                                `<img src="${tribe.imageData}" alt="Emblema de ${escapeHtml(tribe.name)}">` : 
-                                `<div class="tribe-emblema-placeholder">🛡️</div>`
-                            }
-                        </div>
-                        <div class="tribe-header">
-                            <div class="tribe-name">${escapeHtml(tribe.name)}</div>
-                            ${tribe.warCry ? `<div class="tribe-war-cry">⚡ "${escapeHtml(tribe.warCry)}"</div>` : ''}
-                        </div>
-                        <div class="score-section">
-                            <div class="score-label">🏆 PUNTUACIÓN DE LA TRIBU 🏆</div>
-                            <div class="score-value">
-                                <span>⭐</span>
-                                <span id="points_${tribe.id}">${points}</span>
-                                <span>🏅</span>
-                            </div>
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: ${percent}%;"></div>
-                            </div>
-                            <div class="score-buttons">
-                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}', 5)">+5</button>
-                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}', 10)">+10</button>
-                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}', 20)">+20</button>
-                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}', -5)">-5</button>
-                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}', -10)">-10</button>
-                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}', -20)">-20</button>
-                            </div>
-                            <div class="score-custom">
-                                <input type="number" id="customPoints_${uniqueId}" placeholder="Cantidad" value="0" step="1">
-                                <button onclick="window.applyCustomPoints('${tribe.id}', '${uniqueId}')">➕ Aplicar</button>
-                            </div>
-                        </div>
-                        <div class="members-section">
-                            <h4>👥 INTEGRANTES (${(tribe.members || []).length})</h4>
-                            ${(tribe.members || []).map((member, idx) => `
-                                <div class="member-item">
-                                    <div class="member-info">
-                                        <span class="member-name">${escapeHtml(member.name)}</span>
-                                        <span class="member-role">${escapeHtml(member.role)}</span>
-                                    </div>
-                                    <div class="member-actions">
-                                        <button class="edit-member" onclick="window.openEditMemberModal('${tribe.id}', ${idx})" title="Editar"><i class="fas fa-edit"></i></button>
-                                        <button class="delete-member" onclick="window.deleteMember('${tribe.id}', ${idx})" title="Eliminar"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="add-member-form">
-                            <input type="text" id="newMemberName_${tribe.id}" placeholder="Nuevo integrante">
-                            <select id="newMemberRole_${tribe.id}">
-                                ${rolesDisponibles.map(role => `<option value="${role}">${role}</option>`).join('')}
-                            </select>
-                            <button onclick="window.addMember('${tribe.id}')">➕</button>
-                        </div>
-                        <div class="tribe-actions">
-                            <button class="edit-tribe" onclick="window.openEditTribeModal('${tribe.id}')">✏️ Editar Tribu</button>
-                            <button class="delete-tribe" onclick="window.confirmDeleteTribe('${tribe.id}')">🗑️ Eliminar Tribu</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        } catch (error) {
-            console.error("Error renderizando tribus:", error);
-            container.innerHTML = `<div class="empty-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Error al cargar datos</h3>
-                <p>Verifica tu conexión a internet y recarga la página.</p>
-            </div>`;
-        }
-    }
-    
-    // Funciones globales
-    window.addPoints = async (tribeId, delta) => {
-        await updatePoints(tribeId, delta);
-        await renderTribes();
-        await renderChart();
-    };
-    
-    window.applyCustomPoints = async (tribeId, uniqueId) => {
-        const input = document.getElementById(`customPoints_${uniqueId}`);
-        const value = parseInt(input.value);
-        if (isNaN(value)) {
-            alert("Ingresa un número válido");
-            return;
-        }
-        if (value === 0) {
-            alert("El valor no puede ser 0");
-            return;
-        }
-        await addCustomPoints(tribeId, value);
-        await renderTribes();
-        await renderChart();
-    };
-    
-    window.addMember = async (tribeId) => {
-        const nameInput = document.getElementById(`newMemberName_${tribeId}`);
-        const roleSelect = document.getElementById(`newMemberRole_${tribeId}`);
-        const name = nameInput.value.trim();
-        const role = roleSelect.value;
-        
-        if (!name) {
-            alert("Por favor ingresa el nombre del estudiante");
-            return;
-        }
-        
-        const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
-        if (tribe) {
-            const newMembers = [...(tribe.members || []), { name: name, role: role }];
-            await updateMember(tribeId, newMembers);
-            await renderTribes();
-            await renderChart();
-        }
-        nameInput.value = '';
-    };
-    
-    window.deleteMember = async (tribeId, memberIndex) => {
-        if (!confirm("¿Eliminar este integrante?")) return;
-        
-        const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
-        if (tribe) {
-            const newMembers = (tribe.members || []).filter((_, idx) => idx !== memberIndex);
-            await updateMember(tribeId, newMembers);
-            await renderTribes();
-            await renderChart();
-        }
-    };
-    
-    window.openEditMemberModal = async (tribeId, memberIndex) => {
-        const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
-        if (!tribe) return;
-        
-        const member = tribe.members[memberIndex];
-        const newName = prompt("Editar nombre del integrante:", member.name);
-        if (newName && newName.trim()) {
-            const newRole = prompt(`Rol actual: ${member.role}\nRoles disponibles: ${rolesDisponibles.join(", ")}\nNuevo rol:`, member.role);
-            if (newRole && rolesDisponibles.includes(newRole)) {
-                const newMembers = [...tribe.members];
-                newMembers[memberIndex] = { name: newName.trim(), role: newRole };
-                await updateMember(tribeId, newMembers);
-                await renderTribes();
-                await renderChart();
-            } else if (newRole) {
-                alert("Rol no válido. Usa: " + rolesDisponibles.join(", "));
-            }
-        }
-    };
-    
-    window.openEditTribeModal = async (tribeId) => {
-        const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
-        if (!tribe) return;
-        
-        editingTribeId = tribeId;
-        tempImageData = tribe.imageData || null;
-        document.getElementById("tribeName").value = tribe.name;
-        document.getElementById("tribeWarCry").value = tribe.warCry || "";
-        document.getElementById("imagePreview").innerHTML = tribe.imageData ? 
-            `<img src="${tribe.imageData}" style="width:100px; height:100px; object-fit:cover;">` : 
-            `<div class="tribe-emblema-placeholder" style="width:100px; height:100px;">🏹</div>`;
-        document.getElementById("modalTitle").innerHTML = "✏️ Editar Tribu ✏️";
-        document.getElementById("tribeModal").style.display = "flex";
-    };
-    
-    window.confirmDeleteTribe = async (tribeId) => {
-        const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
-        if (!tribe) return;
-        
-        if (confirm(`¿Eliminar la tribu "${tribe.name}"? Esta acción eliminará también todos sus integrantes y puntuaciones.`)) {
-            await deleteTribe(tribeId);
-            await renderTribes();
-            await renderChart();
-        }
-    };
-    
-    // Modal functions
     function openAddTribeModal() {
         editingTribeId = null;
         tempImageData = null;
         document.getElementById("tribeName").value = "";
         document.getElementById("tribeWarCry").value = "";
         document.getElementById("tribeImage").value = "";
-        document.getElementById("imagePreview").innerHTML = `<div class="tribe-emblema-placeholder" style="width:100px; height:100px;">🏹</div>`;
+        document.getElementById("imagePreview").innerHTML = `<div class="tribe-emblema-placeholder">🏹</div>`;
         document.getElementById("modalTitle").innerHTML = "✨ Crear Nueva Tribu ✨";
         document.getElementById("tribeModal").style.display = "flex";
     }
     
     async function saveTribeFromModal() {
         const name = document.getElementById("tribeName").value.trim();
-        const warCry = document.getElementById("tribeWarCry").value.trim();
-        
-        if (!name) {
-            alert("Por favor ingresa el nombre de la tribu");
-            return;
-        }
-        
-        const tribeData = {
-            grade: currentGrade,
-            name: name,
-            imageData: tempImageData || null,
-            warCry: warCry || "",
-            members: [],
-            points: 0,
-            updatedAt: new Date().toISOString()
-        };
-        
+        if (!name) { alert("Ingresa el nombre"); return; }
+        const tribeData = { grade: currentGrade, name, imageData: tempImageData, warCry: document.getElementById("tribeWarCry").value.trim(), members: [], points: 0, createdAt: new Date().toISOString() };
         if (editingTribeId) {
             const tribes = await getTribes(currentGrade);
             const existing = tribes.find(t => t.id === editingTribeId);
-            if (existing && existing.members) tribeData.members = existing.members;
-            if (existing && existing.points !== undefined) tribeData.points = existing.points;
+            if (existing) { tribeData.members = existing.members || []; tribeData.points = existing.points || 0; }
             delete tribeData.createdAt;
             await saveTribe(tribeData, editingTribeId);
-        } else {
-            tribeData.createdAt = new Date().toISOString();
-            await saveTribe(tribeData, null);
-        }
-        
+        } else { await saveTribe(tribeData, null); }
         closeModal();
         await renderTribes();
         await renderChart();
     }
     
-    function closeModal() {
-        document.getElementById("tribeModal").style.display = "none";
-        editingTribeId = null;
-        tempImageData = null;
-    }
+    function closeModal() { document.getElementById("tribeModal").style.display = "none"; editingTribeId = null; }
     
-    // Subir imagen
     document.getElementById("tribeImage").addEventListener("change", function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(event) {
-                tempImageData = event.target.result;
-                document.getElementById("imagePreview").innerHTML = `<img src="${tempImageData}" style="width:100px; height:100px; object-fit:cover;">`;
-            };
+            reader.onload = (ev) => { tempImageData = ev.target.result; document.getElementById("imagePreview").innerHTML = `<img src="${tempImageData}">`; };
             reader.readAsDataURL(file);
         }
     });
     
-    // Eventos
-    document.getElementById("logoutBtn").onclick = async () => {
-        await signOut(auth);
-        window.location.href = "index.html";
-    };
     document.getElementById("addTribeBtn").onclick = openAddTribeModal;
     document.getElementById("saveTribeBtn").onclick = saveTribeFromModal;
     document.getElementById("cancelModalBtn").onclick = closeModal;
+    window.onclick = (e) => { if (e.target === document.getElementById("tribeModal")) closeModal(); };
     
-    window.onclick = (event) => {
-        if (event.target === document.getElementById("tribeModal")) closeModal();
-    };
-    
-    // Inicialización
-    renderCoursesNav();
-    document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
-    await renderTribes();
-    await renderChart();
-    
-    console.log("✅ Dashboard de Tribus inicializado correctamente");
+    async function initDashboard() {
+        renderCoursesNav();
+        document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
+        await renderTribes();
+        await renderChart();
+    }
 </script>
+
 </body>
 </html>
