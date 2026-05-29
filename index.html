@@ -33,6 +33,8 @@
             align-items: center;
             z-index: 1000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .logo-portada {
@@ -111,6 +113,7 @@
             gap: 20px;
             font-size: 40px;
             margin-top: 30px;
+            flex-wrap: wrap;
         }
 
         .section {
@@ -146,6 +149,7 @@
             margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
         }
 
         .level-number {
@@ -263,7 +267,7 @@
             font-weight: 600;
         }
 
-        /* Modal Login */
+        /* Modal Login - Estilos mejorados */
         .modal {
             display: none;
             position: fixed;
@@ -279,23 +283,31 @@
 
         .modal-content {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
-            padding: 35px;
-            border-radius: 28px;
+            padding: 40px;
+            border-radius: 32px;
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
             border: 1px solid #e94560;
         }
 
         .modal-content h2 {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             color: #f39c12;
             text-align: center;
+            font-size: 24px;
         }
 
         .modal-content .login-icon {
             text-align: center;
             font-size: 48px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+        }
+
+        .modal-content .login-subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 14px;
         }
 
         .input-group {
@@ -307,6 +319,24 @@
             margin-bottom: 8px;
             color: #94a3b8;
             font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #e94560;
+            background: rgba(255, 255, 255, 0.12);
         }
 
         .password-wrapper {
@@ -314,31 +344,21 @@
         }
 
         .password-wrapper input {
-            width: 100%;
-            padding: 12px;
-            padding-right: 45px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
-        }
-
-        .password-wrapper input:focus {
-            outline: none;
-            border-color: #e94560;
+            padding-right: 50px;
         }
 
         .toggle-password {
             position: absolute;
-            right: 12px;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             color: #94a3b8;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
+            padding: 5px;
+            transition: color 0.3s;
         }
 
         .toggle-password:hover {
@@ -347,15 +367,16 @@
 
         .modal-login-btn {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: linear-gradient(135deg, #e94560, #ff6b6b);
             border: none;
-            border-radius: 30px;
+            border-radius: 40px;
             color: white;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 15px;
+            transition: all 0.3s;
         }
 
         .modal-login-btn:hover {
@@ -364,13 +385,18 @@
 
         .modal-cancel {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: none;
             border: none;
             color: #94a3b8;
             cursor: pointer;
             margin-top: 15px;
             font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .modal-cancel:hover {
+            color: #e94560;
         }
 
         .error-message {
@@ -385,10 +411,13 @@
         }
 
         @media (max-width: 768px) {
-            .hero h1 { font-size: 36px; }
+            .hero h1 { font-size: 32px; }
             .roles-grid { grid-template-columns: repeat(2, 1fr); }
             .level-header { flex-direction: column; text-align: center; }
             .nav-links { display: none; }
+            .header-portada { justify-content: center; }
+            .section { padding: 40px 20px; }
+            .modal-content { padding: 25px; }
         }
 
         @media (max-width: 480px) {
@@ -492,27 +521,31 @@
     <div class="modal-content">
         <div class="login-icon">🏹🛡️</div>
         <h2>Ética en Acción</h2>
+        <div class="login-subtitle">Acceso para docentes</div>
+        
         <div class="input-group">
             <label>📧 Correo electrónico</label>
-            <input type="email" id="loginEmail" placeholder="profesor@etica.com">
+            <input type="email" id="loginEmail" placeholder="profesor@etica.com" value="profesor@etica.com">
         </div>
+        
         <div class="input-group">
             <label>🔒 Contraseña</label>
             <div class="password-wrapper">
-                <input type="password" id="loginPassword" placeholder="••••••">
+                <input type="password" id="loginPassword" placeholder="Ingresa tu contraseña">
                 <button type="button" class="toggle-password" id="togglePasswordBtn">
                     <i class="fas fa-eye"></i>
                 </button>
             </div>
         </div>
-        <button class="modal-login-btn" id="doLoginBtn">Ingresar al Dashboard</button>
+        
+        <button class="modal-login-btn" id="doLoginBtn">INGRESAR AL DASHBOARD</button>
         <button class="modal-cancel" id="closeLoginModalBtn">Cancelar</button>
         <div id="loginError" class="error-message"></div>
     </div>
 </div>
 
-<!-- Configuración de Firebase (directa) -->
 <script>
+    // ==================== CONFIGURACIÓN DE FIREBASE ====================
     const firebaseConfig = {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
         authDomain: "ethicos-a9a66.firebaseapp.com",
@@ -521,23 +554,12 @@
         messagingSenderId: "1038796710548",
         appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
     };
-    console.log("🔥 Configuración cargada");
+    console.log("🔥 Configuración de Firebase cargada");
     window.firebaseConfig = firebaseConfig;
-</script>
-
-<!-- Firebase SDKs -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
     
-    const app = initializeApp(window.firebaseConfig);
-    const auth = getAuth(app);
-    
-    console.log("🔥 Firebase conectado");
-    
-    // Elementos
-    const loginModal = document.getElementById("loginModal");
+    // Elementos del DOM
     const mostrarLoginBtn = document.getElementById("mostrarLoginBtn");
+    const loginModal = document.getElementById("loginModal");
     const closeLoginModalBtn = document.getElementById("closeLoginModalBtn");
     const doLoginBtn = document.getElementById("doLoginBtn");
     const loginEmail = document.getElementById("loginEmail");
@@ -547,10 +569,10 @@
     
     // Mostrar/ocultar contraseña
     if (togglePasswordBtn) {
-        togglePasswordBtn.addEventListener("click", () => {
+        togglePasswordBtn.addEventListener("click", function() {
             const type = loginPassword.getAttribute("type") === "password" ? "text" : "password";
             loginPassword.setAttribute("type", type);
-            const icon = togglePasswordBtn.querySelector("i");
+            const icon = this.querySelector("i");
             if (type === "text") {
                 icon.classList.remove("fa-eye");
                 icon.classList.add("fa-eye-slash");
@@ -561,6 +583,44 @@
         });
     }
     
+    // Funciones del modal
+    mostrarLoginBtn.onclick = function() {
+        loginModal.style.display = "flex";
+        loginError.textContent = "";
+        loginPassword.value = "";
+        loginPassword.setAttribute("type", "password");
+        const icon = togglePasswordBtn.querySelector("i");
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    };
+    
+    closeLoginModalBtn.onclick = function() {
+        loginModal.style.display = "none";
+    };
+    
+    window.onclick = function(event) {
+        if (event.target === loginModal) {
+            loginModal.style.display = "none";
+        }
+    };
+    
+    // Función scroll
+    function scrollToSection(id) {
+        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+    window.scrollToSection = scrollToSection;
+</script>
+
+<!-- Firebase SDKs - Módulo separado -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    
+    const app = initializeApp(window.firebaseConfig);
+    const auth = getAuth(app);
+    
+    console.log("🔥 Firebase Auth conectado");
+    
     // Verificar si ya está logueado
     onAuthStateChanged(auth, (user) => {
         if (user) {
@@ -568,19 +628,11 @@
         }
     });
     
-    mostrarLoginBtn.onclick = () => {
-        loginModal.style.display = "flex";
-        loginError.textContent = "";
-        loginPassword.value = "";
-    };
-    
-    closeLoginModalBtn.onclick = () => {
-        loginModal.style.display = "none";
-    };
-    
-    doLoginBtn.onclick = async () => {
-        const email = loginEmail.value.trim();
-        const password = loginPassword.value;
+    // Login
+    window.doLogin = async function() {
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        const loginError = document.getElementById("loginError");
         
         if (!email || !password) {
             loginError.textContent = "Ingresa correo y contraseña";
@@ -610,16 +662,10 @@
         }
     };
     
-    window.onclick = (event) => {
-        if (event.target === loginModal) {
-            loginModal.style.display = "none";
-        }
-    };
-    
-    function scrollToSection(id) {
-        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-    }
-    window.scrollToSection = scrollToSection;
+    document.getElementById("doLoginBtn").onclick = window.doLogin;
+    document.getElementById("loginPassword").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") window.doLogin();
+    });
 </script>
 
 </body>

@@ -20,121 +20,6 @@
             color: #f1f5f9;
         }
 
-        /* Pantalla de login */
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border-radius: 32px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            border: 1px solid #e94560;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .login-card h2 {
-            text-align: center;
-            margin-bottom: 10px;
-            color: #f39c12;
-        }
-
-        .login-card p {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        .login-icon {
-            text-align: center;
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #94a3b8;
-            font-size: 14px;
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-wrapper input {
-            width: 100%;
-            padding: 12px;
-            padding-right: 45px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
-        }
-
-        .password-wrapper input:focus {
-            outline: none;
-            border-color: #e94560;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .toggle-password:hover {
-            color: #f39c12;
-        }
-
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #e94560, #ff6b6b);
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-        }
-
-        .login-btn:hover {
-            transform: scale(1.02);
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 13px;
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        /* Dashboard (oculto inicialmente) */
-        .dashboard-container {
-            display: none;
-        }
-
         .header-dashboard {
             background: linear-gradient(90deg, #1a1a2e, #16213e);
             padding: 15px 30px;
@@ -143,6 +28,7 @@
             align-items: center;
             flex-wrap: wrap;
             border-bottom: 2px solid #e94560;
+            gap: 15px;
         }
 
         .logo {
@@ -522,6 +408,8 @@
             background: rgba(0, 0, 0, 0.3);
             border-radius: 12px;
             font-size: 13px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .member-info {
@@ -558,6 +446,7 @@
             margin-top: 10px;
             padding-top: 10px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
         }
 
         .add-member-form input {
@@ -568,6 +457,7 @@
             border-radius: 12px;
             color: white;
             font-size: 12px;
+            min-width: 120px;
         }
 
         .add-member-form input::placeholder {
@@ -726,70 +616,42 @@
             .course-btn { padding: 6px 18px; font-size: 14px; }
             .course-title { font-size: 22px; }
             .chart-tribe-name { width: 80px; font-size: 11px; }
+            .member-item { flex-direction: column; align-items: flex-start; }
+            .member-actions { align-self: flex-end; }
         }
     </style>
 </head>
 <body>
 
-<!-- Pantalla de Login -->
-<div id="loginContainer" class="login-container">
-    <div class="login-card">
-        <div class="login-icon">🏹🛡️</div>
-        <h2>Ética en Acción</h2>
-        <p>Acceso para docentes</p>
-        
-        <div class="input-group">
-            <label>📧 Correo electrónico</label>
-            <input type="email" id="loginEmail" placeholder="profesor@etica.com">
-        </div>
-        
-        <div class="input-group">
-            <label>🔒 Contraseña</label>
-            <div class="password-wrapper">
-                <input type="password" id="loginPassword" placeholder="••••••">
-                <button type="button" class="toggle-password" id="togglePasswordBtn">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </div>
-        </div>
-        
-        <button class="login-btn" id="doLoginBtn">INGRESAR AL DASHBOARD</button>
-        <div id="loginError" class="error-message"></div>
+<div class="header-dashboard">
+    <div class="logo">
+        <span class="logo-icon">🏹</span>
+        <h1>GESTIÓN DE TRIBUS - ÉTICA</h1>
+        <span class="logo-icon">🛡️</span>
     </div>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
 </div>
 
-<!-- Dashboard (inicialmente oculto) -->
-<div id="dashboardContainer" class="dashboard-container">
-    <div class="header-dashboard">
-        <div class="logo">
-            <span class="logo-icon">🏹</span>
-            <h1>GESTIÓN DE TRIBUS - ÉTICA</h1>
-            <span class="logo-icon">🛡️</span>
-        </div>
-        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+<div class="courses-nav" id="coursesNav"></div>
+
+<div class="main-content">
+    <div class="course-header">
+        <div class="course-title">📚 <span id="selectedGrade">6°</span></div>
+        <button class="add-tribe-btn" id="addTribeBtn">
+            <i class="fas fa-plus"></i> CREAR NUEVA TRIBU
+        </button>
     </div>
 
-    <div class="courses-nav" id="coursesNav"></div>
-
-    <div class="main-content">
-        <div class="course-header">
-            <div class="course-title">📚 <span id="selectedGrade">6°</span></div>
-            <button class="add-tribe-btn" id="addTribeBtn">
-                <i class="fas fa-plus"></i> CREAR NUEVA TRIBU
-            </button>
+    <div class="chart-section" id="chartSection">
+        <div class="chart-title">
+            <i class="fas fa-chart-bar"></i> COMPARATIVA DE PUNTUACIONES
         </div>
-
-        <div class="chart-section" id="chartSection">
-            <div class="chart-title">
-                <i class="fas fa-chart-bar"></i> COMPARATIVA DE PUNTUACIONES
-            </div>
-            <div id="chartContainer" class="chart-container">
-                <div class="loading">Cargando gráfico...</div>
-            </div>
+        <div id="chartContainer" class="chart-container">
+            <div class="loading">Cargando gráfico...</div>
         </div>
-
-        <div id="tribesContainer" class="tribes-grid"></div>
     </div>
+
+    <div id="tribesContainer" class="tribes-grid"></div>
 </div>
 
 <!-- Modal para crear/editar tribu -->
@@ -813,7 +675,7 @@
 </div>
 
 <script>
-    // ==================== CONFIGURACIÓN DE FIREBASE (DIRECTA) ====================
+    // ==================== CONFIGURACIÓN DE FIREBASE ====================
     const firebaseConfig = {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
         authDomain: "ethicos-a9a66.firebaseapp.com",
@@ -822,123 +684,46 @@
         messagingSenderId: "1038796710548",
         appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
     };
+    console.log("🔥 Configuración cargada");
+    window.firebaseConfig = firebaseConfig;
+</script>
 
-    console.log("🔥 Configuración de Firebase:", firebaseConfig);
-
-    // Elementos de UI
-    const loginContainer = document.getElementById("loginContainer");
-    const dashboardContainer = document.getElementById("dashboardContainer");
-    const loginEmail = document.getElementById("loginEmail");
-    const loginPassword = document.getElementById("loginPassword");
-    const doLoginBtn = document.getElementById("doLoginBtn");
-    const loginError = document.getElementById("loginError");
-    const togglePasswordBtn = document.getElementById("togglePasswordBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    // ==================== FUNCIONES DE UI ====================
-    function showDashboard() {
-        loginContainer.style.display = "none";
-        dashboardContainer.style.display = "block";
-    }
-
-    function showLogin() {
-        loginContainer.style.display = "flex";
-        dashboardContainer.style.display = "none";
-    }
-
-    // Mostrar/ocultar contraseña
-    togglePasswordBtn.addEventListener("click", () => {
-        const type = loginPassword.getAttribute("type") === "password" ? "text" : "password";
-        loginPassword.setAttribute("type", type);
-        const icon = togglePasswordBtn.querySelector("i");
-        if (type === "text") {
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
-        }
-    });
-
-    // ==================== FIREBASE INIT ====================
+<!-- Firebase SDKs y lógica principal -->
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
     import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
     
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     
-    console.log("🔥 Firebase inicializado");
+    console.log("🔥 Firebase conectado");
     
-    // Verificar estado de autenticación
+    // Verificar autenticación
     onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log("✅ Usuario autenticado:", user.email);
-            showDashboard();
-            initDashboard();
+        if (!user) {
+            window.location.href = "index.html";
         } else {
-            console.log("❌ Usuario no autenticado");
-            showLogin();
+            console.log("✅ Usuario autenticado:", user.email);
+            initDashboard();
         }
     });
     
-    // Login
-    doLoginBtn.addEventListener("click", async () => {
-        const email = loginEmail.value.trim();
-        const password = loginPassword.value;
-        
-        if (!email || !password) {
-            loginError.textContent = "Ingresa correo y contraseña";
-            return;
-        }
-        
-        loginError.textContent = "Iniciando sesión...";
-        loginError.style.color = "#f39c12";
-        
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            loginError.textContent = "";
-        } catch (error) {
-            console.error("Error:", error);
-            if (error.code === 'auth/user-not-found') {
-                loginError.textContent = "Usuario no encontrado. Verifica tus datos.";
-            } else if (error.code === 'auth/wrong-password') {
-                loginError.textContent = "Contraseña incorrecta";
-            } else if (error.code === 'auth/invalid-email') {
-                loginError.textContent = "Correo inválido";
-            } else if (error.code === 'auth/api-key-not-valid') {
-                loginError.textContent = "Error de API key. Contacta al administrador.";
-            } else {
-                loginError.textContent = "Error: " + error.message;
-            }
-            loginError.style.color = "#e74c3c";
-        }
-    });
+    // Datos
+    const courseNames = { 6: "6°", 7: "7°", 8: "8°", 9: "9°", 10: "10°", 11: "11°" };
+    const rolesDisponibles = ["Líder", "Comunicador", "Artesano", "Guardián", "Explorador", "Guerrero"];
     
-    // Logout
-    logoutBtn.addEventListener("click", async () => {
-        await signOut(auth);
-        showLogin();
-    });
-    
-    // ==================== LÓGICA DEL DASHBOARD ====================
     let currentGrade = 6;
     let editingTribeId = null;
     let tempImageData = null;
     
-    const courseNames = { 6: "6°", 7: "7°", 8: "8°", 9: "9°", 10: "10°", 11: "11°" };
-    const rolesDisponibles = ["Líder", "Comunicador", "Artesano", "Guardián", "Explorador", "Guerrero"];
-    
     async function getTribes(grade) {
         try {
-            const tribesRef = collection(db, "tribes");
-            const q = query(tribesRef, where("grade", "==", grade));
+            const q = query(collection(db, "tribes"), where("grade", "==", grade));
             const snapshot = await getDocs(q);
             const tribes = [];
-            snapshot.forEach(doc => {
-                tribes.push({ id: doc.id, ...doc.data() });
-            });
+            snapshot.forEach(doc => tribes.push({ id: doc.id, ...doc.data() }));
             return tribes.sort((a, b) => a.name.localeCompare(b.name));
         } catch (error) {
             console.error("Error:", error);
@@ -948,11 +733,9 @@
     
     async function saveTribe(tribeData, editingId) {
         if (editingId) {
-            const tribeRef = doc(db, "tribes", editingId);
-            await updateDoc(tribeRef, tribeData);
+            await updateDoc(doc(db, "tribes", editingId), tribeData);
         } else {
-            const tribesRef = collection(db, "tribes");
-            await addDoc(tribesRef, tribeData);
+            await addDoc(collection(db, "tribes"), tribeData);
         }
     }
     
@@ -1000,14 +783,14 @@
                 return;
             }
             
-            const sortedTribes = [...tribes].sort((a, b) => (b.points || 0) - (a.points || 0));
-            const maxPoints = Math.max(...sortedTribes.map(t => t.points || 0), 1);
+            const sorted = [...tribes].sort((a, b) => (b.points || 0) - (a.points || 0));
+            const maxPoints = Math.max(...sorted.map(t => t.points || 0), 1);
             
             let html = '';
-            for (const tribe of sortedTribes) {
+            for (const tribe of sorted) {
                 const points = tribe.points || 0;
-                const percentage = maxPoints > 0 ? (points / maxPoints) * 100 : 0;
-                const barWidth = Math.max(percentage, 5);
+                const percent = (points / maxPoints) * 100;
+                const barWidth = Math.max(percent, 5);
                 html += `
                     <div class="chart-bar-item">
                         <div class="chart-tribe-name" title="${escapeHtml(tribe.name)}">${escapeHtml(tribe.name)}</div>
@@ -1096,7 +879,6 @@
         }
     }
     
-    // Funciones globales para los botones
     window.addPoints = async (tribeId, delta) => {
         await updatePoints(tribeId, delta);
         await renderTribes();
@@ -1111,6 +893,7 @@
         await addCustomPoints(tribeId, value);
         await renderTribes();
         await renderChart();
+        input.value = 0;
     };
     
     window.addMember = async (tribeId) => {
@@ -1217,7 +1000,9 @@
             if (existing) { tribeData.members = existing.members || []; tribeData.points = existing.points || 0; }
             delete tribeData.createdAt;
             await saveTribe(tribeData, editingTribeId);
-        } else { await saveTribe(tribeData, null); }
+        } else {
+            await saveTribe(tribeData, null);
+        }
         closeModal();
         await renderTribes();
         await renderChart();
@@ -1234,6 +1019,10 @@
         }
     });
     
+    document.getElementById("logoutBtn").onclick = async () => {
+        await signOut(auth);
+        window.location.href = "index.html";
+    };
     document.getElementById("addTribeBtn").onclick = openAddTribeModal;
     document.getElementById("saveTribeBtn").onclick = saveTribeFromModal;
     document.getElementById("cancelModalBtn").onclick = closeModal;
