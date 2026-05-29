@@ -130,6 +130,89 @@
             transform: scale(1.02);
         }
 
+        /* Gráfico de puntuaciones */
+        .chart-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chart-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .chart-tribe-name {
+            width: 120px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chart-bar-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .chart-bar {
+            flex: 1;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f39c12, #e94560);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 35px;
+        }
+
+        .chart-points {
+            width: 60px;
+            text-align: right;
+            font-weight: 700;
+            color: #f39c12;
+        }
+
+        .empty-chart {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+        }
+
+        /* Grid de tribus */
         .tribes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -274,7 +357,7 @@
         }
 
         .score-custom input {
-            width: 70px;
+            width: 80px;
             padding: 5px 8px;
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -529,6 +612,7 @@
             .tribes-grid { grid-template-columns: 1fr; }
             .course-btn { padding: 6px 18px; font-size: 14px; }
             .course-title { font-size: 22px; }
+            .chart-tribe-name { width: 80px; font-size: 11px; }
         }
     </style>
 </head>
@@ -552,6 +636,17 @@
             <i class="fas fa-plus"></i> CREAR NUEVA TRIBU
         </button>
     </div>
+
+    <!-- Gráfico de puntuaciones -->
+    <div class="chart-section" id="chartSection">
+        <div class="chart-title">
+            <i class="fas fa-chart-bar"></i> COMPARATIVA DE PUNTUACIONES
+        </div>
+        <div id="chartContainer" class="chart-container">
+            <div class="loading">Cargando gráfico...</div>
+        </div>
+    </div>
+
     <div id="tribesContainer" class="tribes-grid"></div>
 </div>
 
@@ -575,8 +670,9 @@
     </div>
 </div>
 
-<!-- Configuración de Firebase inyectada por Vercel -->
+<!-- Configuración de Firebase (mismo patrón que la trivia) -->
 <script>
+    // Esta variable será inyectada por Vercel en tiempo de ejecución
     const firebaseConfig = typeof __FIREBASE_CONFIG !== 'undefined' ? __FIREBASE_CONFIG : {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
         authDomain: "ethicos-a9a66.firebaseapp.com",
@@ -594,7 +690,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
     
     const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
@@ -673,7 +769,7 @@
         await updateDoc(doc(db, "tribes", tribeId), { members: members });
     }
     
-    // Renderizado
+    // Renderizado de cursos
     function renderCoursesNav() {
         const container = document.getElementById("coursesNav");
         container.innerHTML = Object.keys(courseNames).map(grade => `
@@ -688,6 +784,7 @@
                 renderCoursesNav();
                 document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
                 renderTribes();
+                renderChart();
             });
         });
     }
@@ -699,6 +796,54 @@
         return div.innerHTML;
     }
     
+    // Renderizar gráfico de puntuaciones
+    async function renderChart() {
+        const container = document.getElementById("chartContainer");
+        if (!container) return;
+        
+        try {
+            const tribes = await getTribes(currentGrade);
+            
+            if (tribes.length === 0) {
+                container.innerHTML = '<div class="empty-chart"><i class="fas fa-chart-simple"></i><p>Crea tribus para ver la comparativa de puntuaciones</p></div>';
+                return;
+            }
+            
+            // Ordenar por puntos (mayor a menor)
+            const sortedTribes = [...tribes].sort((a, b) => (b.points || 0) - (a.points || 0));
+            const maxPoints = Math.max(...sortedTribes.map(t => t.points || 0), 1);
+            
+            let html = '';
+            for (const tribe of sortedTribes) {
+                const points = tribe.points || 0;
+                const percentage = maxPoints > 0 ? (points / maxPoints) * 100 : 0;
+                const barWidth = Math.max(percentage, 5); // mínimo 5% para visibilidad
+                
+                html += `
+                    <div class="chart-bar-item">
+                        <div class="chart-tribe-name" title="${escapeHtml(tribe.name)}">
+                            ${tribe.logo || '🏹'} ${escapeHtml(tribe.name)}
+                        </div>
+                        <div class="chart-bar-wrapper">
+                            <div class="chart-bar">
+                                <div class="chart-bar-fill" style="width: ${barWidth}%;">
+                                    ${points > 0 && barWidth > 15 ? points : ''}
+                                </div>
+                            </div>
+                            <div class="chart-points">${points} pts</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        } catch (error) {
+            console.error("Error renderizando gráfico:", error);
+            container.innerHTML = '<div class="empty-chart">Error al cargar el gráfico</div>';
+        }
+    }
+    
+    // Renderizar tribus
     async function renderTribes() {
         const container = document.getElementById("tribesContainer");
         container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando tribus...</div>';
@@ -798,7 +943,8 @@
     // Funciones globales
     window.addPoints = async (tribeId, delta) => {
         await updatePoints(tribeId, delta);
-        renderTribes();
+        await renderTribes();
+        await renderChart();
     };
     
     window.applyCustomPoints = async (tribeId, uniqueId) => {
@@ -813,7 +959,8 @@
             return;
         }
         await addCustomPoints(tribeId, value);
-        renderTribes();
+        await renderTribes();
+        await renderChart();
     };
     
     window.addMember = async (tribeId) => {
@@ -832,7 +979,8 @@
         if (tribe) {
             const newMembers = [...(tribe.members || []), { name: name, role: role }];
             await updateMember(tribeId, newMembers);
-            renderTribes();
+            await renderTribes();
+            await renderChart();
         }
         nameInput.value = '';
     };
@@ -845,7 +993,8 @@
         if (tribe) {
             const newMembers = (tribe.members || []).filter((_, idx) => idx !== memberIndex);
             await updateMember(tribeId, newMembers);
-            renderTribes();
+            await renderTribes();
+            await renderChart();
         }
     };
     
@@ -862,7 +1011,8 @@
                 const newMembers = [...tribe.members];
                 newMembers[memberIndex] = { name: newName.trim(), role: newRole };
                 await updateMember(tribeId, newMembers);
-                renderTribes();
+                await renderTribes();
+                await renderChart();
             } else if (newRole) {
                 alert("Rol no válido. Usa: " + rolesDisponibles.join(", "));
             }
@@ -892,7 +1042,8 @@
         
         if (confirm(`¿Eliminar la tribu "${tribe.name}"? Esta acción eliminará también todos sus integrantes y puntuaciones.`)) {
             await deleteTribe(tribeId);
-            renderTribes();
+            await renderTribes();
+            await renderChart();
         }
     };
     
@@ -940,7 +1091,8 @@
         }
         
         closeModal();
-        renderTribes();
+        await renderTribes();
+        await renderChart();
     }
     
     function closeModal() {
@@ -978,7 +1130,8 @@
     // Inicialización
     renderCoursesNav();
     document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
-    renderTribes();
+    await renderTribes();
+    await renderChart();
     
     console.log("✅ Dashboard de Tribus inicializado correctamente");
 </script>
