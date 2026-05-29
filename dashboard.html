@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🏹 Ética en Acción - Gestión de Tribus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0f1e 0%, #0f172a 50%, #1e1b2e 100%);
+            min-height: 100vh;
+            color: #f1f5f9;
+        }
+
+        .header-dashboard {
+            background: linear-gradient(90deg, #1a1a2e, #16213e);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #e94560;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            background: linear-gradient(135deg, #e94560, #f39c12);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logout-btn {
+            background: #7f8c8d;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .courses-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
+        }
+
+        .course-btn {
+            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            border: none;
+            padding: 10px 28px;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .course-btn:hover, .course-btn.active {
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            padding: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .course-header {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .course-title {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .add-tribe-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            border: none;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+
+        .add-tribe-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .tribes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+        }
+
+        .tribe-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.2));
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .tribe-card:hover {
+            transform: translateY(-5px);
+            border-color: #e94560;
+        }
+
+        .tribe-emblema {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .tribe-emblema img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #e94560;
+            background: #1a1a2e;
+        }
+
+        .tribe-emblema-placeholder {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #f39c12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .tribe-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tribe-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .tribe-war-cry {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .score-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: #f39c12;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #f39c12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #f39c12, #e94560);
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .score-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .score-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .score-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .score-plus { color: #2ecc71; }
+        .score-plus:hover { background: #2ecc71; color: #1a1a2e; }
+
+        .score-minus { color: #e74c3c; }
+        .score-minus:hover { background: #e74c3c; color: #1a1a2e; }
+
+        .score-custom {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            justify-content: center;
+        }
+
+        .score-custom input {
+            width: 70px;
+            padding: 5px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .score-custom input:focus {
+            outline: none;
+            border-color: #f39c12;
+        }
+
+        .score-custom button {
+            background: #f39c12;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            color: #1a1a2e;
+            transition: all 0.2s;
+        }
+
+        .score-custom button:hover {
+            background: #e67e22;
+        }
+
+        .members-section {
+            margin: 15px 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .members-section h4 {
+            font-size: 13px;
+            color: #f39c12;
+            margin-bottom: 10px;
+        }
+
+        .member-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .member-info {
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .member-name { font-weight: 500; }
+        .member-role {
+            background: #e94560;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .member-actions { display: flex; gap: 8px; }
+        .member-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            transition: transform 0.2s;
+        }
+        .member-actions button:hover { transform: scale(1.1); }
+        .edit-member { color: #3498db; }
+        .delete-member { color: #e74c3c; }
+
+        .add-member-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .add-member-form input {
+            flex: 1;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .add-member-form input::placeholder {
+            color: #94a3b8;
+        }
+
+        .add-member-form select {
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+        }
+
+        .add-member-form button {
+            background: #27ae60;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: white;
+            transition: background 0.2s;
+        }
+
+        .add-member-form button:hover {
+            background: #2ecc71;
+        }
+
+        .tribe-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .edit-tribe, .delete-tribe {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .edit-tribe { background: #3498db; color: white; }
+        .edit-tribe:hover { background: #2980b9; }
+        .delete-tribe { background: #c0392b; color: white; }
+        .delete-tribe:hover { background: #a93226; }
+
+        .empty-message {
+            text-align: center;
+            padding: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+        }
+
+        .empty-message i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 30px;
+            border-radius: 28px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid #e94560;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #f39c12;
+        }
+
+        .modal-content label {
+            font-size: 14px;
+            color: #94a3b8;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .modal-content input, .modal-content textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 10px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-save, .modal-cancel {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-save { background: #27ae60; color: white; }
+        .modal-save:hover { background: #2ecc71; }
+        .modal-cancel { background: #7f8c8d; color: white; }
+        .modal-cancel:hover { background: #95a5a6; }
+
+        @media (max-width: 768px) {
+            .tribes-grid { grid-template-columns: 1fr; }
+            .course-btn { padding: 6px 18px; font-size: 14px; }
+            .course-title { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-dashboard">
+    <div class="logo">
+        <span class="logo-icon">🏹</span>
+        <h1>GESTIÓN DE TRIBUS - ÉTICA</h1>
+        <span class="logo-icon">🛡️</span>
+    </div>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+</div>
+
+<div class="courses-nav" id="coursesNav"></div>
+
+<div class="main-content">
+    <div class="course-header">
+        <div class="course-title">📚 <span id="selectedGrade">6°</span></div>
+        <button class="add-tribe-btn" id="addTribeBtn">
+            <i class="fas fa-plus"></i> CREAR NUEVA TRIBU
+        </button>
+    </div>
+    <div id="tribesContainer" class="tribes-grid"></div>
+</div>
+
+<!-- Modal para crear/editar tribu -->
+<div id="tribeModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle">✨ Crear Nueva Tribu ✨</h2>
+        <label>🏷️ Nombre de la Tribu</label>
+        <input type="text" id="tribeName" placeholder="Ej: Servidores, Luz, Esperanza...">
+        <label>🎨 Emblema (imagen)</label>
+        <div class="image-preview" id="imagePreview">
+            <div class="tribe-emblema-placeholder" style="width:100px; height:100px;">🏹</div>
+        </div>
+        <input type="file" id="tribeImage" accept="image/*">
+        <label>⚡ Grito de Batalla / Consigna</label>
+        <textarea id="tribeWarCry" rows="2" placeholder="Ej: ¡Servir con alegría!"></textarea>
+        <div class="modal-buttons">
+            <button class="modal-save" id="saveTribeBtn">💾 Guardar</button>
+            <button class="modal-cancel" id="cancelModalBtn">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Configuración de Firebase inyectada por Vercel -->
+<script>
+    const firebaseConfig = typeof __FIREBASE_CONFIG !== 'undefined' ? __FIREBASE_CONFIG : {
+        apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
+        authDomain: "ethicos-a9a66.firebaseapp.com",
+        projectId: "ethicos-a9a66",
+        storageBucket: "ethicos-a9a66.firebasestorage.app",
+        messagingSenderId: "1038796710548",
+        appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
+    };
+    
+    console.log('🔥 Configuración de Firebase cargada');
+    window.firebaseConfig = firebaseConfig;
+</script>
+
+<!-- Firebase SDKs y lógica principal -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    
+    const app = initializeApp(window.firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    console.log('🔥 Firebase conectado correctamente');
+    
+    // Verificar autenticación
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = "index.html";
+        } else {
+            console.log("✅ Usuario autenticado:", user.email);
+        }
+    });
+    
+    // Datos de cursos
+    const courseNames = { 6: "6°", 7: "7°", 8: "8°", 9: "9°", 10: "10°", 11: "11°" };
+    const rolesDisponibles = ["Líder", "Comunicador", "Artesano", "Guardián", "Explorador", "Guerrero"];
+    
+    let currentGrade = 6;
+    let editingTribeId = null;
+    let tempImageData = null;
+    
+    // Funciones de Firestore
+    async function getTribes(grade) {
+        try {
+            const tribesRef = collection(db, "tribes");
+            const q = query(tribesRef, where("grade", "==", grade));
+            const snapshot = await getDocs(q);
+            const tribes = [];
+            snapshot.forEach(doc => {
+                tribes.push({ id: doc.id, ...doc.data() });
+            });
+            return tribes.sort((a, b) => a.name.localeCompare(b.name));
+        } catch (error) {
+            console.error("Error al obtener tribus:", error);
+            return [];
+        }
+    }
+    
+    async function saveTribe(tribeData, editingId) {
+        if (editingId) {
+            const tribeRef = doc(db, "tribes", editingId);
+            await updateDoc(tribeRef, tribeData);
+        } else {
+            const tribesRef = collection(db, "tribes");
+            await addDoc(tribesRef, tribeData);
+        }
+    }
+    
+    async function deleteTribe(tribeId) {
+        await deleteDoc(doc(db, "tribes", tribeId));
+    }
+    
+    async function updatePoints(tribeId, delta) {
+        const tribeRef = doc(db, "tribes", tribeId);
+        const tribeDoc = await getDoc(tribeRef);
+        if (tribeDoc.exists()) {
+            const currentPoints = tribeDoc.data().points || 0;
+            await updateDoc(tribeRef, { points: Math.max(0, currentPoints + delta) });
+        }
+    }
+    
+    async function addCustomPoints(tribeId, value) {
+        const tribeRef = doc(db, "tribes", tribeId);
+        const tribeDoc = await getDoc(tribeRef);
+        if (tribeDoc.exists()) {
+            const currentPoints = tribeDoc.data().points || 0;
+            const newPoints = Math.max(0, currentPoints + value);
+            await updateDoc(tribeRef, { points: newPoints });
+        }
+    }
+    
+    async function updateMember(tribeId, members) {
+        await updateDoc(doc(db, "tribes", tribeId), { members: members });
+    }
+    
+    // Renderizado
+    function renderCoursesNav() {
+        const container = document.getElementById("coursesNav");
+        container.innerHTML = Object.keys(courseNames).map(grade => `
+            <button class="course-btn ${parseInt(grade) === currentGrade ? 'active' : ''}" data-grade="${grade}">
+                ${courseNames[grade]}
+            </button>
+        `).join('');
+        
+        document.querySelectorAll(".course-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                currentGrade = parseInt(btn.dataset.grade);
+                renderCoursesNav();
+                document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
+                renderTribes();
+            });
+        });
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    async function renderTribes() {
+        const container = document.getElementById("tribesContainer");
+        container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando tribus...</div>';
+        
+        try {
+            const tribes = await getTribes(currentGrade);
+            
+            if (tribes.length === 0) {
+                container.innerHTML = `<div class="empty-message">
+                    <i class="fas fa-users"></i>
+                    <h3>Todavía no hay tribus en este curso</h3>
+                    <p>Haz clic en "Crear Nueva Tribu" para comenzar</p>
+                </div>`;
+                return;
+            }
+            
+            container.innerHTML = tribes.map(tribe => {
+                const points = tribe.points || 0;
+                const maxPoints = 500;
+                const percent = Math.min(100, (points / maxPoints) * 100);
+                const uniqueId = tribe.id.replace(/[^a-zA-Z0-9]/g, '');
+                
+                return `
+                    <div class="tribe-card" data-tribe-id="${tribe.id}">
+                        <div class="tribe-emblema">
+                            ${tribe.imageData ? 
+                                `<img src="${tribe.imageData}" alt="Emblema de ${escapeHtml(tribe.name)}">` : 
+                                `<div class="tribe-emblema-placeholder">🛡️</div>`
+                            }
+                        </div>
+                        <div class="tribe-header">
+                            <div class="tribe-name">${escapeHtml(tribe.name)}</div>
+                            ${tribe.warCry ? `<div class="tribe-war-cry">⚡ "${escapeHtml(tribe.warCry)}"</div>` : ''}
+                        </div>
+                        <div class="score-section">
+                            <div class="score-label">🏆 PUNTUACIÓN DE LA TRIBU 🏆</div>
+                            <div class="score-value">
+                                <span>⭐</span>
+                                <span id="points_${tribe.id}">${points}</span>
+                                <span>🏅</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: ${percent}%;"></div>
+                            </div>
+                            <div class="score-buttons">
+                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}', 5)">+5</button>
+                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}', 10)">+10</button>
+                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}', 20)">+20</button>
+                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}', -5)">-5</button>
+                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}', -10)">-10</button>
+                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}', -20)">-20</button>
+                            </div>
+                            <div class="score-custom">
+                                <input type="number" id="customPoints_${uniqueId}" placeholder="Cantidad" value="0" step="1">
+                                <button onclick="window.applyCustomPoints('${tribe.id}', '${uniqueId}')">➕ Aplicar</button>
+                            </div>
+                        </div>
+                        <div class="members-section">
+                            <h4>👥 INTEGRANTES (${(tribe.members || []).length})</h4>
+                            ${(tribe.members || []).map((member, idx) => `
+                                <div class="member-item">
+                                    <div class="member-info">
+                                        <span class="member-name">${escapeHtml(member.name)}</span>
+                                        <span class="member-role">${escapeHtml(member.role)}</span>
+                                    </div>
+                                    <div class="member-actions">
+                                        <button class="edit-member" onclick="window.openEditMemberModal('${tribe.id}', ${idx})" title="Editar"><i class="fas fa-edit"></i></button>
+                                        <button class="delete-member" onclick="window.deleteMember('${tribe.id}', ${idx})" title="Eliminar"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="add-member-form">
+                            <input type="text" id="newMemberName_${tribe.id}" placeholder="Nuevo integrante">
+                            <select id="newMemberRole_${tribe.id}">
+                                ${rolesDisponibles.map(role => `<option value="${role}">${role}</option>`).join('')}
+                            </select>
+                            <button onclick="window.addMember('${tribe.id}')">➕</button>
+                        </div>
+                        <div class="tribe-actions">
+                            <button class="edit-tribe" onclick="window.openEditTribeModal('${tribe.id}')">✏️ Editar Tribu</button>
+                            <button class="delete-tribe" onclick="window.confirmDeleteTribe('${tribe.id}')">🗑️ Eliminar Tribu</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error("Error renderizando tribus:", error);
+            container.innerHTML = `<div class="empty-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Error al cargar datos</h3>
+                <p>Verifica tu conexión a internet y recarga la página.</p>
+            </div>`;
+        }
+    }
+    
+    // Funciones globales
+    window.addPoints = async (tribeId, delta) => {
+        await updatePoints(tribeId, delta);
+        renderTribes();
+    };
+    
+    window.applyCustomPoints = async (tribeId, uniqueId) => {
+        const input = document.getElementById(`customPoints_${uniqueId}`);
+        const value = parseInt(input.value);
+        if (isNaN(value)) {
+            alert("Ingresa un número válido");
+            return;
+        }
+        if (value === 0) {
+            alert("El valor no puede ser 0");
+            return;
+        }
+        await addCustomPoints(tribeId, value);
+        renderTribes();
+    };
+    
+    window.addMember = async (tribeId) => {
+        const nameInput = document.getElementById(`newMemberName_${tribeId}`);
+        const roleSelect = document.getElementById(`newMemberRole_${tribeId}`);
+        const name = nameInput.value.trim();
+        const role = roleSelect.value;
+        
+        if (!name) {
+            alert("Por favor ingresa el nombre del estudiante");
+            return;
+        }
+        
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (tribe) {
+            const newMembers = [...(tribe.members || []), { name: name, role: role }];
+            await updateMember(tribeId, newMembers);
+            renderTribes();
+        }
+        nameInput.value = '';
+    };
+    
+    window.deleteMember = async (tribeId, memberIndex) => {
+        if (!confirm("¿Eliminar este integrante?")) return;
+        
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (tribe) {
+            const newMembers = (tribe.members || []).filter((_, idx) => idx !== memberIndex);
+            await updateMember(tribeId, newMembers);
+            renderTribes();
+        }
+    };
+    
+    window.openEditMemberModal = async (tribeId, memberIndex) => {
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (!tribe) return;
+        
+        const member = tribe.members[memberIndex];
+        const newName = prompt("Editar nombre del integrante:", member.name);
+        if (newName && newName.trim()) {
+            const newRole = prompt(`Rol actual: ${member.role}\nRoles disponibles: ${rolesDisponibles.join(", ")}\nNuevo rol:`, member.role);
+            if (newRole && rolesDisponibles.includes(newRole)) {
+                const newMembers = [...tribe.members];
+                newMembers[memberIndex] = { name: newName.trim(), role: newRole };
+                await updateMember(tribeId, newMembers);
+                renderTribes();
+            } else if (newRole) {
+                alert("Rol no válido. Usa: " + rolesDisponibles.join(", "));
+            }
+        }
+    };
+    
+    window.openEditTribeModal = async (tribeId) => {
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (!tribe) return;
+        
+        editingTribeId = tribeId;
+        tempImageData = tribe.imageData || null;
+        document.getElementById("tribeName").value = tribe.name;
+        document.getElementById("tribeWarCry").value = tribe.warCry || "";
+        document.getElementById("imagePreview").innerHTML = tribe.imageData ? 
+            `<img src="${tribe.imageData}" style="width:100px; height:100px; object-fit:cover;">` : 
+            `<div class="tribe-emblema-placeholder" style="width:100px; height:100px;">🏹</div>`;
+        document.getElementById("modalTitle").innerHTML = "✏️ Editar Tribu ✏️";
+        document.getElementById("tribeModal").style.display = "flex";
+    };
+    
+    window.confirmDeleteTribe = async (tribeId) => {
+        const tribes = await getTribes(currentGrade);
+        const tribe = tribes.find(t => t.id === tribeId);
+        if (!tribe) return;
+        
+        if (confirm(`¿Eliminar la tribu "${tribe.name}"? Esta acción eliminará también todos sus integrantes y puntuaciones.`)) {
+            await deleteTribe(tribeId);
+            renderTribes();
+        }
+    };
+    
+    // Modal functions
+    function openAddTribeModal() {
+        editingTribeId = null;
+        tempImageData = null;
+        document.getElementById("tribeName").value = "";
+        document.getElementById("tribeWarCry").value = "";
+        document.getElementById("tribeImage").value = "";
+        document.getElementById("imagePreview").innerHTML = `<div class="tribe-emblema-placeholder" style="width:100px; height:100px;">🏹</div>`;
+        document.getElementById("modalTitle").innerHTML = "✨ Crear Nueva Tribu ✨";
+        document.getElementById("tribeModal").style.display = "flex";
+    }
+    
+    async function saveTribeFromModal() {
+        const name = document.getElementById("tribeName").value.trim();
+        const warCry = document.getElementById("tribeWarCry").value.trim();
+        
+        if (!name) {
+            alert("Por favor ingresa el nombre de la tribu");
+            return;
+        }
+        
+        const tribeData = {
+            grade: currentGrade,
+            name: name,
+            imageData: tempImageData || null,
+            warCry: warCry || "",
+            members: [],
+            points: 0,
+            updatedAt: new Date().toISOString()
+        };
+        
+        if (editingTribeId) {
+            const tribes = await getTribes(currentGrade);
+            const existing = tribes.find(t => t.id === editingTribeId);
+            if (existing && existing.members) tribeData.members = existing.members;
+            if (existing && existing.points !== undefined) tribeData.points = existing.points;
+            delete tribeData.createdAt;
+            await saveTribe(tribeData, editingTribeId);
+        } else {
+            tribeData.createdAt = new Date().toISOString();
+            await saveTribe(tribeData, null);
+        }
+        
+        closeModal();
+        renderTribes();
+    }
+    
+    function closeModal() {
+        document.getElementById("tribeModal").style.display = "none";
+        editingTribeId = null;
+        tempImageData = null;
+    }
+    
+    // Subir imagen
+    document.getElementById("tribeImage").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                tempImageData = event.target.result;
+                document.getElementById("imagePreview").innerHTML = `<img src="${tempImageData}" style="width:100px; height:100px; object-fit:cover;">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Eventos
+    document.getElementById("logoutBtn").onclick = async () => {
+        await signOut(auth);
+        window.location.href = "index.html";
+    };
+    document.getElementById("addTribeBtn").onclick = openAddTribeModal;
+    document.getElementById("saveTribeBtn").onclick = saveTribeFromModal;
+    document.getElementById("cancelModalBtn").onclick = closeModal;
+    
+    window.onclick = (event) => {
+        if (event.target === document.getElementById("tribeModal")) closeModal();
+    };
+    
+    // Inicialización
+    renderCoursesNav();
+    document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
+    renderTribes();
+    
+    console.log("✅ Dashboard de Tribus inicializado correctamente");
+</script>
+</body>
+</html>
