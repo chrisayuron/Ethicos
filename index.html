@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🏹 Ética en Acción - Sistema de Tribus</title>
+    <title>🏹 Éthykos - Etica en Acción</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="./img/logo.png" type="png">
     <style>
+        /* ==================== RESTO DEL CSS (sin cambios) ==================== */
         * {
             margin: 0;
             padding: 0;
@@ -15,67 +17,73 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0a0f1e 0%, #0f172a 50%, #1e1b2e 100%);
+            background: #F1F5F9;
             min-height: 100vh;
-            color: #f1f5f9;
+            color: #1E293B;
         }
 
+        /* ==================== HEADER ==================== */
         .header-portada {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(10, 15, 30, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 16px 40px;
+            background: #FFFFFF;
+            padding: 12px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 3px solid #3B82F6;
             flex-wrap: wrap;
             gap: 15px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
         }
 
         .logo-portada {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
-        .logo-icon {
-            font-size: 28px;
+        .logo-portada img {
+            height: 55px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
+            transition: transform 0.3s;
         }
 
-        .logo-portada h1 {
-            font-size: 20px;
-            background: linear-gradient(135deg, #e94560, #f39c12);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .logo-portada img:hover {
+            transform: scale(1.02);
         }
 
         .nav-links {
             display: flex;
-            gap: 30px;
+            gap: 35px;
+            align-items: center;
         }
 
         .nav-links a {
-            color: #94a3b8;
+            color: #1E293B;
             text-decoration: none;
             font-weight: 500;
+            font-size: 15px;
             transition: color 0.3s;
             cursor: pointer;
+            padding: 6px 0;
+            border-bottom: 2px solid transparent;
         }
 
         .nav-links a:hover {
-            color: #e94560;
+            color: #3B82F6;
+            border-bottom-color: #3B82F6;
         }
 
         .login-btn {
-            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            background: #3B82F6;
             border: none;
-            padding: 10px 24px;
+            padding: 10px 28px;
             border-radius: 40px;
             font-weight: 600;
             color: white;
@@ -83,18 +91,29 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.35);
         }
 
+        .login-btn:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
+        }
+
+        /* ==================== HERO ==================== */
         .hero {
-            padding: 120px 40px 80px;
+            padding: 120px 40px 60px;
             text-align: center;
+            background: #FFFFFF;
         }
 
         .hero h1 {
             font-size: 56px;
             font-weight: 800;
             margin-bottom: 20px;
-            background: linear-gradient(135deg, #fff, #e94560, #f39c12);
+            background: linear-gradient(135deg, #1E293B, #3B82F6);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -102,7 +121,7 @@
 
         .hero p {
             font-size: 20px;
-            color: #94a3b8;
+            color: #64748B;
             max-width: 700px;
             margin: 0 auto 30px;
         }
@@ -116,6 +135,7 @@
             flex-wrap: wrap;
         }
 
+        /* ==================== SECCIONES ==================== */
         .section {
             padding: 70px 40px;
             max-width: 1300px;
@@ -127,6 +147,14 @@
             font-size: 36px;
             font-weight: 700;
             margin-bottom: 15px;
+            color: #1E293B;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #64748B;
+            margin-bottom: 40px;
+            font-size: 18px;
         }
 
         .levels-grid {
@@ -136,10 +164,11 @@
         }
 
         .level-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: #FFFFFF;
             border-radius: 28px;
             padding: 25px 30px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .level-header {
@@ -148,12 +177,12 @@
             gap: 15px;
             margin-bottom: 25px;
             padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid #E2E8F0;
             flex-wrap: wrap;
         }
 
         .level-number {
-            background: #e94560;
+            background: #3B82F6;
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -162,11 +191,19 @@
             justify-content: center;
             font-size: 24px;
             font-weight: bold;
+            color: white;
         }
 
         .level-title {
             font-size: 28px;
             font-weight: 700;
+            color: #1E293B;
+        }
+
+        .level-desc {
+            color: #64748B;
+            margin-bottom: 20px;
+            font-size: 16px;
         }
 
         .cards-container {
@@ -176,10 +213,17 @@
         }
 
         .info-card {
-            background: rgba(0, 0, 0, 0.4);
+            background: #F8FAFC;
             border-radius: 20px;
             padding: 20px;
             text-align: center;
+            border: 1px solid #E2E8F0;
+            transition: all 0.3s;
+        }
+
+        .info-card:hover {
+            border-color: #3B82F6;
+            transform: translateY(-3px);
         }
 
         .card-icon {
@@ -191,13 +235,15 @@
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 10px;
+            color: #1E293B;
         }
 
         .card-desc {
             font-size: 13px;
-            color: #94a3b8;
+            color: #64748B;
         }
 
+        /* ==================== ROLES ==================== */
         .roles-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -206,10 +252,19 @@
         }
 
         .role-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.2));
+            background: #FFFFFF;
             border-radius: 20px;
             padding: 25px 15px;
             text-align: center;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s;
+        }
+
+        .role-card:hover {
+            transform: translateY(-5px);
+            border-color: #3B82F6;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.1);
         }
 
         .role-icon {
@@ -221,20 +276,22 @@
             font-size: 20px;
             font-weight: 700;
             margin-bottom: 8px;
-            color: #f39c12;
+            color: #2563EB;
         }
 
         .role-function {
             font-size: 12px;
-            color: #94a3b8;
+            color: #64748B;
             margin-bottom: 10px;
             font-style: italic;
         }
 
         .role-desc {
             font-size: 12px;
+            color: #64748B;
         }
 
+        /* ==================== IMAGEN ==================== */
         .students-image-section {
             padding: 40px 40px 60px;
             text-align: center;
@@ -245,7 +302,8 @@
             margin: 0 auto;
             border-radius: 28px;
             overflow: hidden;
-            border: 2px solid rgba(233, 69, 96, 0.3);
+            border: 2px solid #3B82F6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
 
         .image-container img {
@@ -254,20 +312,242 @@
             display: block;
         }
 
+        /* ==================== FOOTER ==================== */
         .footer {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 40px 20px 20px;
-            text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: #FFFFFF;
+            border-top: 3px solid #3B82F6;
+            padding: 40px 40px 30px;
             margin-top: 60px;
+            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05);
         }
 
-        .footer .highlight {
-            color: #e94560;
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .footer-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
+        }
+
+        .footer-logo-col {
+            gap: 8px;
+        }
+
+        .footer-logo-img {
+            height: 100px;
+            width: auto;
+            display: block;
+        }
+
+        /* ===== COLUMNA 2: CRÉDITOS ===== */
+        .footer-credits-col {
+            gap: 4px;
+            text-align: center;
+        }
+
+        .footer-credits-title {
+            color: #F8FAFC;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            background: #2563EB;
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #E2E8F0;
+            display: inline-block;
+        }
+
+        .footer-credits-line {
+            color: #1E293B;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 4px 0 0 0;
+            text-align: center;
+        }
+
+        .footer-copy {
+            color: #3B82F6;
             font-weight: 600;
+            font-size: 20px;
         }
 
-        /* Modal Login - Estilos mejorados */
+        /* ===== BOTÓN CONTÁCTAME (LLAMATIVO) ===== */
+        .footer-url {
+            display: inline-block;
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: #FFFFFF;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 12px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-top: 6px;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 0.5px;
+            position: relative;
+            animation: pulse-btn 2.5s ease-in-out infinite;
+        }
+
+        .footer-url i {
+            margin-right: 8px;
+        }
+
+        .footer-url:hover {
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes pulse-btn {
+            0%, 100% {
+                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            }
+            50% {
+                box-shadow: 0 6px 30px rgba(59, 130, 246, 0.7);
+                transform: scale(1.02);
+            }
+        }
+
+        /* ===== COLUMNA 3: LEGAL ===== */
+        .footer-legal-col {
+            gap: 8px;
+            text-align: center;
+        }
+
+        .footer-legal-title {
+            color: #F8FAFC;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            margin: 0;
+            background: #2563EB;
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #E2E8F0;
+            display: inline-block;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .footer-link {
+            color: #1E293B;
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .footer-link:hover {
+            color: #3B82F6;
+            text-decoration: underline;
+        }
+
+        /* ==================== MODALES ==================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .modal-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 30px;
+            max-width: 550px;
+            width: 90%;
+            z-index: 1000;
+            border: 2px solid #3B82F6;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .modal-header h2 {
+            color: #1E293B;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #94A3B8;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #EF4444;
+        }
+
+        .modal-body {
+            color: #475569;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .modal-body p {
+            margin-bottom: 12px;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #E2E8F0;
+            text-align: right;
+        }
+
+        .btn-modal-close {
+            background: #3B82F6;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-modal-close:hover {
+            background: #2563EB;
+        }
+
+        /* ==================== MODAL LOGIN ==================== */
         .modal {
             display: none;
             position: fixed;
@@ -275,37 +555,37 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 1000;
             justify-content: center;
             align-items: center;
         }
 
-        .modal-content {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+        .modal-login-content {
+            background: #FFFFFF;
             padding: 40px;
             border-radius: 32px;
             width: 90%;
             max-width: 420px;
-            border: 1px solid #e94560;
+            border: 2px solid #3B82F6;
         }
 
-        .modal-content h2 {
+        .modal-login-content h2 {
             margin-bottom: 10px;
-            color: #f39c12;
+            color: #1E293B;
             text-align: center;
             font-size: 24px;
         }
 
-        .modal-content .login-icon {
+        .modal-login-content .login-icon {
             text-align: center;
             font-size: 48px;
             margin-bottom: 10px;
         }
 
-        .modal-content .login-subtitle {
+        .modal-login-content .login-subtitle {
             text-align: center;
-            color: #94a3b8;
+            color: #64748B;
             margin-bottom: 30px;
             font-size: 14px;
         }
@@ -317,7 +597,7 @@
         .input-group label {
             display: block;
             margin-bottom: 8px;
-            color: #94a3b8;
+            color: #64748B;
             font-size: 14px;
             font-weight: 500;
         }
@@ -325,18 +605,18 @@
         .input-group input {
             width: 100%;
             padding: 14px 16px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
             border-radius: 12px;
-            color: white;
+            color: #1E293B;
             font-size: 15px;
             transition: all 0.3s;
         }
 
         .input-group input:focus {
             outline: none;
-            border-color: #e94560;
-            background: rgba(255, 255, 255, 0.12);
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .password-wrapper {
@@ -354,7 +634,7 @@
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: #94a3b8;
+            color: #94A3B8;
             cursor: pointer;
             font-size: 18px;
             padding: 5px;
@@ -362,13 +642,13 @@
         }
 
         .toggle-password:hover {
-            color: #f39c12;
+            color: #3B82F6;
         }
 
         .modal-login-btn {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            background: #3B82F6;
             border: none;
             border-radius: 40px;
             color: white;
@@ -380,7 +660,7 @@
         }
 
         .modal-login-btn:hover {
-            transform: scale(1.02);
+            background: #2563EB;
         }
 
         .modal-cancel {
@@ -388,7 +668,7 @@
             padding: 12px;
             background: none;
             border: none;
-            color: #94a3b8;
+            color: #94A3B8;
             cursor: pointer;
             margin-top: 15px;
             font-size: 14px;
@@ -396,18 +676,35 @@
         }
 
         .modal-cancel:hover {
-            color: #e94560;
+            color: #3B82F6;
         }
 
         .error-message {
-            color: #e74c3c;
+            color: #EF4444;
             font-size: 13px;
             margin-top: 15px;
             text-align: center;
         }
 
+        /* ==================== RESPONSIVE ==================== */
         @media (max-width: 1100px) {
             .roles-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 850px) {
+            .footer-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .footer-section {
+                align-items: center !important;
+                justify-content: center !important;
+                width: 100%;
+            }
+            .footer-links {
+                align-items: center;
+            }
         }
 
         @media (max-width: 768px) {
@@ -415,23 +712,29 @@
             .roles-grid { grid-template-columns: repeat(2, 1fr); }
             .level-header { flex-direction: column; text-align: center; }
             .nav-links { display: none; }
-            .header-portada { justify-content: center; }
+            .header-portada { justify-content: space-between; padding: 10px 20px; }
             .section { padding: 40px 20px; }
-            .modal-content { padding: 25px; }
+            .hero { padding: 110px 20px 40px; }
+            .logo-portada img { height: 40px; }
+            .footer { padding: 30px 20px; }
+            .footer-logo-img { height: 40px; }
+            .footer-url { font-size: 14px; padding: 10px 20px; }
         }
 
         @media (max-width: 480px) {
             .roles-grid { grid-template-columns: 1fr; }
+            .logo-portada img { height: 32px; }
+            .cards-container { grid-template-columns: 1fr; }
+            .modal-container { padding: 20px; }
         }
     </style>
 </head>
 <body>
 
+<!-- ==================== HEADER ==================== -->
 <div class="header-portada">
     <div class="logo-portada">
-        <span class="logo-icon">🏹</span>
-        <h1>ÉTICA EN ACCIÓN</h1>
-        <span class="logo-icon">🛡️</span>
+        <img src="./img/logo.png" alt="ETHYKOS">
     </div>
     <div class="nav-links">
         <a onclick="scrollToSection('que-es')">¿Qué es una Tribu?</a>
@@ -443,6 +746,7 @@
     </button>
 </div>
 
+<!-- ==================== HERO ==================== -->
 <div class="hero">
     <h1>⚔️ FORJA TU TRIBU ⚔️</h1>
     <p>En Ética, no trabajamos solos. Formamos tribus: equipos con identidad, propósito y responsabilidades compartidas.</p>
@@ -451,81 +755,182 @@
     </div>
 </div>
 
+<!-- ==================== SECCIÓN: ¿QUÉ ES UNA TRIBU? ==================== -->
 <section id="que-es" class="section">
     <h2 class="section-title">🌍 ¿QUÉ ES UNA TRIBU?</h2>
+    <p class="section-subtitle">Más que un grupo, una familia con un propósito común</p>
     <div class="levels-grid">
         <div class="level-card">
             <div class="level-header">
                 <div class="level-number">1</div>
                 <div class="level-title">Identidad Colectiva</div>
             </div>
+            <div class="level-desc">Una tribu es un equipo que elige su propio nombre, emblema y consigna. No es solo un grupo de trabajo, es una familia que se apoya, celebra triunfos y aprende de los desafíos.</div>
             <div class="cards-container">
-                <div class="info-card"><div class="card-icon">🤝</div><div class="card-title">Pertenencia</div><div class="card-desc">Cada miembro se siente parte de algo más grande.</div></div>
-                <div class="info-card"><div class="card-icon">🎯</div><div class="card-title">Propósito Común</div><div class="card-desc">Todos reman hacia la misma dirección.</div></div>
-                <div class="info-card"><div class="card-icon">🛡️</div><div class="card-title">Protección Mutua</div><div class="card-desc">Se cuidan entre sí, celebran logros y se apoyan.</div></div>
+                <div class="info-card"><div class="card-icon">🤝</div><div class="card-title">Pertenencia</div><div class="card-desc">Cada miembro se siente parte de algo más grande que sí mismo.</div></div>
+                <div class="info-card"><div class="card-icon">🎯</div><div class="card-title">Propósito Común</div><div class="card-desc">Todos reman hacia la misma dirección: crecer en valores y responsabilidad.</div></div>
+                <div class="info-card"><div class="card-icon">🛡️</div><div class="card-title">Protección Mutua</div><div class="card-desc">Se cuidan entre sí, celebran logros y se apoyan en dificultades.</div></div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- ==================== SECCIÓN: ELEMENTOS ==================== -->
 <section id="elementos" class="section">
     <h2 class="section-title">🏔️ LOS 4 ELEMENTOS DE UNA TRIBU</h2>
+    <p class="section-subtitle">Así como una flecha necesita punta, plumas y arco, cada tribu necesita estos 4 elementos</p>
     <div class="levels-grid">
         <div class="level-card">
             <div class="level-header"><div class="level-number">1</div><div class="level-title">🏷️ EL NOMBRE</div></div>
-            <div class="cards-container"><div class="info-card"><div class="card-icon">💡</div><div class="card-title">¿Por qué es importante?</div><div class="card-desc">Un nombre poderoso une al equipo y les recuerda quiénes son.</div></div></div>
+            <div class="level-desc">El nombre es la identidad. Refleja los valores que la tribu quiere honrar. Debe ser inspirador, fácil de recordar y con significado.</div>
+            <div class="cards-container"><div class="info-card"><div class="card-icon">💡</div><div class="card-title">¿Por qué es importante?</div><div class="card-desc">Un nombre poderoso une al equipo y les recuerda quiénes son y cómo quieren ser reconocidos.</div></div></div>
         </div>
         <div class="level-card">
             <div class="level-header"><div class="level-number">2</div><div class="level-title">🎨 EL EMBLEMA</div></div>
+            <div class="level-desc">El emblema es la representación visual de la tribu. Un símbolo que cuenta una historia sin palabras.</div>
             <div class="cards-container">
-                <div class="info-card"><div class="card-icon">🛡️</div><div class="card-title">Fortaleza</div><div class="card-desc">Protección, unidad, espíritu del equipo.</div></div>
+                <div class="info-card"><div class="card-icon">🛡️</div><div class="card-title">Fortaleza</div><div class="card-desc">Unidad, protección, el espíritu del equipo.</div></div>
                 <div class="info-card"><div class="card-icon">🔥</div><div class="card-title">Pasión</div><div class="card-desc">Energía, determinación para alcanzar metas.</div></div>
                 <div class="info-card"><div class="card-icon">🌿</div><div class="card-title">Crecimiento</div><div class="card-desc">Vida, conexión con la naturaleza y los demás.</div></div>
             </div>
         </div>
         <div class="level-card">
-            <div class="level-header"><div class="level-number">3</div><div class="level-title">⚡ GRITO DE BATALLA</div></div>
-            <div class="cards-container"><div class="info-card"><div class="card-icon">💪</div><div class="card-title">¿Por qué es importante?</div><div class="card-desc">Fortalece la unidad, levanta el ánimo y crea pertenencia.</div></div></div>
+            <div class="level-header"><div class="level-number">3</div><div class="level-title">⚡ CONSIGNA DE EQUIPO</div></div>
+            <div class="level-desc">Una frase corta y poderosa que la tribu dice junta para animarse, celebrar o recordar su propósito.</div>
+            <div class="cards-container"><div class="info-card"><div class="card-icon">💪</div><div class="card-title">¿Por qué es importante?</div><div class="card-desc">Fortalece la unidad, levanta el ánimo y crea un sentido de pertenencia único.</div></div></div>
         </div>
         <div class="level-card">
             <div class="level-header"><div class="level-number">4</div><div class="level-title">👥 LOS ROLES</div></div>
+            <div class="level-desc">Cada miembro tiene una responsabilidad específica dentro de la tribu. Así como en una orquesta, cada instrumento es necesario.</div>
         </div>
     </div>
 </section>
 
+<!-- ==================== SECCIÓN: ROLES ==================== -->
 <section id="roles" class="section">
     <h2 class="section-title">⚔️ LOS 5 ROLES DE LA TRIBU</h2>
+    <p class="section-subtitle">Cada guerrero tiene una misión. Cada rol es esencial.</p>
     <div class="roles-grid">
-        <div class="role-card"><div class="role-icon">👑</div><div class="role-name">LÍDER</div><div class="role-function">Guía y coordina</div><div class="role-desc">Organiza al equipo, recuerda fechas, asegura que todos tengan claro qué hacer.</div></div>
-        <div class="role-card"><div class="role-icon">🎨</div><div class="role-name">ARTESANO</div><div class="role-function">Crea y embellece</div><div class="role-desc">Dibuja, diseña, hace carteles, cómics, emblemas.</div></div>
-        <div class="role-card"><div class="role-icon">🛡️</div><div class="role-name">GUARDIÁN</div><div class="role-function">Cuida y protege</div><div class="role-desc">Vela por los materiales, el orden y el respeto.</div></div>
-        <div class="role-card"><div class="role-icon">🔍</div><div class="role-name">EXPLORADOR</div><div class="role-function">Investiga y pregunta</div><div class="role-desc">Busca información, hace preguntas al profesor.</div></div>
-        <div class="role-card"><div class="role-icon">⚔️</div><div class="role-name">GUERRERO</div><div class="role-function">Actúa y defiende</div><div class="role-desc">Habla en nombre del equipo, presenta trabajos.</div></div>
+        <div class="role-card"><div class="role-icon">👑</div><div class="role-name">LÍDER</div><div class="role-function">Guía y coordina</div><div class="role-desc">Organiza al equipo, recuerda fechas, asegura que todos tengan claro qué hacer. Sirve al equipo, no manda.</div></div>
+        <div class="role-card"><div class="role-icon">🎨</div><div class="role-name">ARTESANO</div><div class="role-function">Crea y embellece</div><div class="role-desc">Dibuja, diseña, hace carteles, cómics, emblemas. Da vida visual a las ideas del equipo.</div></div>
+        <div class="role-card"><div class="role-icon">🛡️</div><div class="role-name">GUARDIÁN</div><div class="role-function">Cuida y protege</div><div class="role-desc">Vela por los materiales, el orden y el respeto. Es el que dice "cuidado" cuando algo no va bien.</div></div>
+        <div class="role-card"><div class="role-icon">🔍</div><div class="role-name">EXPLORADOR</div><div class="role-function">Investiga y pregunta</div><div class="role-desc">Busca información, hace preguntas al profesor, encuentra recursos nuevos para el equipo.</div></div>
+        <div class="role-card"><div class="role-icon">⚔️</div><div class="role-name">GUERRERO</div><div class="role-function">Actúa y defiende</div><div class="role-desc">Habla en nombre del equipo, presenta trabajos, defiende las ideas de la tribu con respeto.</div></div>
     </div>
 </section>
 
+<!-- ==================== IMAGEN ==================== -->
 <section class="students-image-section">
     <div class="image-container">
-        <img src="./img/imagen-tribus.png" alt="Estudiantes en tribu">
+        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=900&h=500&fit=crop" alt="Estudiantes en tribu">
     </div>
 </section>
 
-<div class="footer">
-    <p>Desarrollado por <span class="highlight">Chrisayuron</span></p>
-    <p>Una idea de <span class="highlight">Ronald Rojas Newball</span></p>
-    <p>Año 2026</p>
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <div class="footer-content">
+
+        <!-- Columna 1: Logo -->
+        <div class="footer-section footer-logo-col">
+            <img src="./img/logo.png" alt="ETHYKOS" class="footer-logo-img">
+        </div>
+
+        <!-- Columna 2: Créditos -->
+        <div class="footer-section footer-credits-col">
+            <span class="footer-credits-title">Idea y desarrollo por:</span>
+            <p class="footer-credits-line">
+                <span class="footer-copy">©</span> Ronald Rojas Newball (Chrisayuron) &nbsp;2026<br>
+                <b>versión 1.0.0</b>
+            </p>
+            <a href="https://mr-ronald.vercel.app/" target="_blank" rel="noopener noreferrer" class="footer-url">
+                <i class="fas fa-envelope"></i> CONTÁCTAME
+            </a>
+        </div>
+
+        <!-- Columna 3: Legal -->
+        <div class="footer-section footer-legal-col">
+            <h4 class="footer-legal-title">Legal</h4>
+            <ul class="footer-links">
+                <li><a href="#" id="linkTerminos" class="footer-link">Términos de uso</a></li>
+                <li><a href="#" id="linkPrivacidad" class="footer-link">Política de privacidad</a></li>
+                <li><a href="#" id="linkLicencia" class="footer-link">Licencia</a></li>
+            </ul>
+        </div>
+
+    </div>
+</footer>
+
+<!-- ==================== MODALES LEGALES ==================== -->
+
+<!-- Modal Términos de uso -->
+<div id="modalTerminos" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTerminosTitulo" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 id="modalTerminosTitulo">📜 Términos de uso</h2>
+            <button class="modal-close" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Esta plataforma ha sido desarrollada exclusivamente con fines educativos.</p>
+            <p>Su uso debe realizarse de forma responsable y respetando los derechos de terceros.</p>
+            <p>No está permitido utilizar la plataforma para actividades ilícitas, fraudulentas o que vulneren la propiedad intelectual de este proyecto.</p>
+            <p>El usuario es responsable del contenido de las actividades que cree y comparta mediante la plataforma.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-close">Cerrar</button>
+        </div>
+    </div>
 </div>
 
-<!-- Modal Login -->
-<div id="loginModal" class="modal">
-    <div class="modal-content">
+<!-- Modal Política de privacidad -->
+<div id="modalPrivacidad" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalPrivacidadTitulo" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 id="modalPrivacidadTitulo">🔒 Política de privacidad</h2>
+            <button class="modal-close" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>ETHYKOS únicamente almacena la información necesaria para el funcionamiento de la plataforma.</p>
+            <p>No se comercializan ni comparten datos personales con terceros.</p>
+            <p>La información almacenada mediante Firebase es utilizada exclusivamente para brindar las funcionalidades propias del sistema.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-close">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Licencia -->
+<div id="modalLicencia" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalLicenciaTitulo" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 id="modalLicenciaTitulo">📄 Licencia</h2>
+            <button class="modal-close" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Este proyecto tiene su código fuente publicado públicamente en GitHub con fines de consulta y aprendizaje.</p>
+            <p><strong>Todos los derechos</strong> sobre el diseño, la idea, la implementación y el contenido pertenecen a Ronald Rojas Newball.</p>
+            <p>La publicación del código no autoriza su copia, redistribución, comercialización o reutilización total o parcial sin autorización expresa del autor.</p>
+            <p><strong>Todos los derechos reservados.</strong></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-close">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL LOGIN ==================== -->
+<div id="loginModal" class="modal" style="display: none;">
+    <div class="modal-login-content">
         <div class="login-icon">🏹🛡️</div>
         <h2>Ética en Acción</h2>
         <div class="login-subtitle">Acceso para docentes</div>
         
         <div class="input-group">
             <label>📧 Correo electrónico</label>
-            <input type="email" id="loginEmail" placeholder="ingresa tu correo">
+            <input type="email" id="loginEmail" placeholder="profesor@etica.com" value="profesor@etica.com">
         </div>
         
         <div class="input-group">
@@ -544,6 +949,7 @@
     </div>
 </div>
 
+<!-- ==================== SCRIPTS ==================== -->
 <script>
     // ==================== CONFIGURACIÓN DE FIREBASE ====================
     const firebaseConfig = {
@@ -556,8 +962,8 @@
     };
     console.log("🔥 Configuración de Firebase cargada");
     window.firebaseConfig = firebaseConfig;
-    
-    // Elementos del DOM
+
+    // ==================== ELEMENTOS DEL DOM ====================
     const mostrarLoginBtn = document.getElementById("mostrarLoginBtn");
     const loginModal = document.getElementById("loginModal");
     const closeLoginModalBtn = document.getElementById("closeLoginModalBtn");
@@ -566,45 +972,95 @@
     const loginPassword = document.getElementById("loginPassword");
     const loginError = document.getElementById("loginError");
     const togglePasswordBtn = document.getElementById("togglePasswordBtn");
-    
-    // Mostrar/ocultar contraseña
+
+    // ==================== MODALES LEGALES ====================
+    const modales = {
+        terminos: { btn: document.getElementById('linkTerminos'), modal: document.getElementById('modalTerminos') },
+        privacidad: { btn: document.getElementById('linkPrivacidad'), modal: document.getElementById('modalPrivacidad') },
+        licencia: { btn: document.getElementById('linkLicencia'), modal: document.getElementById('modalLicencia') }
+    };
+
+    function abrirModal(modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModal(modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Configurar eventos de los modales legales
+    Object.values(modales).forEach(({ btn, modal }) => {
+        if (btn) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                abrirModal(modal);
+            });
+        }
+        if (modal) {
+            const closeBtn = modal.querySelector('.modal-close');
+            const closeFooterBtn = modal.querySelector('.btn-modal-close');
+            const overlay = modal.querySelector('.modal-overlay');
+
+            if (closeBtn) closeBtn.addEventListener('click', () => cerrarModal(modal));
+            if (closeFooterBtn) closeFooterBtn.addEventListener('click', () => cerrarModal(modal));
+            if (overlay) overlay.addEventListener('click', () => cerrarModal(modal));
+        }
+    });
+
+    // Cerrar modales con tecla ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            Object.values(modales).forEach(({ modal }) => {
+                if (modal && modal.style.display === 'flex') {
+                    cerrarModal(modal);
+                }
+            });
+            if (loginModal && loginModal.style.display === 'flex') {
+                loginModal.style.display = 'none';
+            }
+        }
+    });
+
+    // ==================== MOSTRAR/OCULTAR CONTRASEÑA ====================
     if (togglePasswordBtn) {
-        togglePasswordBtn.addEventListener("click", function() {
-            const type = loginPassword.getAttribute("type") === "password" ? "text" : "password";
-            loginPassword.setAttribute("type", type);
-            const icon = this.querySelector("i");
-            if (type === "text") {
-                icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash");
+        togglePasswordBtn.addEventListener('click', function() {
+            const type = loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            loginPassword.setAttribute('type', type);
+            const icon = this.querySelector('i');
+            if (type === 'text') {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
-                icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye");
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         });
     }
-    
-    // Funciones del modal
+
+    // ==================== FUNCIONES DEL MODAL LOGIN ====================
     mostrarLoginBtn.onclick = function() {
-        loginModal.style.display = "flex";
-        loginError.textContent = "";
-        loginPassword.value = "";
-        loginPassword.setAttribute("type", "password");
-        const icon = togglePasswordBtn.querySelector("i");
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
+        loginModal.style.display = 'flex';
+        loginError.textContent = '';
+        loginPassword.value = '';
+        loginPassword.setAttribute('type', 'password');
+        const icon = togglePasswordBtn.querySelector('i');
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
     };
-    
+
     closeLoginModalBtn.onclick = function() {
-        loginModal.style.display = "none";
+        loginModal.style.display = 'none';
     };
-    
+
     window.onclick = function(event) {
         if (event.target === loginModal) {
-            loginModal.style.display = "none";
+            loginModal.style.display = 'none';
         }
     };
-    
-    // Función scroll
+
+    // ==================== FUNCIÓN SCROLL ====================
     function scrollToSection(id) {
         document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
     }
@@ -640,7 +1096,7 @@
         }
         
         loginError.textContent = "Iniciando sesión...";
-        loginError.style.color = "#f39c12";
+        loginError.style.color = "#2563EB";
         
         try {
             await signInWithEmailAndPassword(auth, email, password);
@@ -658,7 +1114,7 @@
             } else {
                 loginError.textContent = "Error: " + error.message;
             }
-            loginError.style.color = "#e74c3c";
+            loginError.style.color = "#EF4444";
         }
     };
     

@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* ==================== ESTILOS COMPLETOS ==================== */
         * {
             margin: 0;
             padding: 0;
@@ -15,53 +16,57 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0a0f1e 0%, #0f172a 50%, #1e1b2e 100%);
+            background: #F1F5F9;
             min-height: 100vh;
-            color: #f1f5f9;
+            color: #1E293B;
         }
 
         .header-dashboard {
-            background: linear-gradient(90deg, #1a1a2e, #16213e);
-            padding: 15px 30px;
+            background: #FFFFFF;
+            padding: 12px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            border-bottom: 2px solid #e94560;
+            border-bottom: 3px solid #3B82F6;
             gap: 15px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
-        .logo-icon {
-            font-size: 28px;
+        .logo img {
+            height: 50px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.06));
         }
 
         .logo h1 {
             font-size: 22px;
-            background: linear-gradient(135deg, #e94560, #f39c12);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            color: #1E293B;
+            font-weight: 700;
         }
 
         .logout-btn {
-            background: #7f8c8d;
+            background: #3B82F6;
             border: none;
             padding: 8px 20px;
             border-radius: 30px;
             color: white;
             cursor: pointer;
             font-weight: 600;
-            transition: background 0.3s;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
         }
 
         .logout-btn:hover {
-            background: #c0392b;
+            background: #2563EB;
+            transform: translateY(-2px);
         }
 
         .courses-nav {
@@ -69,24 +74,26 @@
             justify-content: center;
             gap: 12px;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
+            background: #FFFFFF;
             flex-wrap: wrap;
+            border-bottom: 1px solid #E2E8F0;
         }
 
         .course-btn {
-            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            background: #F1F5F9;
             border: none;
             padding: 10px 28px;
             border-radius: 40px;
             font-size: 16px;
             font-weight: 700;
-            color: white;
+            color: #475569;
             cursor: pointer;
             transition: all 0.3s;
         }
 
         .course-btn:hover, .course-btn.active {
-            background: linear-gradient(135deg, #e94560, #ff6b6b);
+            background: #3B82F6;
+            color: white;
             transform: translateY(-2px);
         }
 
@@ -97,7 +104,7 @@
         }
 
         .course-header {
-            background: rgba(255, 255, 255, 0.08);
+            background: #FFFFFF;
             border-radius: 20px;
             padding: 15px 25px;
             margin-bottom: 25px;
@@ -106,15 +113,18 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #E2E8F0;
         }
 
         .course-title {
             font-size: 28px;
             font-weight: 700;
+            color: #1E293B;
         }
 
         .add-tribe-btn {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: #3B82F6;
             border: none;
             padding: 10px 22px;
             border-radius: 40px;
@@ -124,18 +134,22 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: transform 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
         }
 
         .add-tribe-btn:hover {
+            background: #2563EB;
             transform: scale(1.02);
         }
 
         .chart-section {
-            background: rgba(255, 255, 255, 0.05);
+            background: #FFFFFF;
             border-radius: 24px;
             padding: 20px;
             margin-bottom: 25px;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .chart-title {
@@ -145,6 +159,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            color: #1E293B;
         }
 
         .chart-container {
@@ -164,6 +179,7 @@
             width: 120px;
             font-size: 13px;
             font-weight: 500;
+            color: #475569;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -180,14 +196,14 @@
         .chart-bar {
             flex: 1;
             height: 28px;
-            background: rgba(255, 255, 255, 0.1);
+            background: #E2E8F0;
             border-radius: 14px;
             overflow: hidden;
         }
 
         .chart-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #f39c12, #e94560);
+            background: linear-gradient(90deg, #3B82F6, #2563EB);
             border-radius: 14px;
             display: flex;
             align-items: center;
@@ -203,13 +219,13 @@
             width: 60px;
             text-align: right;
             font-weight: 700;
-            color: #f39c12;
+            color: #2563EB;
         }
 
         .empty-chart {
             text-align: center;
             padding: 30px;
-            color: #94a3b8;
+            color: #94A3B8;
         }
 
         .tribes-grid {
@@ -219,16 +235,18 @@
         }
 
         .tribe-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.2));
+            background: #FFFFFF;
             border-radius: 24px;
             padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid #E2E8F0;
             transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .tribe-card:hover {
             transform: translateY(-5px);
-            border-color: #e94560;
+            border-color: #3B82F6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
         }
 
         .tribe-emblema {
@@ -243,44 +261,47 @@
             height: 120px;
             object-fit: cover;
             border-radius: 50%;
-            border: 3px solid #e94560;
-            background: #1a1a2e;
+            border: 3px solid #3B82F6;
+            background: #F1F5F9;
         }
 
         .tribe-emblema-placeholder {
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #e94560, #f39c12);
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 48px;
+            color: white;
         }
 
         .tribe-header {
             text-align: center;
             margin-bottom: 15px;
             padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid #E2E8F0;
         }
 
         .tribe-name {
             font-size: 24px;
             font-weight: 700;
             margin-bottom: 5px;
+            color: #1E293B;
         }
 
         .tribe-war-cry {
-            background: rgba(0, 0, 0, 0.4);
+            background: #F1F5F9;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             display: inline-block;
+            color: #475569;
         }
 
         .score-section {
-            background: rgba(0, 0, 0, 0.3);
+            background: #F8FAFC;
             border-radius: 16px;
             padding: 12px;
             margin-bottom: 15px;
@@ -289,14 +310,14 @@
 
         .score-label {
             font-size: 11px;
-            color: #f39c12;
+            color: #64748B;
             margin-bottom: 5px;
         }
 
         .score-value {
             font-size: 28px;
             font-weight: 800;
-            color: #f39c12;
+            color: #2563EB;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -306,7 +327,7 @@
         .progress-bar-container {
             width: 100%;
             height: 8px;
-            background: rgba(255, 255, 255, 0.1);
+            background: #E2E8F0;
             border-radius: 10px;
             margin-top: 8px;
             overflow: hidden;
@@ -314,7 +335,7 @@
 
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #f39c12, #e94560);
+            background: linear-gradient(90deg, #3B82F6, #2563EB);
             border-radius: 10px;
             transition: width 0.3s;
         }
@@ -323,14 +344,14 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             margin-top: 8px;
         }
 
         .score-btn {
-            background: rgba(255, 255, 255, 0.15);
+            background: #E2E8F0;
             border: none;
-            padding: 5px 12px;
+            padding: 4px 12px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 12px;
@@ -342,11 +363,11 @@
             transform: scale(1.05);
         }
 
-        .score-plus { color: #2ecc71; }
-        .score-plus:hover { background: #2ecc71; color: #1a1a2e; }
+        .score-plus { color: #059669; }
+        .score-plus:hover { background: #059669; color: white; }
 
-        .score-minus { color: #e74c3c; }
-        .score-minus:hover { background: #e74c3c; color: #1a1a2e; }
+        .score-minus { color: #EF4444; }
+        .score-minus:hover { background: #EF4444; color: white; }
 
         .score-custom {
             display: flex;
@@ -358,33 +379,42 @@
         .score-custom input {
             width: 80px;
             padding: 5px 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
             border-radius: 20px;
-            color: white;
+            color: #1E293B;
             text-align: center;
             font-size: 12px;
         }
 
         .score-custom input:focus {
             outline: none;
-            border-color: #f39c12;
+            border-color: #3B82F6;
         }
 
         .score-custom button {
-            background: #f39c12;
+            background: #3B82F6;
             border: none;
             padding: 5px 12px;
             border-radius: 20px;
             cursor: pointer;
             font-size: 12px;
             font-weight: bold;
-            color: #1a1a2e;
+            color: #FFFFFF;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .score-custom button i {
+            color: #FFFFFF;
+            font-size: 12px;
         }
 
         .score-custom button:hover {
-            background: #e67e22;
+            background: #2563EB;
+            transform: scale(1.05);
         }
 
         .members-section {
@@ -395,7 +425,7 @@
 
         .members-section h4 {
             font-size: 13px;
-            color: #f39c12;
+            color: #64748B;
             margin-bottom: 10px;
         }
 
@@ -405,7 +435,7 @@
             align-items: center;
             padding: 8px 12px;
             margin: 4px 0;
-            background: rgba(0, 0, 0, 0.3);
+            background: #F8FAFC;
             border-radius: 12px;
             font-size: 13px;
             flex-wrap: wrap;
@@ -419,9 +449,10 @@
             flex-wrap: wrap;
         }
 
-        .member-name { font-weight: 500; }
+        .member-name { font-weight: 500; color: #1E293B; }
         .member-role {
-            background: #e94560;
+            background: #DBEAFE;
+            color: #2563EB;
             padding: 3px 10px;
             border-radius: 20px;
             font-size: 10px;
@@ -437,54 +468,64 @@
             transition: transform 0.2s;
         }
         .member-actions button:hover { transform: scale(1.1); }
-        .edit-member { color: #3498db; }
-        .delete-member { color: #e74c3c; }
+        .edit-member { color: #3B82F6; }
+        .delete-member { color: #EF4444; }
 
         .add-member-form {
             display: flex;
             gap: 8px;
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid #E2E8F0;
             flex-wrap: wrap;
         }
 
         .add-member-form input {
             flex: 1;
             padding: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
             border-radius: 12px;
-            color: white;
+            color: #1E293B;
             font-size: 12px;
             min-width: 120px;
         }
 
         .add-member-form input::placeholder {
-            color: #94a3b8;
+            color: #94A3B8;
         }
 
         .add-member-form select {
             padding: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
             border-radius: 12px;
-            color: white;
+            color: #1E293B;
             font-size: 12px;
         }
 
         .add-member-form button {
-            background: #27ae60;
+            background: #3B82F6;
             border: none;
-            padding: 8px 12px;
+            padding: 8px 14px;
             border-radius: 12px;
             cursor: pointer;
-            color: white;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 16px;
+        }
+
+        .add-member-form button i {
+            color: #FFFFFF;
+            font-size: 16px;
         }
 
         .add-member-form button:hover {
-            background: #2ecc71;
+            background: #2563EB;
+            transform: scale(1.05);
         }
 
         .tribe-actions {
@@ -492,7 +533,7 @@
             gap: 10px;
             margin-top: 15px;
             padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid #E2E8F0;
         }
 
         .edit-tribe, .delete-tribe {
@@ -505,26 +546,29 @@
             transition: all 0.2s;
         }
 
-        .edit-tribe { background: #3498db; color: white; }
-        .edit-tribe:hover { background: #2980b9; }
-        .delete-tribe { background: #c0392b; color: white; }
-        .delete-tribe:hover { background: #a93226; }
+        .edit-tribe { background: #3B82F6; color: white; }
+        .edit-tribe:hover { background: #2563EB; }
+        .delete-tribe { background: #EF4444; color: white; }
+        .delete-tribe:hover { background: #DC2626; }
 
         .empty-message {
             text-align: center;
             padding: 50px;
-            background: rgba(255, 255, 255, 0.05);
+            background: #FFFFFF;
             border-radius: 20px;
+            border: 1px solid #E2E8F0;
         }
 
         .empty-message i {
             font-size: 48px;
             margin-bottom: 15px;
+            color: #94A3B8;
         }
 
         .loading {
             text-align: center;
             padding: 50px;
+            color: #64748B;
         }
 
         .modal {
@@ -534,29 +578,29 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 1000;
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: #FFFFFF;
             padding: 30px;
             border-radius: 28px;
             width: 90%;
             max-width: 500px;
-            border: 1px solid #e94560;
+            border: 2px solid #3B82F6;
         }
 
         .modal-content h2 {
             margin-bottom: 20px;
-            color: #f39c12;
+            color: #1E293B;
         }
 
         .modal-content label {
             font-size: 14px;
-            color: #94a3b8;
+            color: #64748B;
             display: block;
             margin-top: 10px;
         }
@@ -565,10 +609,10 @@
             width: 100%;
             padding: 12px;
             margin: 8px 0;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
             border-radius: 12px;
-            color: white;
+            color: #1E293B;
             font-size: 14px;
         }
 
@@ -580,7 +624,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: rgba(255, 255, 255, 0.1);
+            background: #F1F5F9;
             overflow: hidden;
         }
 
@@ -606,10 +650,10 @@
             transition: all 0.2s;
         }
 
-        .modal-save { background: #27ae60; color: white; }
-        .modal-save:hover { background: #2ecc71; }
-        .modal-cancel { background: #7f8c8d; color: white; }
-        .modal-cancel:hover { background: #95a5a6; }
+        .modal-save { background: #3B82F6; color: white; }
+        .modal-save:hover { background: #2563EB; }
+        .modal-cancel { background: #E2E8F0; color: #475569; }
+        .modal-cancel:hover { background: #CBD5E1; }
 
         @media (max-width: 768px) {
             .tribes-grid { grid-template-columns: 1fr; }
@@ -618,6 +662,8 @@
             .chart-tribe-name { width: 80px; font-size: 11px; }
             .member-item { flex-direction: column; align-items: flex-start; }
             .member-actions { align-self: flex-end; }
+            .logo h1 { font-size: 16px; }
+            .logo img { height: 35px; }
         }
     </style>
 </head>
@@ -625,9 +671,8 @@
 
 <div class="header-dashboard">
     <div class="logo">
-        <span class="logo-icon">🏹</span>
-        <h1>GESTIÓN DE TRIBUS - ÉTICA</h1>
-        <span class="logo-icon">🛡️</span>
+        <img src="./img/logo.png" alt="ETHICOS">
+        <h1>GESTIÓN DE TRIBUS</h1>
     </div>
     <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
 </div>
@@ -674,8 +719,8 @@
     </div>
 </div>
 
+<!-- ==================== FIREBASE ==================== -->
 <script>
-    // ==================== CONFIGURACIÓN DE FIREBASE ====================
     const firebaseConfig = {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
         authDomain: "ethicos-a9a66.firebaseapp.com",
@@ -688,7 +733,6 @@
     window.firebaseConfig = firebaseConfig;
 </script>
 
-<!-- Firebase SDKs y lógica principal -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
@@ -700,7 +744,6 @@
     
     console.log("🔥 Firebase conectado");
     
-    // Verificar autenticación
     onAuthStateChanged(auth, (user) => {
         if (!user) {
             window.location.href = "index.html";
@@ -710,7 +753,6 @@
         }
     });
     
-    // Datos
     const courseNames = { 6: "6°", 7: "7°", 8: "8°", 9: "9°", 10: "10°", 11: "11°" };
     const rolesDisponibles = ["Líder", "Comunicador", "Artesano", "Guardián", "Explorador", "Guerrero"];
     
@@ -837,16 +879,16 @@
                             <div class="score-value"><span>⭐</span><span id="points_${tribe.id}">${points}</span><span>🏅</span></div>
                             <div class="progress-bar-container"><div class="progress-bar" style="width: ${percent}%;"></div></div>
                             <div class="score-buttons">
+                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',1)">+1</button>
+                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',3)">+3</button>
                                 <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',5)">+5</button>
-                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',10)">+10</button>
-                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',20)">+20</button>
+                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-1)">-1</button>
+                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-3)">-3</button>
                                 <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-5)">-5</button>
-                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-10)">-10</button>
-                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-20)">-20</button>
                             </div>
                             <div class="score-custom">
                                 <input type="number" id="customPoints_${uniqueId}" placeholder="Cantidad" value="0" step="1">
-                                <button onclick="window.applyCustomPoints('${tribe.id}', '${uniqueId}')">➕ Aplicar</button>
+                                <button onclick="window.applyCustomPoints('${tribe.id}', '${uniqueId}')"><i class="fas fa-plus"></i> Aplicar</button>
                             </div>
                         </div>
                         <div class="members-section">
@@ -864,7 +906,7 @@
                         <div class="add-member-form">
                             <input type="text" id="newMemberName_${tribe.id}" placeholder="Nuevo integrante">
                             <select id="newMemberRole_${tribe.id}">${rolesDisponibles.map(r => `<option value="${r}">${r}</option>`).join('')}</select>
-                            <button onclick="window.addMember('${tribe.id}')">➕</button>
+                            <button onclick="window.addMember('${tribe.id}')"><i class="fas fa-plus"></i></button>
                         </div>
                         <div class="tribe-actions">
                             <button class="edit-tribe" onclick="window.openEditTribeModal('${tribe.id}')">✏️ Editar Tribu</button>
@@ -922,22 +964,100 @@
         }
     };
     
+    // ==================== EDITAR INTEGRANTE (NOMBRE + ROL) ====================
     window.openEditMemberModal = async (tribeId, idx) => {
         const tribes = await getTribes(currentGrade);
         const tribe = tribes.find(t => t.id === tribeId);
         if (!tribe) return;
-        const m = tribe.members[idx];
-        const newName = prompt("Editar nombre:", m.name);
-        if (newName && newName.trim()) {
-            const newRole = prompt(`Rol actual: ${m.role}\nRoles: ${rolesDisponibles.join(", ")}`, m.role);
-            if (newRole && rolesDisponibles.includes(newRole)) {
-                const newMembers = [...tribe.members];
-                newMembers[idx] = { name: newName.trim(), role: newRole };
-                await updateMember(tribeId, newMembers);
-                await renderTribes();
-                await renderChart();
-            } else if (newRole) alert("Rol no válido");
-        }
+        const member = tribe.members[idx];
+        
+        // Crear modal personalizado
+        const modalOverlay = document.createElement('div');
+        modalOverlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+            animation: fadeIn 0.3s ease;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: #FFFFFF; padding: 30px; border-radius: 24px;
+            width: 90%; max-width: 400px;
+            border: 2px solid #3B82F6;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        `;
+        
+        modalContent.innerHTML = `
+            <h3 style="margin-bottom: 20px; color: #1E293B; font-size: 20px;">
+                ✏️ Editar Integrante
+            </h3>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #64748B; font-size: 14px;">
+                    👤 Nombre
+                </label>
+                <input type="text" id="editMemberName" value="${escapeHtml(member.name)}" 
+                       style="width: 100%; padding: 10px 12px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; color: #1E293B; font-size: 14px;">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; color: #64748B; font-size: 14px;">
+                    🎯 Rol
+                </label>
+                <select id="editMemberRole" 
+                        style="width: 100%; padding: 10px 12px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; color: #1E293B; font-size: 14px;">
+                    ${rolesDisponibles.map(r => `<option value="${r}" ${member.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="saveEditMember" style="flex: 1; padding: 10px; background: #3B82F6; border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+                    💾 Guardar
+                </button>
+                <button id="cancelEditMember" style="flex: 1; padding: 10px; background: #E2E8F0; border: none; border-radius: 30px; color: #475569; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+                    Cancelar
+                </button>
+            </div>
+        `;
+        
+        modalOverlay.appendChild(modalContent);
+        document.body.appendChild(modalOverlay);
+        
+        // Cerrar al hacer clic fuera
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.remove();
+            }
+        });
+        
+        // Guardar cambios
+        modalContent.querySelector('#saveEditMember').addEventListener('click', async () => {
+            const newName = document.getElementById('editMemberName').value.trim();
+            const newRole = document.getElementById('editMemberRole').value;
+            
+            if (!newName) {
+                alert("El nombre no puede estar vacío");
+                return;
+            }
+            
+            const newMembers = [...tribe.members];
+            newMembers[idx] = { name: newName, role: newRole };
+            await updateMember(tribeId, newMembers);
+            await renderTribes();
+            await renderChart();
+            modalOverlay.remove();
+        });
+        
+        // Cancelar
+        modalContent.querySelector('#cancelEditMember').addEventListener('click', () => {
+            modalOverlay.remove();
+        });
+        
+        // Cerrar con ESC
+        document.addEventListener('keydown', function handler(e) {
+            if (e.key === 'Escape' && document.body.contains(modalOverlay)) {
+                modalOverlay.remove();
+                document.removeEventListener('keydown', handler);
+            }
+        });
     };
     
     window.openEditTribeModal = async (tribeId) => {
