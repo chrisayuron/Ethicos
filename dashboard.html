@@ -7,653 +7,207 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ==================== ESTILOS COMPLETOS ==================== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #F1F5F9;
-            min-height: 100vh;
-            color: #1E293B;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #F1F5F9; min-height: 100vh; color: #1E293B; }
 
         .header-dashboard {
-            background: #FFFFFF;
-            padding: 12px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            border-bottom: 3px solid #3B82F6;
-            gap: 15px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+            background: #FFFFFF; padding: 12px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; border-bottom: 3px solid #3B82F6; gap: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.06);
         }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo img { height: 50px; width: auto; display: block; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.06)); }
+        .logo h1 { font-size: 22px; color: #1E293B; font-weight: 700; }
+        .header-btns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .header-btn {
+            background: #3B82F6; border: none; padding: 8px 18px; border-radius: 30px;
+            color: white; cursor: pointer; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(59,130,246,0.3); font-size: 14px;
+            display: flex; align-items: center; gap: 6px;
         }
-
-        .logo img {
-            height: 50px;
-            width: auto;
-            display: block;
-            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.06));
-        }
-
-        .logo h1 {
-            font-size: 22px;
-            color: #1E293B;
-            font-weight: 700;
-        }
-
-        .logout-btn {
-            background: #3B82F6;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 30px;
-            color: white;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
-        }
-
-        .logout-btn:hover {
-            background: #2563EB;
-            transform: translateY(-2px);
-        }
+        .header-btn:hover { background: #2563EB; transform: translateY(-2px); }
+        .header-btn.green { background: #059669; box-shadow: 0 2px 10px rgba(5,150,105,0.3); }
+        .header-btn.green:hover { background: #047857; }
+        .header-btn.purple { background: #7C3AED; box-shadow: 0 2px 10px rgba(124,58,237,0.3); }
+        .header-btn.purple:hover { background: #6D28D9; }
+        .logout-btn { background: #64748B; border: none; padding: 8px 18px; border-radius: 30px; color: white; cursor: pointer; font-weight: 600; transition: all 0.3s; font-size: 14px; }
+        .logout-btn:hover { background: #475569; }
 
         .courses-nav {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            padding: 20px;
-            background: #FFFFFF;
-            flex-wrap: wrap;
+            display: flex; justify-content: center; gap: 12px;
+            padding: 20px; background: #FFFFFF; flex-wrap: wrap;
             border-bottom: 1px solid #E2E8F0;
         }
-
         .course-btn {
-            background: #F1F5F9;
-            border: none;
-            padding: 10px 28px;
-            border-radius: 40px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #475569;
-            cursor: pointer;
-            transition: all 0.3s;
+            background: #F1F5F9; border: none; padding: 10px 28px;
+            border-radius: 40px; font-size: 16px; font-weight: 700; color: #475569;
+            cursor: pointer; transition: all 0.3s;
         }
+        .course-btn:hover, .course-btn.active { background: #3B82F6; color: white; transform: translateY(-2px); }
 
-        .course-btn:hover, .course-btn.active {
-            background: #3B82F6;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .main-content {
-            padding: 25px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        .main-content { padding: 25px; max-width: 1400px; margin: 0 auto; }
 
         .course-header {
-            background: #FFFFFF;
-            border-radius: 20px;
-            padding: 15px 25px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            border: 1px solid #E2E8F0;
+            background: #FFFFFF; border-radius: 20px; padding: 15px 25px;
+            margin-bottom: 25px; display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #E2E8F0;
         }
-
-        .course-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1E293B;
-        }
-
+        .course-title { font-size: 28px; font-weight: 700; color: #1E293B; }
         .add-tribe-btn {
-            background: #3B82F6;
-            border: none;
-            padding: 10px 22px;
-            border-radius: 40px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+            background: #3B82F6; border: none; padding: 10px 22px; border-radius: 40px;
+            font-weight: bold; color: white; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(59,130,246,0.3);
         }
-
-        .add-tribe-btn:hover {
-            background: #2563EB;
-            transform: scale(1.02);
-        }
+        .add-tribe-btn:hover { background: #2563EB; transform: scale(1.02); }
 
         .chart-section {
-            background: #FFFFFF;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            background: #FFFFFF; border-radius: 24px; padding: 20px;
+            margin-bottom: 25px; border: 1px solid #E2E8F0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
+        .chart-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; color: #1E293B; }
+        .chart-container { display: flex; flex-direction: column; gap: 12px; }
+        .chart-bar-item { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .chart-tribe-name { width: 120px; font-size: 13px; font-weight: 500; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chart-bar-wrapper { flex: 1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .chart-bar { flex: 1; height: 28px; background: #E2E8F0; border-radius: 14px; overflow: hidden; }
+        .chart-bar-fill { height: 100%; background: linear-gradient(90deg, #3B82F6, #2563EB); border-radius: 14px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-size: 11px; font-weight: bold; min-width: 35px; }
+        .chart-points { width: 60px; text-align: right; font-weight: 700; color: #2563EB; }
+        .empty-chart { text-align: center; padding: 30px; color: #94A3B8; }
 
-        .chart-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #1E293B;
-        }
-
-        .chart-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chart-bar-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .chart-tribe-name {
-            width: 120px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #475569;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chart-bar-wrapper {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .chart-bar {
-            flex: 1;
-            height: 28px;
-            background: #E2E8F0;
-            border-radius: 14px;
-            overflow: hidden;
-        }
-
-        .chart-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3B82F6, #2563EB);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
-            color: white;
-            font-size: 11px;
-            font-weight: bold;
-            min-width: 35px;
-        }
-
-        .chart-points {
-            width: 60px;
-            text-align: right;
-            font-weight: 700;
-            color: #2563EB;
-        }
-
-        .empty-chart {
-            text-align: center;
-            padding: 30px;
-            color: #94A3B8;
-        }
-
-        .tribes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 25px;
-        }
-
-        .tribe-card {
-            background: #FFFFFF;
-            border-radius: 24px;
-            padding: 20px;
-            border: 1px solid #E2E8F0;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .tribe-card:hover {
-            transform: translateY(-5px);
-            border-color: #3B82F6;
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
-        }
-
-        .tribe-emblema {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .tribe-emblema img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 3px solid #3B82F6;
-            background: #F1F5F9;
-        }
-
-        .tribe-emblema-placeholder {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3B82F6, #2563EB);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: white;
-        }
-
-        .tribe-header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #E2E8F0;
-        }
-
-        .tribe-name {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            color: #1E293B;
-        }
-
-        .tribe-war-cry {
-            background: #F1F5F9;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            display: inline-block;
-            color: #475569;
-        }
-
-        .score-section {
-            background: #F8FAFC;
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .score-label {
-            font-size: 11px;
-            color: #64748B;
-            margin-bottom: 5px;
-        }
-
-        .score-value {
-            font-size: 28px;
-            font-weight: 800;
-            color: #2563EB;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .progress-bar-container {
-            width: 100%;
-            height: 8px;
-            background: #E2E8F0;
-            border-radius: 10px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #3B82F6, #2563EB);
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-
-        .score-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 8px;
-        }
-
-        .score-btn {
-            background: #E2E8F0;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .score-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .score-plus { color: #059669; }
-        .score-plus:hover { background: #059669; color: white; }
-
-        .score-minus { color: #EF4444; }
-        .score-minus:hover { background: #EF4444; color: white; }
-
-        .score-custom {
-            display: flex;
-            gap: 6px;
-            margin-top: 8px;
-            justify-content: center;
-        }
-
-        .score-custom input {
-            width: 80px;
-            padding: 5px 8px;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 20px;
-            color: #1E293B;
-            text-align: center;
-            font-size: 12px;
-        }
-
-        .score-custom input:focus {
-            outline: none;
-            border-color: #3B82F6;
-        }
-
-        .score-custom button {
-            background: #3B82F6;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            color: #FFFFFF;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .score-custom button i {
-            color: #FFFFFF;
-            font-size: 12px;
-        }
-
-        .score-custom button:hover {
-            background: #2563EB;
-            transform: scale(1.05);
-        }
-
-        .members-section {
-            margin: 15px 0;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-
-        .members-section h4 {
-            font-size: 13px;
-            color: #64748B;
-            margin-bottom: 10px;
-        }
-
-        .member-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            margin: 4px 0;
-            background: #F8FAFC;
-            border-radius: 12px;
-            font-size: 13px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .member-info {
-            display: flex;
-            gap: 12px;
-            align-items: baseline;
-            flex-wrap: wrap;
-        }
-
+        .tribes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 25px; }
+        .tribe-card { background: #FFFFFF; border-radius: 24px; padding: 20px; border: 1px solid #E2E8F0; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .tribe-card:hover { transform: translateY(-5px); border-color: #3B82F6; box-shadow: 0 10px 25px rgba(59,130,246,0.1); }
+        .tribe-emblema { width: 100%; display: flex; justify-content: center; margin-bottom: 15px; }
+        .tribe-emblema img { width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 3px solid #3B82F6; background: #F1F5F9; }
+        .tribe-emblema-placeholder { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #3B82F6, #2563EB); display: flex; align-items: center; justify-content: center; font-size: 48px; color: white; }
+        .tribe-header { text-align: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #E2E8F0; }
+        .tribe-name { font-size: 24px; font-weight: 700; margin-bottom: 5px; color: #1E293B; }
+        .tribe-war-cry { background: #F1F5F9; padding: 4px 12px; border-radius: 20px; font-size: 12px; display: inline-block; color: #475569; }
+        .score-section { background: #F8FAFC; border-radius: 16px; padding: 12px; margin-bottom: 15px; text-align: center; }
+        .score-label { font-size: 11px; color: #64748B; margin-bottom: 5px; }
+        .score-value { font-size: 28px; font-weight: 800; color: #2563EB; display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .progress-bar-container { width: 100%; height: 8px; background: #E2E8F0; border-radius: 10px; margin-top: 8px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #3B82F6, #2563EB); border-radius: 10px; transition: width 0.3s; }
+        .score-buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 8px; }
+        .score-btn { background: #E2E8F0; border: none; padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; transition: all 0.2s; }
+        .score-btn:hover { transform: scale(1.05); }
+        .score-plus { color: #059669; } .score-plus:hover { background: #059669; color: white; }
+        .score-minus { color: #EF4444; } .score-minus:hover { background: #EF4444; color: white; }
+        .score-custom { display: flex; gap: 6px; margin-top: 8px; justify-content: center; }
+        .score-custom input { width: 80px; padding: 5px 8px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 20px; color: #1E293B; text-align: center; font-size: 12px; }
+        .score-custom input:focus { outline: none; border-color: #3B82F6; }
+        .score-custom button { background: #3B82F6; border: none; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold; color: #FFFFFF; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+        .score-custom button:hover { background: #2563EB; transform: scale(1.05); }
+        .members-section { margin: 15px 0; max-height: 250px; overflow-y: auto; }
+        .members-section h4 { font-size: 13px; color: #64748B; margin-bottom: 10px; }
+        .member-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; margin: 4px 0; background: #F8FAFC; border-radius: 12px; font-size: 13px; flex-wrap: wrap; gap: 8px; }
+        .member-info { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
         .member-name { font-weight: 500; color: #1E293B; }
-        .member-role {
-            background: #DBEAFE;
-            color: #2563EB;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
+        .member-role { background: #DBEAFE; color: #2563EB; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
         .member-actions { display: flex; gap: 8px; }
-        .member-actions button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            transition: transform 0.2s;
-        }
+        .member-actions button { background: none; border: none; cursor: pointer; font-size: 12px; transition: transform 0.2s; }
         .member-actions button:hover { transform: scale(1.1); }
-        .edit-member { color: #3B82F6; }
-        .delete-member { color: #EF4444; }
+        .edit-member { color: #3B82F6; } .delete-member { color: #EF4444; }
+        .add-member-form { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #E2E8F0; flex-wrap: wrap; }
+        .add-member-form input { flex: 1; padding: 8px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; color: #1E293B; font-size: 12px; min-width: 120px; }
+        .add-member-form input::placeholder { color: #94A3B8; }
+        .add-member-form select { padding: 8px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; color: #1E293B; font-size: 12px; }
+        .add-member-form button { background: #3B82F6; border: none; padding: 8px 14px; border-radius: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 16px; }
+        .add-member-form button i { color: #FFFFFF; font-size: 16px; }
+        .add-member-form button:hover { background: #2563EB; transform: scale(1.05); }
+        .tribe-actions { display: flex; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid #E2E8F0; }
+        .edit-tribe, .delete-tribe { flex: 1; padding: 8px; border: none; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .edit-tribe { background: #3B82F6; color: white; } .edit-tribe:hover { background: #2563EB; }
+        .delete-tribe { background: #EF4444; color: white; } .delete-tribe:hover { background: #DC2626; }
+        .empty-message { text-align: center; padding: 50px; background: #FFFFFF; border-radius: 20px; border: 1px solid #E2E8F0; }
+        .empty-message i { font-size: 48px; margin-bottom: 15px; color: #94A3B8; display: block; }
+        .loading { text-align: center; padding: 50px; color: #64748B; }
 
-        .add-member-form {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #E2E8F0;
-            flex-wrap: wrap;
-        }
+        /* ===== MODALS ===== */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: #FFFFFF; padding: 30px; border-radius: 28px; width: 90%; max-width: 500px; border: 2px solid #3B82F6; max-height: 90vh; overflow-y: auto; }
+        .modal-content h2 { margin-bottom: 20px; color: #1E293B; }
+        .modal-content label { font-size: 14px; color: #64748B; display: block; margin-top: 10px; }
+        .modal-content input, .modal-content textarea, .modal-content select { width: 100%; padding: 12px; margin: 8px 0; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; color: #1E293B; font-size: 14px; }
+        .image-preview { width: 100px; height: 100px; border-radius: 50%; margin: 10px auto; display: flex; justify-content: center; align-items: center; background: #F1F5F9; overflow: hidden; }
+        .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-buttons { display: flex; gap: 15px; margin-top: 20px; }
+        .modal-save, .modal-cancel { flex: 1; padding: 12px; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .modal-save { background: #3B82F6; color: white; } .modal-save:hover { background: #2563EB; }
+        .modal-cancel { background: #E2E8F0; color: #475569; } .modal-cancel:hover { background: #CBD5E1; }
 
-        .add-member-form input {
-            flex: 1;
-            padding: 8px;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            color: #1E293B;
-            font-size: 12px;
-            min-width: 120px;
-        }
+        /* ===== STUDENTS MODAL ===== */
+        .modal-content.wide { max-width: 700px; }
+        .tabs { display: flex; gap: 0; margin-bottom: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0; }
+        .tab-btn { flex: 1; padding: 10px; border: none; background: #F1F5F9; color: #475569; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; }
+        .tab-btn.active { background: #3B82F6; color: white; }
+        .tab-panel { display: none; } .tab-panel.active { display: block; }
+        .student-list { max-height: 300px; overflow-y: auto; margin-top: 10px; }
+        .student-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #F8FAFC; border-radius: 10px; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+        .student-row .sname { font-weight: 500; font-size: 14px; }
+        .student-row .scourse { background: #DBEAFE; color: #2563EB; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .student-row .sdoc { color: #94A3B8; font-size: 11px; }
+        .student-row .sactions { display: flex; gap: 6px; }
+        .student-row .sactions button { border: none; background: none; cursor: pointer; font-size: 13px; padding: 4px 8px; border-radius: 8px; transition: all 0.2s; }
+        .assign-btn { color: #059669; background: #D1FAE5 !important; font-weight: bold; }
+        .assign-btn:hover { background: #059669 !important; color: white !important; }
+        .del-student-btn { color: #EF4444; }
+        .del-student-btn:hover { background: #FEE2E2 !important; }
+        .csv-area { border: 2px dashed #CBD5E1; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; color: #64748B; margin: 10px 0; }
+        .csv-area:hover { border-color: #3B82F6; background: #EFF6FF; }
+        .csv-area input[type=file] { display: none; }
+        .csv-preview { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+        .csv-row { display: flex; gap: 10px; padding: 6px 10px; background: #F8FAFC; border-radius: 8px; margin-bottom: 4px; font-size: 12px; align-items: center; }
+        .search-input { width: 100%; padding: 10px 14px; border: 1px solid #E2E8F0; border-radius: 12px; font-size: 14px; margin-bottom: 10px; background: #F8FAFC; color: #1E293B; }
+        .search-input:focus { outline: none; border-color: #3B82F6; }
 
-        .add-member-form input::placeholder {
-            color: #94A3B8;
-        }
+        /* ===== ATTENDANCE / QR MODAL ===== */
+        .modal-content.qr-modal { max-width: 550px; }
+        #qr-video-container { position: relative; width: 100%; border-radius: 16px; overflow: hidden; background: #000; }
+        #qr-video { width: 100%; display: block; border-radius: 16px; }
+        #qr-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .qr-frame { width: 200px; height: 200px; border: 3px solid #3B82F6; border-radius: 16px; box-shadow: 0 0 0 4000px rgba(0,0,0,0.3); }
+        .qr-status { text-align: center; margin-top: 15px; min-height: 60px; }
+        .qr-status .status-msg { font-size: 16px; font-weight: 600; padding: 10px 16px; border-radius: 12px; display: inline-block; }
+        .status-waiting { background: #F1F5F9; color: #64748B; }
+        .status-success { background: #D1FAE5; color: #065F46; }
+        .status-error { background: #FEE2E2; color: #991B1B; }
+        .attendance-log { max-height: 180px; overflow-y: auto; margin-top: 10px; }
+        .att-entry { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #F0FDF4; border-radius: 10px; margin-bottom: 5px; font-size: 13px; border-left: 3px solid #059669; }
+        .att-entry .att-name { font-weight: 600; }
+        .att-entry .att-tribe { color: #059669; font-size: 11px; }
+        .att-entry .att-time { color: #94A3B8; font-size: 11px; }
+        .att-count { background: #3B82F6; color: white; border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: bold; }
+        .qr-generator-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid #E2E8F0; }
+        .qr-gen-title { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .qr-gen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto; }
+        .qr-gen-item { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .qr-gen-item:hover { border-color: #3B82F6; background: #EFF6FF; }
+        .qr-gen-item .qr-mini { margin: 0 auto 6px; }
+        .qr-gen-item .qr-label { font-size: 11px; font-weight: 500; color: #1E293B; }
+        .qr-gen-item .qr-doc { font-size: 10px; color: #94A3B8; }
+        .qr-print-btn { margin-top: 10px; width: 100%; padding: 10px; background: #7C3AED; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .qr-print-btn:hover { background: #6D28D9; }
 
-        .add-member-form select {
-            padding: 8px;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            color: #1E293B;
-            font-size: 12px;
-        }
+        /* ===== ASSIGN TRIBE MODAL ===== */
+        .tribe-option { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #F8FAFC; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+        .tribe-option:hover { border-color: #3B82F6; background: #EFF6FF; }
+        .tribe-option img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #3B82F6; }
+        .tribe-option .to-name { font-weight: 600; font-size: 14px; }
+        .tribe-option .to-count { color: #94A3B8; font-size: 12px; }
 
-        .add-member-form button {
-            background: #3B82F6;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFFFFF;
-            font-size: 16px;
-        }
-
-        .add-member-form button i {
-            color: #FFFFFF;
-            font-size: 16px;
-        }
-
-        .add-member-form button:hover {
-            background: #2563EB;
-            transform: scale(1.05);
-        }
-
-        .tribe-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 1px solid #E2E8F0;
-        }
-
-        .edit-tribe, .delete-tribe {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .edit-tribe { background: #3B82F6; color: white; }
-        .edit-tribe:hover { background: #2563EB; }
-        .delete-tribe { background: #EF4444; color: white; }
-        .delete-tribe:hover { background: #DC2626; }
-
-        .empty-message {
-            text-align: center;
-            padding: 50px;
-            background: #FFFFFF;
-            border-radius: 20px;
-            border: 1px solid #E2E8F0;
-        }
-
-        .empty-message i {
-            font-size: 48px;
-            margin-bottom: 15px;
-            color: #94A3B8;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #64748B;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: #FFFFFF;
-            padding: 30px;
-            border-radius: 28px;
-            width: 90%;
-            max-width: 500px;
-            border: 2px solid #3B82F6;
-        }
-
-        .modal-content h2 {
-            margin-bottom: 20px;
-            color: #1E293B;
-        }
-
-        .modal-content label {
-            font-size: 14px;
-            color: #64748B;
-            display: block;
-            margin-top: 10px;
-        }
-
-        .modal-content input, .modal-content textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            color: #1E293B;
-            font-size: 14px;
-        }
-
-        .image-preview {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            margin: 10px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #F1F5F9;
-            overflow: hidden;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .modal-save, .modal-cancel {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .modal-save { background: #3B82F6; color: white; }
-        .modal-save:hover { background: #2563EB; }
-        .modal-cancel { background: #E2E8F0; color: #475569; }
-        .modal-cancel:hover { background: #CBD5E1; }
+        /* ===== TOAST ===== */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #1E293B; color: white; padding: 12px 18px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.2); animation: slideIn 0.3s ease; max-width: 300px; }
+        .toast.success { background: #059669; }
+        .toast.error { background: #EF4444; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         @media (max-width: 768px) {
             .tribes-grid { grid-template-columns: 1fr; }
@@ -664,6 +218,13 @@
             .member-actions { align-self: flex-end; }
             .logo h1 { font-size: 16px; }
             .logo img { height: 35px; }
+            .header-btn span { display: none; }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { position: fixed; top: 0; left: 0; width: 100%; }
         }
     </style>
 </head>
@@ -674,7 +235,15 @@
         <img src="./img/logo.png" alt="ETHICOS">
         <h1>GESTIÓN DE TRIBUS</h1>
     </div>
-    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+    <div class="header-btns">
+        <button class="header-btn green" id="studentsBtn">
+            <i class="fas fa-users"></i> <span>Estudiantes</span>
+        </button>
+        <button class="header-btn purple" id="attendanceBtn">
+            <i class="fas fa-qrcode"></i> <span>Asistencia QR</span>
+        </button>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
 </div>
 
 <div class="courses-nav" id="coursesNav"></div>
@@ -686,20 +255,14 @@
             <i class="fas fa-plus"></i> CREAR NUEVA TRIBU
         </button>
     </div>
-
-    <div class="chart-section" id="chartSection">
-        <div class="chart-title">
-            <i class="fas fa-chart-bar"></i> COMPARATIVA DE PUNTUACIONES
-        </div>
-        <div id="chartContainer" class="chart-container">
-            <div class="loading">Cargando gráfico...</div>
-        </div>
+    <div class="chart-section">
+        <div class="chart-title"><i class="fas fa-chart-bar"></i> COMPARATIVA DE PUNTUACIONES</div>
+        <div id="chartContainer" class="chart-container"><div class="loading">Cargando gráfico...</div></div>
     </div>
-
     <div id="tribesContainer" class="tribes-grid"></div>
 </div>
 
-<!-- Modal para crear/editar tribu -->
+<!-- Modal Tribu -->
 <div id="tribeModal" class="modal">
     <div class="modal-content">
         <h2 id="modalTitle">✨ Crear Nueva Tribu ✨</h2>
@@ -707,7 +270,7 @@
         <input type="text" id="tribeName" placeholder="Ej: Servidores, Luz, Esperanza...">
         <label>🎨 Emblema (imagen)</label>
         <div class="image-preview" id="imagePreview">
-            <div class="tribe-emblema-placeholder" style="width:100px; height:100px;">🏹</div>
+            <div class="tribe-emblema-placeholder" style="width:100px;height:100px;">🏹</div>
         </div>
         <input type="file" id="tribeImage" accept="image/*">
         <label>⚡ Grito de Batalla / Consigna</label>
@@ -719,7 +282,124 @@
     </div>
 </div>
 
-<!-- ==================== FIREBASE ==================== -->
+<!-- Modal Estudiantes -->
+<div id="studentsModal" class="modal">
+    <div class="modal-content wide">
+        <h2>👥 Gestión de Estudiantes</h2>
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="listTab">📋 Lista</button>
+            <button class="tab-btn" data-tab="addOneTab">➕ Agregar uno</button>
+            <button class="tab-btn" data-tab="csvTab">📂 Importar CSV</button>
+        </div>
+
+        <!-- Tab Lista -->
+        <div id="listTab" class="tab-panel active">
+            <input type="text" id="studentSearch" class="search-input" placeholder="🔍 Buscar por nombre, documento o curso...">
+            <div id="studentList" class="student-list">
+                <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>
+            </div>
+        </div>
+
+        <!-- Tab Agregar uno -->
+        <div id="addOneTab" class="tab-panel">
+            <label>👤 Nombre completo</label>
+            <input type="text" id="newStudentName" placeholder="Ej: Laura Gómez Ruiz">
+            <label>🎓 Curso</label>
+            <select id="newStudentCourse">
+                <option value="6">6°</option><option value="7">7°</option>
+                <option value="8">8°</option><option value="9">9°</option>
+                <option value="10">10°</option><option value="11">11°</option>
+            </select>
+            <label>🪪 Documento</label>
+            <input type="text" id="newStudentDoc" placeholder="Número de documento">
+            <button class="modal-save" style="width:100%;margin-top:15px;" id="saveOneStudentBtn">
+                <i class="fas fa-plus"></i> Guardar Estudiante
+            </button>
+        </div>
+
+        <!-- Tab CSV -->
+        <div id="csvTab" class="tab-panel">
+            <p style="font-size:13px;color:#475569;margin-bottom:10px;">
+                El CSV debe tener columnas: <strong>nombre, curso, documento</strong> (con encabezado).
+            </p>
+            <div class="csv-area" id="csvDropArea">
+                <input type="file" id="csvFileInput" accept=".csv">
+                <i class="fas fa-file-csv" style="font-size:36px;margin-bottom:10px;color:#3B82F6;"></i>
+                <p style="font-weight:600;">Haz clic o arrastra aquí tu archivo CSV</p>
+                <p style="font-size:12px;margin-top:5px;">Formato: nombre,curso,documento</p>
+            </div>
+            <div id="csvPreviewContainer" style="display:none;">
+                <p style="font-size:13px;color:#475569;margin-bottom:8px;" id="csvPreviewMsg"></p>
+                <div id="csvPreview" class="csv-preview"></div>
+                <button class="modal-save" style="width:100%;margin-top:12px;" id="importCsvBtn">
+                    <i class="fas fa-upload"></i> Importar estudiantes
+                </button>
+            </div>
+        </div>
+
+        <div class="modal-buttons" style="margin-top:15px;">
+            <button class="modal-cancel" id="closeStudentsBtn" style="flex:none;padding:10px 24px;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Asignar Tribu -->
+<div id="assignTribeModal" class="modal">
+    <div class="modal-content" style="max-width:420px;">
+        <h2>🏹 Asignar a Tribu</h2>
+        <p id="assignStudentName" style="color:#475569;font-size:14px;margin-bottom:16px;"></p>
+        <div id="tribeOptionsList"></div>
+        <div class="modal-buttons" style="margin-top:10px;">
+            <button class="modal-cancel" id="closeAssignBtn">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Asistencia QR -->
+<div id="attendanceModal" class="modal">
+    <div class="modal-content qr-modal">
+        <h2>📷 Registro de Asistencia QR</h2>
+        <div id="qr-video-container">
+            <video id="qr-video" autoplay playsinline muted></video>
+            <div id="qr-overlay"><div class="qr-frame"></div></div>
+        </div>
+        <div class="qr-status">
+            <div id="qr-status-msg" class="status-msg status-waiting">
+                <i class="fas fa-camera"></i> Esperando código QR...
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
+            <strong style="font-size:14px;">Asistencias hoy:</strong>
+            <span id="attCount" class="att-count">0</span>
+        </div>
+        <div id="attendanceLog" class="attendance-log" style="margin-top:8px;"></div>
+
+        <!-- Generador de QR de estudiantes -->
+        <div class="qr-generator-section">
+            <div class="qr-gen-title"><i class="fas fa-id-card"></i> Carnés QR de estudiantes</div>
+            <div id="qrGenGrid" class="qr-gen-grid">
+                <div style="text-align:center;color:#94A3B8;font-size:13px;padding:20px;">
+                    Carga estudiantes para generar sus QR
+                </div>
+            </div>
+            <button class="qr-print-btn" id="printQrsBtn">
+                <i class="fas fa-print"></i> Imprimir carnés QR
+            </button>
+        </div>
+
+        <div class="modal-buttons" style="margin-top:15px;">
+            <button class="modal-cancel" id="closeAttendanceBtn" style="flex:none;padding:10px 24px;">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Área de impresión QR -->
+<div id="printArea" style="display:none;"></div>
+
+<!-- Toast -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Firebase -->
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
@@ -729,425 +409,673 @@
         messagingSenderId: "1038796710548",
         appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
     };
-    console.log("🔥 Configuración cargada");
     window.firebaseConfig = firebaseConfig;
 </script>
+
+<!-- QR Scanner library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<!-- QRCode generator -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-    
+    import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, addDoc, setDoc, query, where, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
     const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    
-    console.log("🔥 Firebase conectado");
-    
-    onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            window.location.href = "index.html";
-        } else {
-            console.log("✅ Usuario autenticado:", user.email);
-            initDashboard();
-        }
-    });
-    
-    const courseNames = { 6: "6°", 7: "7°", 8: "8°", 9: "9°", 10: "10°", 11: "11°" };
-    const rolesDisponibles = ["Líder", "Comunicador", "Artesano", "Guardián", "Explorador", "Guerrero"];
-    
+
+    const courseNames = { 6:"6°", 7:"7°", 8:"8°", 9:"9°", 10:"10°", 11:"11°" };
+    const rolesDisponibles = ["Líder","Comunicador","Artesano","Guardián","Explorador","Guerrero"];
     let currentGrade = 6;
     let editingTribeId = null;
     let tempImageData = null;
-    
+    let csvParsedData = [];
+    let qrStream = null;
+    let qrScanInterval = null;
+    let scannedToday = new Set();
+    let assigningStudent = null;
+
+    // ===== UTILS =====
+    function escapeHtml(t) {
+        if (!t) return '';
+        const d = document.createElement('div');
+        d.textContent = t;
+        return d.innerHTML;
+    }
+    function showToast(msg, type = '') {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast ${type}`;
+        t.textContent = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    // ===== AUTH =====
+    onAuthStateChanged(auth, (user) => {
+        if (!user) { window.location.href = "index.html"; return; }
+        initDashboard();
+    });
+
+    // ===== TRIBES CRUD =====
     async function getTribes(grade) {
         try {
             const q = query(collection(db, "tribes"), where("grade", "==", grade));
-            const snapshot = await getDocs(q);
+            const snap = await getDocs(q);
             const tribes = [];
-            snapshot.forEach(doc => tribes.push({ id: doc.id, ...doc.data() }));
+            snap.forEach(d => tribes.push({ id: d.id, ...d.data() }));
             return tribes.sort((a, b) => a.name.localeCompare(b.name));
-        } catch (error) {
-            console.error("Error:", error);
-            return [];
-        }
+        } catch (e) { console.error(e); return []; }
     }
-    
-    async function saveTribe(tribeData, editingId) {
-        if (editingId) {
-            await updateDoc(doc(db, "tribes", editingId), tribeData);
+    async function saveTribe(data, editId) {
+        if (editId) { await updateDoc(doc(db, "tribes", editId), data); }
+        else { await addDoc(collection(db, "tribes"), data); }
+    }
+    async function deleteTribe(id) { await deleteDoc(doc(db, "tribes", id)); }
+    async function updatePoints(id, delta) {
+        const ref = doc(db, "tribes", id);
+        const d = await getDoc(ref);
+        if (d.exists()) await updateDoc(ref, { points: Math.max(0, (d.data().points||0) + delta) });
+    }
+    async function updateMember(id, members) { await updateDoc(doc(db, "tribes", id), { members }); }
+
+    // ===== STUDENTS CRUD =====
+    async function getStudents(filterCourse) {
+        try {
+            let q;
+            if (filterCourse) q = query(collection(db, "students"), where("course", "==", String(filterCourse)));
+            else q = collection(db, "students");
+            const snap = await getDocs(q);
+            const list = [];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            return list.sort((a, b) => a.name.localeCompare(b.name));
+        } catch(e) { console.error(e); return []; }
+    }
+    async function saveStudent(data) {
+        if (data.id) {
+            await setDoc(doc(db, "students", data.id), data, { merge: true });
         } else {
-            await addDoc(collection(db, "tribes"), tribeData);
+            await addDoc(collection(db, "students"), data);
         }
     }
-    
-    async function deleteTribe(tribeId) {
-        await deleteDoc(doc(db, "tribes", tribeId));
+    async function deleteStudent(id) { await deleteDoc(doc(db, "students", id)); }
+
+    // ===== ATTENDANCE =====
+    async function recordAttendance(studentDoc, studentName, tribeId, tribeName) {
+        const today = new Date().toISOString().slice(0, 10);
+        const key = `${studentDoc}_${today}`;
+        if (scannedToday.has(key)) return { duplicate: true };
+        scannedToday.add(key);
+        await addDoc(collection(db, "attendance"), {
+            studentDoc, studentName, tribeId: tribeId||null, tribeName: tribeName||null,
+            date: today, timestamp: serverTimestamp()
+        });
+        if (tribeId) await updatePoints(tribeId, 1);
+        return { ok: true, tribeName };
     }
-    
-    async function updatePoints(tribeId, delta) {
-        const tribeRef = doc(db, "tribes", tribeId);
-        const tribeDoc = await getDoc(tribeRef);
-        if (tribeDoc.exists()) {
-            const currentPoints = tribeDoc.data().points || 0;
-            await updateDoc(tribeRef, { points: Math.max(0, currentPoints + delta) });
-        }
+    async function getTodayAttendance() {
+        const today = new Date().toISOString().slice(0, 10);
+        try {
+            const q = query(collection(db, "attendance"), where("date","==",today));
+            const snap = await getDocs(q);
+            const list = [];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            return list;
+        } catch(e) { return []; }
     }
-    
-    async function addCustomPoints(tribeId, value) {
-        const tribeRef = doc(db, "tribes", tribeId);
-        const tribeDoc = await getDoc(tribeRef);
-        if (tribeDoc.exists()) {
-            const currentPoints = tribeDoc.data().points || 0;
-            await updateDoc(tribeRef, { points: Math.max(0, currentPoints + value) });
-        }
-    }
-    
-    async function updateMember(tribeId, members) {
-        await updateDoc(doc(db, "tribes", tribeId), { members: members });
-    }
-    
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
+
+    // ===== RENDER CHART =====
     async function renderChart() {
         const container = document.getElementById("chartContainer");
         if (!container) return;
-        
         try {
             const tribes = await getTribes(currentGrade);
-            if (tribes.length === 0) {
-                container.innerHTML = '<div class="empty-chart"><i class="fas fa-chart-simple"></i><p>Crea tribus para ver la comparativa</p></div>';
-                return;
-            }
-            
-            const sorted = [...tribes].sort((a, b) => (b.points || 0) - (a.points || 0));
-            const maxPoints = Math.max(...sorted.map(t => t.points || 0), 1);
-            
-            let html = '';
-            for (const tribe of sorted) {
-                const points = tribe.points || 0;
-                const percent = (points / maxPoints) * 100;
-                const barWidth = Math.max(percent, 5);
-                html += `
-                    <div class="chart-bar-item">
-                        <div class="chart-tribe-name" title="${escapeHtml(tribe.name)}">${escapeHtml(tribe.name)}</div>
-                        <div class="chart-bar-wrapper">
-                            <div class="chart-bar">
-                                <div class="chart-bar-fill" style="width: ${barWidth}%;">${points > 0 && barWidth > 15 ? points : ''}</div>
-                            </div>
-                            <div class="chart-points">${points} pts</div>
-                        </div>
+            if (!tribes.length) { container.innerHTML = '<div class="empty-chart"><i class="fas fa-chart-simple"></i><p>Crea tribus para ver la comparativa</p></div>'; return; }
+            const sorted = [...tribes].sort((a,b) => (b.points||0)-(a.points||0));
+            const maxPts = Math.max(...sorted.map(t=>t.points||0), 1);
+            container.innerHTML = sorted.map(tribe => {
+                const pts = tribe.points||0;
+                const w = Math.max((pts/maxPts)*100, 5);
+                return `<div class="chart-bar-item">
+                    <div class="chart-tribe-name" title="${escapeHtml(tribe.name)}">${escapeHtml(tribe.name)}</div>
+                    <div class="chart-bar-wrapper">
+                        <div class="chart-bar"><div class="chart-bar-fill" style="width:${w}%">${pts>0&&w>15?pts:''}</div></div>
+                        <div class="chart-points">${pts} pts</div>
                     </div>
-                `;
-            }
-            container.innerHTML = html;
-        } catch (error) {
-            console.error("Error:", error);
-            container.innerHTML = '<div class="empty-chart">Error al cargar el gráfico</div>';
-        }
+                </div>`;
+            }).join('');
+        } catch(e) { container.innerHTML = '<div class="empty-chart">Error al cargar</div>'; }
     }
-    
+
+    // ===== RENDER TRIBES =====
     async function renderTribes() {
         const container = document.getElementById("tribesContainer");
         container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
-        
         try {
             const tribes = await getTribes(currentGrade);
-            if (tribes.length === 0) {
-                container.innerHTML = `<div class="empty-message"><i class="fas fa-users"></i><h3>Todavía no hay tribus</h3><p>Haz clic en "Crear Nueva Tribu"</p></div>`;
-                return;
-            }
-            
+            if (!tribes.length) { container.innerHTML = `<div class="empty-message"><i class="fas fa-users"></i><h3>Todavía no hay tribus</h3><p>Haz clic en "Crear Nueva Tribu"</p></div>`; return; }
             container.innerHTML = tribes.map(tribe => {
-                const points = tribe.points || 0;
-                const percent = Math.min(100, (points / 500) * 100);
-                const uniqueId = tribe.id.replace(/[^a-zA-Z0-9]/g, '');
-                return `
-                    <div class="tribe-card">
-                        <div class="tribe-emblema">${tribe.imageData ? `<img src="${tribe.imageData}">` : `<div class="tribe-emblema-placeholder">🛡️</div>`}</div>
-                        <div class="tribe-header">
-                            <div class="tribe-name">${escapeHtml(tribe.name)}</div>
-                            ${tribe.warCry ? `<div class="tribe-war-cry">⚡ "${escapeHtml(tribe.warCry)}"</div>` : ''}
+                const pts = tribe.points||0;
+                const pct = Math.min(100,(pts/500)*100);
+                const uid = tribe.id.replace(/[^a-zA-Z0-9]/g,'');
+                return `<div class="tribe-card">
+                    <div class="tribe-emblema">${tribe.imageData?`<img src="${tribe.imageData}">`:`<div class="tribe-emblema-placeholder">🛡️</div>`}</div>
+                    <div class="tribe-header">
+                        <div class="tribe-name">${escapeHtml(tribe.name)}</div>
+                        ${tribe.warCry?`<div class="tribe-war-cry">⚡ "${escapeHtml(tribe.warCry)}"</div>`:''}
+                    </div>
+                    <div class="score-section">
+                        <div class="score-label">🏆 PUNTUACIÓN 🏆</div>
+                        <div class="score-value"><span>⭐</span><span id="points_${tribe.id}">${pts}</span><span>🏅</span></div>
+                        <div class="progress-bar-container"><div class="progress-bar" style="width:${pct}%"></div></div>
+                        <div class="score-buttons">
+                            <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',1)">+1</button>
+                            <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',3)">+3</button>
+                            <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',5)">+5</button>
+                            <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-1)">-1</button>
+                            <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-3)">-3</button>
+                            <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-5)">-5</button>
                         </div>
-                        <div class="score-section">
-                            <div class="score-label">🏆 PUNTUACIÓN 🏆</div>
-                            <div class="score-value"><span>⭐</span><span id="points_${tribe.id}">${points}</span><span>🏅</span></div>
-                            <div class="progress-bar-container"><div class="progress-bar" style="width: ${percent}%;"></div></div>
-                            <div class="score-buttons">
-                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',1)">+1</button>
-                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',3)">+3</button>
-                                <button class="score-btn score-plus" onclick="window.addPoints('${tribe.id}',5)">+5</button>
-                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-1)">-1</button>
-                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-3)">-3</button>
-                                <button class="score-btn score-minus" onclick="window.addPoints('${tribe.id}',-5)">-5</button>
-                            </div>
-                            <div class="score-custom">
-                                <input type="number" id="customPoints_${uniqueId}" placeholder="Cantidad" value="0" step="1">
-                                <button onclick="window.applyCustomPoints('${tribe.id}', '${uniqueId}')"><i class="fas fa-plus"></i> Aplicar</button>
-                            </div>
-                        </div>
-                        <div class="members-section">
-                            <h4>👥 INTEGRANTES (${(tribe.members || []).length})</h4>
-                            ${(tribe.members || []).map((m, idx) => `
-                                <div class="member-item">
-                                    <div class="member-info"><span class="member-name">${escapeHtml(m.name)}</span><span class="member-role">${escapeHtml(m.role)}</span></div>
-                                    <div class="member-actions">
-                                        <button class="edit-member" onclick="window.openEditMemberModal('${tribe.id}',${idx})"><i class="fas fa-edit"></i></button>
-                                        <button class="delete-member" onclick="window.deleteMember('${tribe.id}',${idx})"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="add-member-form">
-                            <input type="text" id="newMemberName_${tribe.id}" placeholder="Nuevo integrante">
-                            <select id="newMemberRole_${tribe.id}">${rolesDisponibles.map(r => `<option value="${r}">${r}</option>`).join('')}</select>
-                            <button onclick="window.addMember('${tribe.id}')"><i class="fas fa-plus"></i></button>
-                        </div>
-                        <div class="tribe-actions">
-                            <button class="edit-tribe" onclick="window.openEditTribeModal('${tribe.id}')">✏️ Editar Tribu</button>
-                            <button class="delete-tribe" onclick="window.confirmDeleteTribe('${tribe.id}')">🗑️ Eliminar</button>
+                        <div class="score-custom">
+                            <input type="number" id="customPoints_${uid}" placeholder="Cantidad" value="0" step="1">
+                            <button onclick="window.applyCustomPoints('${tribe.id}','${uid}')"><i class="fas fa-plus"></i> Aplicar</button>
                         </div>
                     </div>
-                `;
+                    <div class="members-section">
+                        <h4>👥 INTEGRANTES (${(tribe.members||[]).length})</h4>
+                        ${(tribe.members||[]).map((m,idx)=>`
+                            <div class="member-item">
+                                <div class="member-info"><span class="member-name">${escapeHtml(m.name)}</span><span class="member-role">${escapeHtml(m.role)}</span></div>
+                                <div class="member-actions">
+                                    <button class="edit-member" onclick="window.openEditMemberModal('${tribe.id}',${idx})"><i class="fas fa-edit"></i></button>
+                                    <button class="delete-member" onclick="window.deleteMember('${tribe.id}',${idx})"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                    <div class="add-member-form">
+                        <input type="text" id="newMemberName_${tribe.id}" placeholder="Nuevo integrante">
+                        <select id="newMemberRole_${tribe.id}">${rolesDisponibles.map(r=>`<option value="${r}">${r}</option>`).join('')}</select>
+                        <button onclick="window.addMember('${tribe.id}')"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div class="tribe-actions">
+                        <button class="edit-tribe" onclick="window.openEditTribeModal('${tribe.id}')">✏️ Editar Tribu</button>
+                        <button class="delete-tribe" onclick="window.confirmDeleteTribe('${tribe.id}')">🗑️ Eliminar</button>
+                    </div>
+                </div>`;
             }).join('');
-        } catch (error) {
-            console.error("Error:", error);
-            container.innerHTML = `<div class="empty-message"><p>❌ Error al cargar datos</p></div>`;
-        }
+        } catch(e) { container.innerHTML = `<div class="empty-message"><p>❌ Error al cargar datos</p></div>`; }
     }
-    
-    window.addPoints = async (tribeId, delta) => {
-        await updatePoints(tribeId, delta);
-        await renderTribes();
-        await renderChart();
-    };
-    
-    window.applyCustomPoints = async (tribeId, uniqueId) => {
-        const input = document.getElementById(`customPoints_${uniqueId}`);
-        const value = parseInt(input.value);
-        if (isNaN(value)) { alert("Número válido"); return; }
-        if (value === 0) { alert("El valor no puede ser 0"); return; }
-        await addCustomPoints(tribeId, value);
-        await renderTribes();
-        await renderChart();
+
+    // ===== WINDOW TRIBE ACTIONS =====
+    window.addPoints = async (id, delta) => { await updatePoints(id, delta); await renderTribes(); await renderChart(); };
+    window.applyCustomPoints = async (id, uid) => {
+        const input = document.getElementById(`customPoints_${uid}`);
+        const v = parseInt(input.value);
+        if (isNaN(v)||v===0) { showToast("Ingresa un número válido", "error"); return; }
+        const ref = doc(db,"tribes",id);
+        const d = await getDoc(ref);
+        if (d.exists()) await updateDoc(ref, { points: Math.max(0,(d.data().points||0)+v) });
         input.value = 0;
+        await renderTribes(); await renderChart();
     };
-    
     window.addMember = async (tribeId) => {
         const name = document.getElementById(`newMemberName_${tribeId}`).value.trim();
         const role = document.getElementById(`newMemberRole_${tribeId}`).value;
-        if (!name) { alert("Ingresa el nombre"); return; }
+        if (!name) { showToast("Ingresa el nombre","error"); return; }
         const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
-        if (tribe) {
-            await updateMember(tribeId, [...(tribe.members || []), { name, role }]);
-            await renderTribes();
-            await renderChart();
-        }
-        document.getElementById(`newMemberName_${tribeId}`).value = '';
+        const tribe = tribes.find(t=>t.id===tribeId);
+        if (tribe) { await updateMember(tribeId, [...(tribe.members||[]), {name,role}]); await renderTribes(); await renderChart(); }
+        document.getElementById(`newMemberName_${tribeId}`).value='';
+        showToast("Integrante agregado ✅","success");
     };
-    
     window.deleteMember = async (tribeId, idx) => {
         if (!confirm("¿Eliminar este integrante?")) return;
         const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
+        const tribe = tribes.find(t=>t.id===tribeId);
         if (tribe) {
-            const newMembers = (tribe.members || []).filter((_, i) => i !== idx);
-            await updateMember(tribeId, newMembers);
-            await renderTribes();
-            await renderChart();
+            await updateMember(tribeId, (tribe.members||[]).filter((_,i)=>i!==idx));
+            await renderTribes(); await renderChart();
         }
     };
-    
-    // ==================== EDITAR INTEGRANTE (NOMBRE + ROL) ====================
     window.openEditMemberModal = async (tribeId, idx) => {
         const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
+        const tribe = tribes.find(t=>t.id===tribeId);
         if (!tribe) return;
         const member = tribe.members[idx];
-        
-        // Crear modal personalizado
-        const modalOverlay = document.createElement('div');
-        modalOverlay.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); z-index: 2000;
-            display: flex; justify-content: center; align-items: center;
-            animation: fadeIn 0.3s ease;
-        `;
-        
-        const modalContent = document.createElement('div');
-        modalContent.style.cssText = `
-            background: #FFFFFF; padding: 30px; border-radius: 24px;
-            width: 90%; max-width: 400px;
-            border: 2px solid #3B82F6;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        `;
-        
-        modalContent.innerHTML = `
-            <h3 style="margin-bottom: 20px; color: #1E293B; font-size: 20px;">
-                ✏️ Editar Integrante
-            </h3>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #64748B; font-size: 14px;">
-                    👤 Nombre
-                </label>
-                <input type="text" id="editMemberName" value="${escapeHtml(member.name)}" 
-                       style="width: 100%; padding: 10px 12px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; color: #1E293B; font-size: 14px;">
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; color: #64748B; font-size: 14px;">
-                    🎯 Rol
-                </label>
-                <select id="editMemberRole" 
-                        style="width: 100%; padding: 10px 12px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; color: #1E293B; font-size: 14px;">
-                    ${rolesDisponibles.map(r => `<option value="${r}" ${member.role === r ? 'selected' : ''}>${r}</option>`).join('')}
-                </select>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button id="saveEditMember" style="flex: 1; padding: 10px; background: #3B82F6; border: none; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; transition: all 0.2s;">
-                    💾 Guardar
-                </button>
-                <button id="cancelEditMember" style="flex: 1; padding: 10px; background: #E2E8F0; border: none; border-radius: 30px; color: #475569; font-weight: bold; cursor: pointer; transition: all 0.2s;">
-                    Cancelar
-                </button>
-            </div>
-        `;
-        
-        modalOverlay.appendChild(modalContent);
-        document.body.appendChild(modalOverlay);
-        
-        // Cerrar al hacer clic fuera
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                modalOverlay.remove();
-            }
-        });
-        
-        // Guardar cambios
-        modalContent.querySelector('#saveEditMember').addEventListener('click', async () => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:2000;display:flex;justify-content:center;align-items:center;';
+        const mc = document.createElement('div');
+        mc.style.cssText = 'background:#fff;padding:30px;border-radius:24px;width:90%;max-width:400px;border:2px solid #3B82F6;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+        mc.innerHTML = `<h3 style="margin-bottom:20px;color:#1E293B;">✏️ Editar Integrante</h3>
+            <label style="display:block;margin-bottom:5px;color:#64748B;font-size:14px;">👤 Nombre</label>
+            <input type="text" id="editMemberName" value="${escapeHtml(member.name)}" style="width:100%;padding:10px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;color:#1E293B;font-size:14px;margin-bottom:12px;">
+            <label style="display:block;margin-bottom:5px;color:#64748B;font-size:14px;">🎯 Rol</label>
+            <select id="editMemberRole" style="width:100%;padding:10px 12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;color:#1E293B;font-size:14px;margin-bottom:20px;">
+                ${rolesDisponibles.map(r=>`<option value="${r}" ${member.role===r?'selected':''}>${r}</option>`).join('')}
+            </select>
+            <div style="display:flex;gap:10px;">
+                <button id="saveEditMember" style="flex:1;padding:10px;background:#3B82F6;border:none;border-radius:30px;color:white;font-weight:bold;cursor:pointer;">💾 Guardar</button>
+                <button id="cancelEditMember" style="flex:1;padding:10px;background:#E2E8F0;border:none;border-radius:30px;color:#475569;font-weight:bold;cursor:pointer;">Cancelar</button>
+            </div>`;
+        overlay.appendChild(mc); document.body.appendChild(overlay);
+        overlay.addEventListener('click', e => { if (e.target===overlay) overlay.remove(); });
+        mc.querySelector('#saveEditMember').addEventListener('click', async () => {
             const newName = document.getElementById('editMemberName').value.trim();
             const newRole = document.getElementById('editMemberRole').value;
-            
-            if (!newName) {
-                alert("El nombre no puede estar vacío");
-                return;
-            }
-            
+            if (!newName) { showToast("El nombre no puede estar vacío","error"); return; }
             const newMembers = [...tribe.members];
-            newMembers[idx] = { name: newName, role: newRole };
+            newMembers[idx] = {name:newName, role:newRole};
             await updateMember(tribeId, newMembers);
-            await renderTribes();
-            await renderChart();
-            modalOverlay.remove();
+            await renderTribes(); await renderChart();
+            overlay.remove(); showToast("Integrante actualizado ✅","success");
         });
-        
-        // Cancelar
-        modalContent.querySelector('#cancelEditMember').addEventListener('click', () => {
-            modalOverlay.remove();
-        });
-        
-        // Cerrar con ESC
-        document.addEventListener('keydown', function handler(e) {
-            if (e.key === 'Escape' && document.body.contains(modalOverlay)) {
-                modalOverlay.remove();
-                document.removeEventListener('keydown', handler);
-            }
-        });
+        mc.querySelector('#cancelEditMember').addEventListener('click', () => overlay.remove());
     };
-    
     window.openEditTribeModal = async (tribeId) => {
         const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
+        const tribe = tribes.find(t=>t.id===tribeId);
         if (!tribe) return;
-        editingTribeId = tribeId;
-        tempImageData = tribe.imageData || null;
+        editingTribeId = tribeId; tempImageData = tribe.imageData||null;
         document.getElementById("tribeName").value = tribe.name;
-        document.getElementById("tribeWarCry").value = tribe.warCry || "";
-        document.getElementById("imagePreview").innerHTML = tribe.imageData ? `<img src="${tribe.imageData}">` : `<div class="tribe-emblema-placeholder">🏹</div>`;
+        document.getElementById("tribeWarCry").value = tribe.warCry||"";
+        document.getElementById("imagePreview").innerHTML = tribe.imageData?`<img src="${tribe.imageData}">`:`<div class="tribe-emblema-placeholder">🏹</div>`;
         document.getElementById("modalTitle").innerHTML = "✏️ Editar Tribu ✏️";
-        document.getElementById("tribeModal").style.display = "flex";
+        openModal("tribeModal");
     };
-    
     window.confirmDeleteTribe = async (tribeId) => {
         const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t => t.id === tribeId);
+        const tribe = tribes.find(t=>t.id===tribeId);
         if (tribe && confirm(`¿Eliminar "${tribe.name}"?`)) {
-            await deleteTribe(tribeId);
-            await renderTribes();
-            await renderChart();
+            await deleteTribe(tribeId); await renderTribes(); await renderChart();
         }
     };
-    
+
+    // ===== COURSES NAV =====
     function renderCoursesNav() {
-        const container = document.getElementById("coursesNav");
-        container.innerHTML = Object.keys(courseNames).map(g => `
-            <button class="course-btn ${parseInt(g) === currentGrade ? 'active' : ''}" data-grade="${g}">${courseNames[g]}</button>
-        `).join('');
+        const c = document.getElementById("coursesNav");
+        c.innerHTML = Object.keys(courseNames).map(g=>`<button class="course-btn ${parseInt(g)===currentGrade?'active':''}" data-grade="${g}">${courseNames[g]}</button>`).join('');
         document.querySelectorAll(".course-btn").forEach(btn => {
             btn.addEventListener("click", () => {
                 currentGrade = parseInt(btn.dataset.grade);
                 renderCoursesNav();
                 document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
-                renderTribes();
-                renderChart();
+                renderTribes(); renderChart();
             });
         });
     }
-    
+
+    // ===== TRIBE MODAL =====
     function openAddTribeModal() {
-        editingTribeId = null;
-        tempImageData = null;
-        document.getElementById("tribeName").value = "";
-        document.getElementById("tribeWarCry").value = "";
-        document.getElementById("tribeImage").value = "";
-        document.getElementById("imagePreview").innerHTML = `<div class="tribe-emblema-placeholder">🏹</div>`;
-        document.getElementById("modalTitle").innerHTML = "✨ Crear Nueva Tribu ✨";
-        document.getElementById("tribeModal").style.display = "flex";
+        editingTribeId = null; tempImageData = null;
+        document.getElementById("tribeName").value="";
+        document.getElementById("tribeWarCry").value="";
+        document.getElementById("tribeImage").value="";
+        document.getElementById("imagePreview").innerHTML=`<div class="tribe-emblema-placeholder">🏹</div>`;
+        document.getElementById("modalTitle").innerHTML="✨ Crear Nueva Tribu ✨";
+        openModal("tribeModal");
     }
-    
     async function saveTribeFromModal() {
         const name = document.getElementById("tribeName").value.trim();
-        if (!name) { alert("Ingresa el nombre"); return; }
-        const tribeData = { grade: currentGrade, name, imageData: tempImageData, warCry: document.getElementById("tribeWarCry").value.trim(), members: [], points: 0, createdAt: new Date().toISOString() };
+        if (!name) { showToast("Ingresa el nombre de la tribu","error"); return; }
+        const tribeData = { grade:currentGrade, name, imageData:tempImageData, warCry:document.getElementById("tribeWarCry").value.trim(), members:[], points:0, createdAt:new Date().toISOString() };
         if (editingTribeId) {
             const tribes = await getTribes(currentGrade);
-            const existing = tribes.find(t => t.id === editingTribeId);
-            if (existing) { tribeData.members = existing.members || []; tribeData.points = existing.points || 0; }
+            const existing = tribes.find(t=>t.id===editingTribeId);
+            if (existing) { tribeData.members=existing.members||[]; tribeData.points=existing.points||0; }
             delete tribeData.createdAt;
             await saveTribe(tribeData, editingTribeId);
-        } else {
-            await saveTribe(tribeData, null);
-        }
-        closeModal();
-        await renderTribes();
-        await renderChart();
+        } else { await saveTribe(tribeData, null); }
+        closeModal("tribeModal"); editingTribeId=null;
+        await renderTribes(); await renderChart();
+        showToast("Tribu guardada ✅","success");
     }
-    
-    function closeModal() { document.getElementById("tribeModal").style.display = "none"; editingTribeId = null; }
-    
     document.getElementById("tribeImage").addEventListener("change", function(e) {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => { tempImageData = ev.target.result; document.getElementById("imagePreview").innerHTML = `<img src="${tempImageData}">`; };
-            reader.readAsDataURL(file);
-        }
+        if (file) { const r=new FileReader(); r.onload=ev=>{tempImageData=ev.target.result;document.getElementById("imagePreview").innerHTML=`<img src="${tempImageData}">`;}; r.readAsDataURL(file); }
     });
-    
-    document.getElementById("logoutBtn").onclick = async () => {
-        await signOut(auth);
-        window.location.href = "index.html";
-    };
+    document.getElementById("logoutBtn").onclick = async () => { await signOut(auth); window.location.href="index.html"; };
     document.getElementById("addTribeBtn").onclick = openAddTribeModal;
     document.getElementById("saveTribeBtn").onclick = saveTribeFromModal;
-    document.getElementById("cancelModalBtn").onclick = closeModal;
-    window.onclick = (e) => { if (e.target === document.getElementById("tribeModal")) closeModal(); };
-    
+    document.getElementById("cancelModalBtn").onclick = () => closeModal("tribeModal");
+    window.onclick = (e) => { if (e.target===document.getElementById("tribeModal")) closeModal("tribeModal"); };
+
+    // ===== STUDENTS MODAL =====
+    document.getElementById("studentsBtn").onclick = () => { openModal("studentsModal"); loadStudentList(); };
+    document.getElementById("closeStudentsBtn").onclick = () => closeModal("studentsModal");
+
+    // Tabs
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+            document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+            btn.classList.add("active");
+            document.getElementById(btn.dataset.tab).classList.add("active");
+        });
+    });
+
+    // Búsqueda estudiantes
+    let allStudents = [];
+    async function loadStudentList() {
+        const list = document.getElementById("studentList");
+        list.innerHTML='<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
+        allStudents = await getStudents(null);
+        renderStudentList(allStudents);
+    }
+    function renderStudentList(students) {
+        const list = document.getElementById("studentList");
+        if (!students.length) { list.innerHTML='<div style="text-align:center;color:#94A3B8;padding:20px;">No hay estudiantes registrados</div>'; return; }
+        list.innerHTML = students.map(s=>`
+            <div class="student-row">
+                <div>
+                    <span class="sname">${escapeHtml(s.name)}</span>
+                    <span class="sdoc">${escapeHtml(s.document||'')}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="scourse">${courseNames[s.course]||s.course}</span>
+                    <div class="sactions">
+                        <button class="assign-btn" onclick="window.openAssignTribe('${s.id}','${escapeHtml(s.name)}',${s.course})">🏹 Asignar</button>
+                        <button class="del-student-btn" onclick="window.removeStudent('${s.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>`).join('');
+    }
+    document.getElementById("studentSearch").addEventListener("input", function() {
+        const q = this.value.toLowerCase();
+        const filtered = allStudents.filter(s => s.name.toLowerCase().includes(q) || (s.document||'').includes(q) || String(s.course).includes(q));
+        renderStudentList(filtered);
+    });
+
+    // Agregar uno
+    document.getElementById("saveOneStudentBtn").onclick = async () => {
+        const name = document.getElementById("newStudentName").value.trim();
+        const course = document.getElementById("newStudentCourse").value;
+        const document_ = document.getElementById("newStudentDoc").value.trim();
+        if (!name) { showToast("Ingresa el nombre","error"); return; }
+        await saveStudent({ name, course, document: document_, createdAt: new Date().toISOString() });
+        document.getElementById("newStudentName").value="";
+        document.getElementById("newStudentDoc").value="";
+        showToast("Estudiante guardado ✅","success");
+        loadStudentList();
+    };
+
+    // CSV
+    const csvArea = document.getElementById("csvDropArea");
+    csvArea.addEventListener("click", () => document.getElementById("csvFileInput").click());
+    csvArea.addEventListener("dragover", e=>{ e.preventDefault(); csvArea.style.borderColor="#3B82F6"; csvArea.style.background="#EFF6FF"; });
+    csvArea.addEventListener("dragleave", ()=>{ csvArea.style.borderColor=""; csvArea.style.background=""; });
+    csvArea.addEventListener("drop", e=>{ e.preventDefault(); csvArea.style.borderColor=""; csvArea.style.background=""; if(e.dataTransfer.files[0]) processCSV(e.dataTransfer.files[0]); });
+    document.getElementById("csvFileInput").addEventListener("change", e=>{ if(e.target.files[0]) processCSV(e.target.files[0]); });
+
+    function processCSV(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const text = e.target.result;
+            const lines = text.split('\n').filter(l=>l.trim());
+            if (!lines.length) return;
+            // Detectar encabezado
+            const firstLine = lines[0].toLowerCase();
+            const startIdx = (firstLine.includes('nombre')||firstLine.includes('name')) ? 1 : 0;
+            csvParsedData = [];
+            for (let i=startIdx; i<lines.length; i++) {
+                const cols = lines[i].split(',').map(c=>c.trim().replace(/^"|"$/g,''));
+                if (cols.length>=1 && cols[0]) {
+                    csvParsedData.push({ name: cols[0], course: cols[1]||'', document: cols[2]||'' });
+                }
+            }
+            document.getElementById("csvPreviewMsg").textContent = `${csvParsedData.length} estudiantes encontrados:`;
+            document.getElementById("csvPreview").innerHTML = csvParsedData.slice(0,10).map(s=>`
+                <div class="csv-row"><span style="flex:2;font-weight:500;">${escapeHtml(s.name)}</span><span style="flex:1;">${escapeHtml(s.course)}</span><span style="flex:1;color:#94A3B8;">${escapeHtml(s.document)}</span></div>`).join('') + (csvParsedData.length>10?`<div style="text-align:center;color:#94A3B8;font-size:12px;padding:8px;">...y ${csvParsedData.length-10} más</div>`:'');
+            document.getElementById("csvPreviewContainer").style.display="block";
+        };
+        reader.readAsText(file);
+    }
+    document.getElementById("importCsvBtn").onclick = async () => {
+        if (!csvParsedData.length) return;
+        let count=0;
+        for (const s of csvParsedData) {
+            await saveStudent({ name:s.name, course:s.course, document:s.document, createdAt:new Date().toISOString() });
+            count++;
+        }
+        showToast(`${count} estudiantes importados ✅`,"success");
+        csvParsedData=[];
+        document.getElementById("csvPreviewContainer").style.display="none";
+        document.getElementById("csvFileInput").value="";
+        loadStudentList();
+        // Cambiar a tab lista
+        document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+        document.querySelector('[data-tab="listTab"]').classList.add("active");
+        document.getElementById("listTab").classList.add("active");
+    };
+
+    // ===== ASSIGN TRIBE =====
+    window.openAssignTribe = async (studentId, studentName, studentCourse) => {
+        assigningStudent = { id: studentId, name: studentName, course: studentCourse };
+        document.getElementById("assignStudentName").textContent = `Asignar a: ${studentName}`;
+        const tribes = await getTribes(parseInt(studentCourse));
+        const list = document.getElementById("tribeOptionsList");
+        if (!tribes.length) { list.innerHTML='<div style="color:#94A3B8;text-align:center;padding:20px;">No hay tribus en este curso</div>'; }
+        else {
+            list.innerHTML = tribes.map(t=>`
+                <div class="tribe-option" onclick="window.assignToTribe('${t.id}','${escapeHtml(t.name)}')">
+                    ${t.imageData?`<img src="${t.imageData}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #3B82F6;">`:`<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#2563EB);display:flex;align-items:center;justify-content:center;font-size:18px;">🛡️</div>`}
+                    <div>
+                        <div class="to-name">${escapeHtml(t.name)}</div>
+                        <div class="to-count">${(t.members||[]).length} integrantes</div>
+                    </div>
+                </div>`).join('');
+        }
+        openModal("assignTribeModal");
+    };
+    window.assignToTribe = async (tribeId, tribeName) => {
+        if (!assigningStudent) return;
+        const tribes = await getTribes(parseInt(assigningStudent.course));
+        const tribe = tribes.find(t=>t.id===tribeId);
+        if (!tribe) return;
+        const existingMembers = tribe.members||[];
+        if (!existingMembers.find(m=>m.name===assigningStudent.name)) {
+            await updateMember(tribeId, [...existingMembers, { name: assigningStudent.name, role: "Explorador", studentId: assigningStudent.id }]);
+        }
+        closeModal("assignTribeModal");
+        showToast(`${assigningStudent.name} asignado/a a ${tribeName} ✅`,"success");
+        if (parseInt(assigningStudent.course)===currentGrade) { await renderTribes(); await renderChart(); }
+        assigningStudent = null;
+    };
+    document.getElementById("closeAssignBtn").onclick = () => closeModal("assignTribeModal");
+    window.removeStudent = async (id) => {
+        if (!confirm("¿Eliminar este estudiante?")) return;
+        await deleteStudent(id);
+        showToast("Estudiante eliminado","");
+        loadStudentList();
+    };
+
+    // ===== ATTENDANCE QR =====
+    document.getElementById("attendanceBtn").onclick = () => { openModal("attendanceModal"); startQRScanner(); loadAttendanceLog(); loadQRGeneratorGrid(); };
+    document.getElementById("closeAttendanceBtn").onclick = () => { stopQRScanner(); closeModal("attendanceModal"); };
+
+    async function loadAttendanceLog() {
+        const records = await getTodayAttendance();
+        scannedToday = new Set(records.map(r=>`${r.studentDoc}_${r.date}`));
+        renderAttendanceLog(records);
+    }
+    function renderAttendanceLog(records) {
+        document.getElementById("attCount").textContent = records.length;
+        const log = document.getElementById("attendanceLog");
+        if (!records.length) { log.innerHTML='<div style="color:#94A3B8;text-align:center;padding:15px;font-size:13px;">Nadie registrado aún hoy</div>'; return; }
+        log.innerHTML = records.sort((a,b)=>b.timestamp?.seconds-a.timestamp?.seconds||0).map(r=>`
+            <div class="att-entry">
+                <div><div class="att-name">${escapeHtml(r.studentName)}</div><div class="att-tribe">🏹 ${escapeHtml(r.tribeName||'Sin tribu')}</div></div>
+                <div class="att-time">${r.date}</div>
+            </div>`).join('');
+    }
+
+    // QR Scanner
+    let qrCanvas = document.createElement('canvas');
+    let qrCtx = qrCanvas.getContext('2d');
+    async function startQRScanner() {
+        try {
+            qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            const video = document.getElementById('qr-video');
+            video.srcObject = qrStream;
+            video.play();
+            video.addEventListener('loadedmetadata', () => {
+                qrCanvas.width = video.videoWidth;
+                qrCanvas.height = video.videoHeight;
+            });
+            qrScanInterval = setInterval(() => scanFrame(video), 300);
+        } catch(e) {
+            document.getElementById('qr-status-msg').textContent = '⚠️ No se pudo acceder a la cámara';
+            document.getElementById('qr-status-msg').className = 'status-msg status-error';
+        }
+    }
+    function stopQRScanner() {
+        if (qrScanInterval) { clearInterval(qrScanInterval); qrScanInterval=null; }
+        if (qrStream) { qrStream.getTracks().forEach(t=>t.stop()); qrStream=null; }
+    }
+    let lastScanTime = 0;
+    async function scanFrame(video) {
+        if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+        qrCanvas.width = video.videoWidth;
+        qrCanvas.height = video.videoHeight;
+        qrCtx.drawImage(video, 0, 0, qrCanvas.width, qrCanvas.height);
+        const imageData = qrCtx.getImageData(0,0,qrCanvas.width,qrCanvas.height);
+        const code = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts:"dontInvert" });
+        if (code && Date.now()-lastScanTime > 2000) {
+            lastScanTime = Date.now();
+            await processQRCode(code.data);
+        }
+    }
+    async function processQRCode(data) {
+        // Formato esperado: ethykos:DOC:NOMBRE o solo el número de documento
+        let studentDoc = data;
+        let studentName = null;
+        if (data.startsWith('ethykos:')) {
+            const parts = data.split(':');
+            studentDoc = parts[1]||data;
+            studentName = parts[2]||null;
+        }
+        const statusEl = document.getElementById('qr-status-msg');
+        // Buscar estudiante en la base de datos
+        try {
+            const q = query(collection(db, "students"), where("document","==", studentDoc));
+            const snap = await getDocs(q);
+            if (snap.empty && !studentName) {
+                statusEl.textContent = `❌ Estudiante no encontrado: ${studentDoc}`;
+                statusEl.className = 'status-msg status-error';
+                return;
+            }
+            let sData = null;
+            if (!snap.empty) {
+                sData = { id: snap.docs[0].id, ...snap.docs[0].data() };
+            }
+            const name = sData?.name || studentName || studentDoc;
+            const today = new Date().toISOString().slice(0,10);
+            const key = `${studentDoc}_${today}`;
+            if (scannedToday.has(key)) {
+                statusEl.textContent = `⚠️ ${name} ya registró asistencia hoy`;
+                statusEl.className = 'status-msg status-error';
+                return;
+            }
+            // Buscar tribu del estudiante
+            let tribeId = null, tribeName = null;
+            if (sData) {
+                const allTribes = await getTribes(parseInt(sData.course));
+                for (const t of allTribes) {
+                    if ((t.members||[]).find(m=>m.studentId===sData.id||m.name===name)) {
+                        tribeId = t.id; tribeName = t.name; break;
+                    }
+                }
+            }
+            const result = await recordAttendance(studentDoc, name, tribeId, tribeName);
+            if (result.duplicate) {
+                statusEl.textContent = `⚠️ ${name} ya registró asistencia hoy`;
+                statusEl.className = 'status-msg status-error';
+            } else {
+                statusEl.textContent = `✅ ¡${name} registrado! ${tribeName?'(+1pt a '+tribeName+')':''}`;
+                statusEl.className = 'status-msg status-success';
+                await loadAttendanceLog();
+                await renderChart();
+            }
+        } catch(e) {
+            statusEl.textContent = `❌ Error al registrar`;
+            statusEl.className = 'status-msg status-error';
+        }
+    }
+
+    // QR Generator Grid
+    async function loadQRGeneratorGrid() {
+        const grid = document.getElementById('qrGenGrid');
+        const students = await getStudents(null);
+        if (!students.length) { grid.innerHTML='<div style="text-align:center;color:#94A3B8;font-size:13px;padding:20px;">Sin estudiantes registrados</div>'; return; }
+        grid.innerHTML = '';
+        for (const s of students) {
+            const item = document.createElement('div');
+            item.className = 'qr-gen-item';
+            item.title = `Ver QR de ${s.name}`;
+            const qrDiv = document.createElement('div');
+            qrDiv.className = 'qr-mini';
+            qrDiv.style.width = '80px'; qrDiv.style.height = '80px';
+            item.appendChild(qrDiv);
+            const label = document.createElement('div');
+            label.className = 'qr-label';
+            label.textContent = s.name.split(' ').slice(0,2).join(' ');
+            const doc_ = document.createElement('div');
+            doc_.className = 'qr-doc';
+            doc_.textContent = s.document||courseNames[s.course]||s.course;
+            item.appendChild(label); item.appendChild(doc_);
+            grid.appendChild(item);
+            // Generar QR
+            try {
+                new window.QRCode(qrDiv, {
+                    text: `ethykos:${s.document||s.id}:${s.name}`,
+                    width: 80, height: 80,
+                    colorDark: "#1E293B", colorLight: "#ffffff",
+                    correctLevel: window.QRCode.CorrectLevel.M
+                });
+            } catch(e) {}
+        }
+    }
+
+    // Imprimir QR
+    document.getElementById("printQrsBtn").onclick = async () => {
+        const students = await getStudents(null);
+        if (!students.length) { showToast("No hay estudiantes para imprimir","error"); return; }
+        const printArea = document.getElementById('printArea');
+        printArea.style.display = 'block';
+        printArea.innerHTML = `
+        <style>
+            @media print { body * { visibility:hidden; } #printArea, #printArea * { visibility:visible; } #printArea { position:fixed;top:0;left:0;width:100%; } }
+            .print-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 20px; }
+            .print-card { border: 2px solid #E2E8F0; border-radius: 12px; padding: 12px; text-align: center; page-break-inside: avoid; }
+            .print-name { font-weight: 700; font-size: 12px; margin-top: 6px; font-family: sans-serif; }
+            .print-doc { color: #94A3B8; font-size: 10px; font-family: sans-serif; }
+            .print-course { background: #DBEAFE; color: #2563EB; border-radius: 10px; padding: 2px 8px; font-size: 10px; display: inline-block; margin-top: 4px; font-family: sans-serif; font-weight: bold; }
+        </style>
+        <div class="print-grid" id="printGrid"></div>`;
+        const grid = document.getElementById('printGrid');
+        for (const s of students) {
+            const card = document.createElement('div');
+            card.className = 'print-card';
+            const qrDiv = document.createElement('div');
+            qrDiv.style.margin = '0 auto';
+            qrDiv.style.width = '90px'; qrDiv.style.height = '90px';
+            card.appendChild(qrDiv);
+            card.innerHTML += `<div class="print-name">${escapeHtml(s.name.split(' ').slice(0,3).join(' '))}</div>
+                <div class="print-doc">${escapeHtml(s.document||'')}</div>
+                <div class="print-course">${courseNames[s.course]||s.course}</div>`;
+            grid.appendChild(card);
+            try {
+                new window.QRCode(qrDiv, { text:`ethykos:${s.document||s.id}:${s.name}`, width:90, height:90, colorDark:"#1E293B", colorLight:"#ffffff", correctLevel:window.QRCode.CorrectLevel.M });
+            } catch(e) {}
+        }
+        setTimeout(() => { window.print(); printArea.style.display='none'; printArea.innerHTML=''; }, 500);
+    };
+
+    // ===== INIT =====
     async function initDashboard() {
         renderCoursesNav();
         document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
@@ -1155,6 +1083,5 @@
         await renderChart();
     }
 </script>
-
 </body>
 </html>

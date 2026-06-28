@@ -8,708 +8,322 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="./img/logo.png" type="png">
     <style>
-        /* ==================== RESTO DEL CSS (sin cambios) ==================== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #F1F5F9;
-            min-height: 100vh;
-            color: #1E293B;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #F1F5F9; min-height: 100vh; color: #1E293B; }
 
         /* ==================== HEADER ==================== */
         .header-portada {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: #FFFFFF;
-            padding: 12px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 1000;
-            border-bottom: 3px solid #3B82F6;
-            flex-wrap: wrap;
-            gap: 15px;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            position: fixed; top: 0; left: 0; right: 0;
+            background: #FFFFFF; padding: 12px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; border-bottom: 3px solid #3B82F6;
+            flex-wrap: wrap; gap: 15px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
         }
-
-        .logo-portada {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo-portada img {
-            height: 55px;
-            width: auto;
-            display: block;
-            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.08));
-            transition: transform 0.3s;
-        }
-
-        .logo-portada img:hover {
-            transform: scale(1.02);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 35px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: #1E293B;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 15px;
-            transition: color 0.3s;
-            cursor: pointer;
-            padding: 6px 0;
-            border-bottom: 2px solid transparent;
-        }
-
-        .nav-links a:hover {
-            color: #3B82F6;
-            border-bottom-color: #3B82F6;
-        }
-
-        .login-btn {
-            background: #3B82F6;
-            border: none;
-            padding: 10px 28px;
-            border-radius: 40px;
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.35);
-        }
-
-        .login-btn:hover {
-            background: #2563EB;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.45);
-        }
+        .logo-portada { display: flex; align-items: center; gap: 15px; }
+        .logo-portada img { height: 55px; width: auto; display: block; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08)); transition: transform 0.3s; }
+        .logo-portada img:hover { transform: scale(1.02); }
+        .nav-links { display: flex; gap: 35px; align-items: center; }
+        .nav-links a { color: #1E293B; text-decoration: none; font-weight: 500; font-size: 15px; transition: color 0.3s; cursor: pointer; padding: 6px 0; border-bottom: 2px solid transparent; }
+        .nav-links a:hover { color: #3B82F6; border-bottom-color: #3B82F6; }
+        .login-btn { background: #3B82F6; border: none; padding: 10px 28px; border-radius: 40px; font-weight: 600; color: white; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: all 0.3s; box-shadow: 0 2px 10px rgba(59,130,246,0.35); }
+        .login-btn:hover { background: #2563EB; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(59,130,246,0.45); }
 
         /* ==================== HERO ==================== */
-        .hero {
-            padding: 120px 40px 60px;
-            text-align: center;
-            background: #FFFFFF;
-        }
-
-        .hero h1 {
-            font-size: 56px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #1E293B, #3B82F6);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .hero p {
-            font-size: 20px;
-            color: #64748B;
-            max-width: 700px;
-            margin: 0 auto 30px;
-        }
-
-        .hero-decoration {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            font-size: 40px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
+        .hero { padding: 120px 40px 60px; text-align: center; background: #FFFFFF; }
+        .hero h1 { font-size: 56px; font-weight: 800; margin-bottom: 20px; background: linear-gradient(135deg, #1E293B, #3B82F6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .hero p { font-size: 20px; color: #64748B; max-width: 700px; margin: 0 auto 30px; }
+        .hero-decoration { display: flex; justify-content: center; gap: 20px; font-size: 40px; margin-top: 30px; flex-wrap: wrap; }
 
         /* ==================== SECCIONES ==================== */
-        .section {
-            padding: 70px 40px;
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 36px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: #1E293B;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            color: #64748B;
-            margin-bottom: 40px;
-            font-size: 18px;
-        }
-
-        .levels-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-        }
-
-        .level-card {
-            background: #FFFFFF;
-            border-radius: 28px;
-            padding: 25px 30px;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        }
-
-        .level-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #E2E8F0;
-            flex-wrap: wrap;
-        }
-
-        .level-number {
-            background: #3B82F6;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-        }
-
-        .level-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1E293B;
-        }
-
-        .level-desc {
-            color: #64748B;
-            margin-bottom: 20px;
-            font-size: 16px;
-        }
-
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .info-card {
-            background: #F8FAFC;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid #E2E8F0;
-            transition: all 0.3s;
-        }
-
-        .info-card:hover {
-            border-color: #3B82F6;
-            transform: translateY(-3px);
-        }
-
-        .card-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #1E293B;
-        }
-
-        .card-desc {
-            font-size: 13px;
-            color: #64748B;
-        }
+        .section { padding: 70px 40px; max-width: 1300px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 36px; font-weight: 700; margin-bottom: 15px; color: #1E293B; }
+        .section-subtitle { text-align: center; color: #64748B; margin-bottom: 40px; font-size: 18px; }
+        .levels-grid { display: flex; flex-direction: column; gap: 40px; }
+        .level-card { background: #FFFFFF; border-radius: 28px; padding: 25px 30px; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .level-header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #E2E8F0; flex-wrap: wrap; }
+        .level-number { background: #3B82F6; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: white; }
+        .level-title { font-size: 28px; font-weight: 700; color: #1E293B; }
+        .level-desc { color: #64748B; margin-bottom: 20px; font-size: 16px; }
+        .cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .info-card { background: #F8FAFC; border-radius: 20px; padding: 20px; text-align: center; border: 1px solid #E2E8F0; transition: all 0.3s; }
+        .info-card:hover { border-color: #3B82F6; transform: translateY(-3px); }
+        .card-icon { font-size: 48px; margin-bottom: 15px; }
+        .card-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; color: #1E293B; }
+        .card-desc { font-size: 13px; color: #64748B; }
 
         /* ==================== ROLES ==================== */
-        .roles-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 25px;
-            margin-top: 20px;
-        }
-
-        .role-card {
-            background: #FFFFFF;
-            border-radius: 20px;
-            padding: 25px 15px;
-            text-align: center;
-            border: 1px solid #E2E8F0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-            transition: all 0.3s;
-        }
-
-        .role-card:hover {
-            transform: translateY(-5px);
-            border-color: #3B82F6;
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.1);
-        }
-
-        .role-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
-        .role-name {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: #2563EB;
-        }
-
-        .role-function {
-            font-size: 12px;
-            color: #64748B;
-            margin-bottom: 10px;
-            font-style: italic;
-        }
-
-        .role-desc {
-            font-size: 12px;
-            color: #64748B;
-        }
+        .roles-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 25px; margin-top: 20px; }
+        .role-card { background: #FFFFFF; border-radius: 20px; padding: 25px 15px; text-align: center; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.3s; }
+        .role-card:hover { transform: translateY(-5px); border-color: #3B82F6; box-shadow: 0 8px 20px rgba(59,130,246,0.1); }
+        .role-icon { font-size: 48px; margin-bottom: 12px; }
+        .role-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: #2563EB; }
+        .role-function { font-size: 12px; color: #64748B; margin-bottom: 10px; font-style: italic; }
+        .role-desc { font-size: 12px; color: #64748B; }
 
         /* ==================== IMAGEN ==================== */
-        .students-image-section {
-            padding: 40px 40px 60px;
-            text-align: center;
-        }
+        .students-image-section { padding: 40px 40px 60px; text-align: center; }
+        .image-container { max-width: 900px; margin: 0 auto; border-radius: 28px; overflow: hidden; border: 2px solid #3B82F6; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .image-container img { width: 100%; height: auto; display: block; }
 
-        .image-container {
-            max-width: 900px;
-            margin: 0 auto;
-            border-radius: 28px;
+        /* ==================== SECCIÓN JUEGOS ==================== */
+        .games-section-wrapper {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+            padding: 70px 40px;
+            position: relative;
             overflow: hidden;
-            border: 2px solid #3B82F6;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .games-section-wrapper::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 50%, rgba(124,58,237,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .games-inner { max-width: 1300px; margin: 0 auto; position: relative; }
+        .games-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3);
+            color: #93C5FD; padding: 6px 16px; border-radius: 20px;
+            font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+            margin-bottom: 16px; text-transform: uppercase;
+        }
+        .games-title {
+            font-size: 38px; font-weight: 800; color: #F1F5F9;
+            margin-bottom: 12px; line-height: 1.15;
+        }
+        .games-title span { color: #60A5FA; }
+        .games-subtitle { color: #94A3B8; font-size: 17px; margin-bottom: 48px; max-width: 600px; }
+
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; }
+
+        .game-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; overflow: hidden;
+            transition: all 0.35s ease;
+            backdrop-filter: blur(4px);
+        }
+        .game-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(96,165,250,0.4);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(96,165,250,0.1);
         }
 
-        .image-container img {
-            width: 100%;
-            height: auto;
-            display: block;
+        /* Preview simulado tipo browser */
+        .game-preview {
+            position: relative; height: 190px; overflow: hidden;
+        }
+        .browser-bar {
+            background: rgba(0,0,0,0.5); padding: 8px 14px;
+            display: flex; align-items: center; gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            position: relative; z-index: 2;
+        }
+        .browser-dots { display: flex; gap: 5px; }
+        .browser-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot-red { background: #FF5F57; }
+        .dot-yellow { background: #FFBD2E; }
+        .dot-green { background: #28CA41; }
+        .browser-url {
+            flex: 1; background: rgba(255,255,255,0.07); border-radius: 6px;
+            padding: 4px 10px; font-size: 11px; color: #94A3B8;
+            font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        /* Previa BingoVerse */
+        .preview-bingo {
+            background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            height: calc(100% - 32px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 10px; padding: 16px;
+        }
+        .bingo-grid-mini {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px;
+        }
+        .bingo-cell {
+            width: 22px; height: 22px; border-radius: 4px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 7px; color: rgba(255,255,255,0.5); font-weight: bold;
+        }
+        .bingo-cell.marked { background: #3B82F6; border-color: #60A5FA; color: white; }
+        .bingo-cell.free { background: #7C3AED; border-color: #A78BFA; color: white; font-size: 6px; }
+        .bingo-title-mini { color: #60A5FA; font-size: 14px; font-weight: 800; letter-spacing: 2px; }
+        .bingo-subtitle-mini { color: #94A3B8; font-size: 9px; }
+
+        /* Previa Gózalo */
+        .preview-gozalo {
+            background: linear-gradient(160deg, #0f2027, #203a43, #2c5364);
+            height: calc(100% - 32px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 8px; padding: 16px;
+        }
+        .wheel-mini {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: conic-gradient(
+                #EF4444 0deg 60deg, #F97316 60deg 120deg,
+                #EAB308 120deg 180deg, #22C55E 180deg 240deg,
+                #3B82F6 240deg 300deg, #8B5CF6 300deg 360deg
+            );
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 0 20px rgba(59,130,246,0.3);
+            animation: spin-slow 8s linear infinite;
+            position: relative;
+        }
+        .wheel-mini::after {
+            content: '▶';
+            position: absolute; right: -14px; top: 50%;
+            transform: translateY(-50%);
+            color: white; font-size: 14px;
+        }
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .snakes-board { display: flex; flex-direction: column; gap: 3px; }
+        .sb-row { display: flex; gap: 3px; }
+        .sb-cell { width: 28px; height: 28px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: rgba(255,255,255,0.5); font-weight: bold; }
+        .sb-cell.ladder-top, .sb-cell.ladder-bot { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); }
+        .sb-cell.snake-head, .sb-cell.snake-tail { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); }
+        .sb-cell.pawn { background: #F59E0B; border-color: #FCD34D; color: white; }
+        .gozalo-label { color: #F8FAFC; font-size: 13px; font-weight: 700; }
+        .gozalo-sub { color: #94A3B8; font-size: 9px; }
+
+        /* Previa Ethykos Game */
+        .preview-game {
+            background: linear-gradient(160deg, #0a0a1a, #0d1b2a, #1a0a2e);
+            height: calc(100% - 32px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 8px; padding: 16px;
+            position: relative; overflow: hidden;
+        }
+        .game-pixel-world {
+            display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px;
+            width: 130px;
+        }
+        .px { width: 11px; height: 11px; border-radius: 2px; }
+        .px-sky { background: #1a3a5c; }
+        .px-tree { background: #2d6a4f; }
+        .px-path { background: #8B7355; }
+        .px-water { background: #1e6091; }
+        .px-grass { background: #3a7d44; }
+        .px-hero { background: #3B82F6; }
+        .game-title-mini { color: #7C3AED; font-size: 12px; font-weight: 800; letter-spacing: 1px; }
+        .game-xp-bar { width: 100px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        .game-xp-fill { height: 100%; width: 65%; background: linear-gradient(90deg, #7C3AED, #3B82F6); border-radius: 4px; }
+
+        /* Game card body */
+        .game-card-body { padding: 22px 24px 24px; }
+        .game-card-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+        .game-card-icon {
+            width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+        }
+        .icon-bingo { background: linear-gradient(135deg, #1D4ED8, #3B82F6); }
+        .icon-gozalo { background: linear-gradient(135deg, #D97706, #F59E0B); }
+        .icon-game { background: linear-gradient(135deg, #5B21B6, #7C3AED); }
+
+        .game-card-name { font-size: 20px; font-weight: 700; color: #F1F5F9; margin-bottom: 4px; }
+        .game-card-tag {
+            display: inline-block; font-size: 11px; font-weight: 600;
+            padding: 2px 10px; border-radius: 20px;
+        }
+        .tag-bingo { background: rgba(59,130,246,0.15); color: #93C5FD; border: 1px solid rgba(59,130,246,0.25); }
+        .tag-gozalo { background: rgba(245,158,11,0.15); color: #FCD34D; border: 1px solid rgba(245,158,11,0.25); }
+        .tag-game { background: rgba(124,58,237,0.15); color: #C4B5FD; border: 1px solid rgba(124,58,237,0.25); }
+
+        .game-card-desc { color: #94A3B8; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+        .game-card-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 22px; border-radius: 30px; font-weight: 700;
+            font-size: 14px; text-decoration: none; transition: all 0.25s;
+            border: none; cursor: pointer; width: 100%; justify-content: center;
+        }
+        .btn-bingo { background: #3B82F6; color: white; }
+        .btn-bingo:hover { background: #2563EB; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.4); }
+        .btn-gozalo { background: #F59E0B; color: #1E293B; }
+        .btn-gozalo:hover { background: #D97706; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+        .btn-game { background: #7C3AED; color: white; }
+        .btn-game:hover { background: #6D28D9; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+
+        /* Separador de sección juegos */
+        .section-divider {
+            text-align: center;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+            background: #F1F5F9;
+            line-height: 0;
+        }
+        .divider-label {
+            display: inline-block;
+            background: linear-gradient(135deg, #0F172A, #1E293B);
+            color: #60A5FA;
+            padding: 12px 28px 20px;
+            border-radius: 20px 20px 0 0;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid rgba(96,165,250,0.2);
+            border-bottom: none;
+            line-height: normal;
         }
 
         /* ==================== FOOTER ==================== */
-        .footer {
-            background: #FFFFFF;
-            border-top: 3px solid #3B82F6;
-            padding: 40px 40px 30px;
-            margin-top: 60px;
-            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 30px;
-        }
-
-        .footer-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-width: 160px;
-        }
-
-        .footer-logo-col {
-            gap: 8px;
-        }
-
-        .footer-logo-img {
-            height: 100px;
-            width: auto;
-            display: block;
-        }
-
-        /* ===== COLUMNA 2: CRÉDITOS ===== */
-        .footer-credits-col {
-            gap: 4px;
-            text-align: center;
-        }
-
-        .footer-credits-title {
-            color: #F8FAFC;
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            background: #2563EB;
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: 1px solid #E2E8F0;
-            display: inline-block;
-        }
-
-        .footer-credits-line {
-            color: #1E293B;
-            font-size: 14px;
-            line-height: 1.6;
-            margin: 4px 0 0 0;
-            text-align: center;
-        }
-
-        .footer-copy {
-            color: #3B82F6;
-            font-weight: 600;
-            font-size: 20px;
-        }
-
-        /* ===== BOTÓN CONTÁCTAME (LLAMATIVO) ===== */
-        .footer-url {
-            display: inline-block;
-            background: linear-gradient(135deg, #3B82F6, #2563EB);
-            color: #FFFFFF;
-            font-size: 15px;
-            font-weight: 700;
-            padding: 12px 28px;
-            border-radius: 50px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            margin-top: 6px;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            letter-spacing: 0.5px;
-            position: relative;
-            animation: pulse-btn 2.5s ease-in-out infinite;
-        }
-
-        .footer-url i {
-            margin-right: 8px;
-        }
-
-        .footer-url:hover {
-            background: linear-gradient(135deg, #2563EB, #1D4ED8);
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        @keyframes pulse-btn {
-            0%, 100% {
-                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-            }
-            50% {
-                box-shadow: 0 6px 30px rgba(59, 130, 246, 0.7);
-                transform: scale(1.02);
-            }
-        }
-
-        /* ===== COLUMNA 3: LEGAL ===== */
-        .footer-legal-col {
-            gap: 8px;
-            text-align: center;
-        }
-
-        .footer-legal-title {
-            color: #F8FAFC;
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-            margin: 0;
-            background: #2563EB;
-            padding: 6px 16px;
-            border-radius: 20px;
-            border: 1px solid #E2E8F0;
-            display: inline-block;
-        }
-
-        .footer-links {
-            list-style: none;
-            padding: 0;
-            margin: 4px 0 0 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .footer-link {
-            color: #1E293B;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.3s;
-        }
-
-        .footer-link:hover {
-            color: #3B82F6;
-            text-decoration: underline;
-        }
+        .footer { background: #FFFFFF; border-top: 3px solid #3B82F6; padding: 40px 40px 30px; margin-top: 0; box-shadow: 0 -2px 20px rgba(0,0,0,0.05); }
+        .footer-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 30px; }
+        .footer-section { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 160px; }
+        .footer-logo-col { gap: 8px; }
+        .footer-logo-img { height: 100px; width: auto; display: block; }
+        .footer-credits-col { gap: 4px; text-align: center; }
+        .footer-credits-title { color: #F8FAFC; font-size: 13px; font-weight: 500; letter-spacing: 0.5px; background: #2563EB; padding: 6px 16px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-block; }
+        .footer-credits-line { color: #1E293B; font-size: 14px; line-height: 1.6; margin: 4px 0 0 0; text-align: center; }
+        .footer-copy { color: #3B82F6; font-weight: 600; font-size: 20px; }
+        .footer-url { display: inline-block; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #FFFFFF; font-size: 15px; font-weight: 700; padding: 12px 28px; border-radius: 50px; text-decoration: none; transition: all 0.3s ease; margin-top: 6px; box-shadow: 0 4px 15px rgba(59,130,246,0.4); border: 2px solid rgba(255,255,255,0.1); letter-spacing: 0.5px; animation: pulse-btn 2.5s ease-in-out infinite; }
+        .footer-url i { margin-right: 8px; }
+        .footer-url:hover { background: linear-gradient(135deg, #2563EB, #1D4ED8); transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(59,130,246,0.5); }
+        @keyframes pulse-btn { 0%, 100% { box-shadow: 0 4px 15px rgba(59,130,246,0.4); } 50% { box-shadow: 0 6px 30px rgba(59,130,246,0.7); transform: scale(1.02); } }
+        .footer-legal-col { gap: 8px; text-align: center; }
+        .footer-legal-title { color: #F8FAFC; font-size: 13px; font-weight: 500; letter-spacing: 0.5px; margin: 0; background: #2563EB; padding: 6px 16px; border-radius: 20px; border: 1px solid #E2E8F0; display: inline-block; }
+        .footer-links { list-style: none; padding: 0; margin: 4px 0 0 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .footer-link { color: #1E293B; text-decoration: none; font-size: 13px; transition: color 0.3s; }
+        .footer-link:hover { color: #3B82F6; text-decoration: underline; }
 
         /* ==================== MODALES ==================== */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 999;
-        }
-
-        .modal-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #FFFFFF;
-            border-radius: 24px;
-            padding: 30px;
-            max-width: 550px;
-            width: 90%;
-            z-index: 1000;
-            border: 2px solid #3B82F6;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #E2E8F0;
-        }
-
-        .modal-header h2 {
-            color: #1E293B;
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #94A3B8;
-            transition: color 0.3s;
-        }
-
-        .modal-close:hover {
-            color: #EF4444;
-        }
-
-        .modal-body {
-            color: #475569;
-            font-size: 15px;
-            line-height: 1.6;
-        }
-
-        .modal-body p {
-            margin-bottom: 12px;
-        }
-
-        .modal-footer {
-            margin-top: 20px;
-            padding-top: 12px;
-            border-top: 1px solid #E2E8F0;
-            text-align: right;
-        }
-
-        .btn-modal-close {
-            background: #3B82F6;
-            border: none;
-            padding: 8px 24px;
-            border-radius: 30px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-modal-close:hover {
-            background: #2563EB;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; }
+        .modal-container { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #FFFFFF; border-radius: 24px; padding: 30px; max-width: 550px; width: 90%; z-index: 1000; border: 2px solid #3B82F6; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #E2E8F0; }
+        .modal-header h2 { color: #1E293B; font-size: 22px; font-weight: 700; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #94A3B8; transition: color 0.3s; }
+        .modal-close:hover { color: #EF4444; }
+        .modal-body { color: #475569; font-size: 15px; line-height: 1.6; }
+        .modal-body p { margin-bottom: 12px; }
+        .modal-footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #E2E8F0; text-align: right; }
+        .btn-modal-close { background: #3B82F6; border: none; padding: 8px 24px; border-radius: 30px; color: white; font-weight: 600; cursor: pointer; transition: background 0.3s; }
+        .btn-modal-close:hover { background: #2563EB; }
 
         /* ==================== MODAL LOGIN ==================== */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-login-content {
-            background: #FFFFFF;
-            padding: 40px;
-            border-radius: 32px;
-            width: 90%;
-            max-width: 420px;
-            border: 2px solid #3B82F6;
-        }
-
-        .modal-login-content h2 {
-            margin-bottom: 10px;
-            color: #1E293B;
-            text-align: center;
-            font-size: 24px;
-        }
-
-        .modal-login-content .login-icon {
-            text-align: center;
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .modal-login-content .login-subtitle {
-            text-align: center;
-            color: #64748B;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #64748B;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 14px 16px;
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 12px;
-            color: #1E293B;
-            font-size: 15px;
-            transition: all 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-wrapper input {
-            padding-right: 50px;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #94A3B8;
-            cursor: pointer;
-            font-size: 18px;
-            padding: 5px;
-            transition: color 0.3s;
-        }
-
-        .toggle-password:hover {
-            color: #3B82F6;
-        }
-
-        .modal-login-btn {
-            width: 100%;
-            padding: 14px;
-            background: #3B82F6;
-            border: none;
-            border-radius: 40px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: all 0.3s;
-        }
-
-        .modal-login-btn:hover {
-            background: #2563EB;
-        }
-
-        .modal-cancel {
-            width: 100%;
-            padding: 12px;
-            background: none;
-            border: none;
-            color: #94A3B8;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 14px;
-            transition: color 0.3s;
-        }
-
-        .modal-cancel:hover {
-            color: #3B82F6;
-        }
-
-        .error-message {
-            color: #EF4444;
-            font-size: 13px;
-            margin-top: 15px;
-            text-align: center;
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-login-content { background: #FFFFFF; padding: 40px; border-radius: 32px; width: 90%; max-width: 420px; border: 2px solid #3B82F6; }
+        .modal-login-content h2 { margin-bottom: 10px; color: #1E293B; text-align: center; font-size: 24px; }
+        .modal-login-content .login-icon { text-align: center; font-size: 48px; margin-bottom: 10px; }
+        .modal-login-content .login-subtitle { text-align: center; color: #64748B; margin-bottom: 30px; font-size: 14px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #64748B; font-size: 14px; font-weight: 500; }
+        .input-group input { width: 100%; padding: 14px 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; color: #1E293B; font-size: 15px; transition: all 0.3s; }
+        .input-group input:focus { outline: none; border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-right: 50px; }
+        .toggle-password { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #94A3B8; cursor: pointer; font-size: 18px; padding: 5px; transition: color 0.3s; }
+        .toggle-password:hover { color: #3B82F6; }
+        .modal-login-btn { width: 100%; padding: 14px; background: #3B82F6; border: none; border-radius: 40px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: all 0.3s; }
+        .modal-login-btn:hover { background: #2563EB; }
+        .modal-cancel { width: 100%; padding: 12px; background: none; border: none; color: #94A3B8; cursor: pointer; margin-top: 15px; font-size: 14px; transition: color 0.3s; }
+        .modal-cancel:hover { color: #3B82F6; }
+        .error-message { color: #EF4444; font-size: 13px; margin-top: 15px; text-align: center; }
 
         /* ==================== RESPONSIVE ==================== */
-        @media (max-width: 1100px) {
-            .roles-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-
-        @media (max-width: 850px) {
-            .footer-content {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .footer-section {
-                align-items: center !important;
-                justify-content: center !important;
-                width: 100%;
-            }
-            .footer-links {
-                align-items: center;
-            }
-        }
-
+        @media (max-width: 1100px) { .roles-grid { grid-template-columns: repeat(3,1fr); } }
+        @media (max-width: 850px) { .footer-content { flex-direction: column; align-items: center; text-align: center; } .footer-section { align-items: center !important; justify-content: center !important; width: 100%; } .footer-links { align-items: center; } }
         @media (max-width: 768px) {
             .hero h1 { font-size: 32px; }
-            .roles-grid { grid-template-columns: repeat(2, 1fr); }
+            .roles-grid { grid-template-columns: repeat(2,1fr); }
             .level-header { flex-direction: column; text-align: center; }
             .nav-links { display: none; }
             .header-portada { justify-content: space-between; padding: 10px 20px; }
@@ -719,14 +333,10 @@
             .footer { padding: 30px 20px; }
             .footer-logo-img { height: 40px; }
             .footer-url { font-size: 14px; padding: 10px 20px; }
+            .games-section-wrapper { padding: 50px 20px; }
+            .games-title { font-size: 28px; }
         }
-
-        @media (max-width: 480px) {
-            .roles-grid { grid-template-columns: 1fr; }
-            .logo-portada img { height: 32px; }
-            .cards-container { grid-template-columns: 1fr; }
-            .modal-container { padding: 20px; }
-        }
+        @media (max-width: 480px) { .roles-grid { grid-template-columns: 1fr; } .logo-portada img { height: 32px; } .cards-container { grid-template-columns: 1fr; } .modal-container { padding: 20px; } }
     </style>
 </head>
 <body>
@@ -740,6 +350,7 @@
         <a onclick="scrollToSection('que-es')">¿Qué es una Tribu?</a>
         <a onclick="scrollToSection('elementos')">Elementos</a>
         <a onclick="scrollToSection('roles')">Roles</a>
+        <a onclick="scrollToSection('juegos')">Juegos</a>
     </div>
     <button class="login-btn" id="mostrarLoginBtn">
         <i class="fas fa-user-shield"></i> Acceso Docente
@@ -765,7 +376,7 @@
                 <div class="level-number">1</div>
                 <div class="level-title">Identidad Colectiva</div>
             </div>
-            <div class="level-desc">Una tribu es un equipo que elige su propio nombre, emblema y consigna. No es solo un grupo de trabajo, es una familia que se apoya, celebra triunfos y aprende de los desafíos.</div>
+            <div class="level-desc">Una tribu es un equipo que elige su propio nombre, escudo y grito de batalla. No es solo un grupo de trabajo, es una familia que se apoya, celebra triunfos y aprende de los desafíos.</div>
             <div class="cards-container">
                 <div class="info-card"><div class="card-icon">🤝</div><div class="card-title">Pertenencia</div><div class="card-desc">Cada miembro se siente parte de algo más grande que sí mismo.</div></div>
                 <div class="info-card"><div class="card-icon">🎯</div><div class="card-title">Propósito Común</div><div class="card-desc">Todos reman hacia la misma dirección: crecer en valores y responsabilidad.</div></div>
@@ -786,8 +397,8 @@
             <div class="cards-container"><div class="info-card"><div class="card-icon">💡</div><div class="card-title">¿Por qué es importante?</div><div class="card-desc">Un nombre poderoso une al equipo y les recuerda quiénes son y cómo quieren ser reconocidos.</div></div></div>
         </div>
         <div class="level-card">
-            <div class="level-header"><div class="level-number">2</div><div class="level-title">🎨 EL EMBLEMA</div></div>
-            <div class="level-desc">El emblema es la representación visual de la tribu. Un símbolo que cuenta una historia sin palabras.</div>
+            <div class="level-header"><div class="level-number">2</div><div class="level-title">🛡️ EL ESCUDO</div></div>
+            <div class="level-desc">El escudo es la representación visual de la tribu. Un símbolo que cuenta una historia sin palabras. Lo diseñan ustedes mismos, píxel a píxel, usando <a href="https://www.pixilart.com/" target="_blank" rel="noopener" style="color:#3B82F6;font-weight:600;text-decoration:none;border-bottom:1px dashed #3B82F6;">Pixilart.com ↗</a>.</div>
             <div class="cards-container">
                 <div class="info-card"><div class="card-icon">🛡️</div><div class="card-title">Fortaleza</div><div class="card-desc">Unidad, protección, el espíritu del equipo.</div></div>
                 <div class="info-card"><div class="card-icon">🔥</div><div class="card-title">Pasión</div><div class="card-desc">Energía, determinación para alcanzar metas.</div></div>
@@ -795,9 +406,9 @@
             </div>
         </div>
         <div class="level-card">
-            <div class="level-header"><div class="level-number">3</div><div class="level-title">⚡ CONSIGNA DE EQUIPO</div></div>
-            <div class="level-desc">Una frase corta y poderosa que la tribu dice junta para animarse, celebrar o recordar su propósito.</div>
-            <div class="cards-container"><div class="info-card"><div class="card-icon">💪</div><div class="card-title">¿Por qué es importante?</div><div class="card-desc">Fortalece la unidad, levanta el ánimo y crea un sentido de pertenencia único.</div></div></div>
+            <div class="level-header"><div class="level-number">3</div><div class="level-title">🔥 EL GRITO DE BATALLA</div></div>
+            <div class="level-desc">Una frase corta y poderosa que la tribu grita junta para encenderse, celebrar victorias o recordar de qué están hechos. No es elegante — es visceral, es suya.</div>
+            <div class="cards-container"><div class="info-card"><div class="card-icon">💪</div><div class="card-title">¿Por qué importa?</div><div class="card-desc">Levanta el ánimo, despierta la energía del equipo y crea un vínculo que solo ellos entienden.</div></div></div>
         </div>
         <div class="level-card">
             <div class="level-header"><div class="level-number">4</div><div class="level-title">👥 LOS ROLES</div></div>
@@ -812,7 +423,7 @@
     <p class="section-subtitle">Cada guerrero tiene una misión. Cada rol es esencial.</p>
     <div class="roles-grid">
         <div class="role-card"><div class="role-icon">👑</div><div class="role-name">LÍDER</div><div class="role-function">Guía y coordina</div><div class="role-desc">Organiza al equipo, recuerda fechas, asegura que todos tengan claro qué hacer. Sirve al equipo, no manda.</div></div>
-        <div class="role-card"><div class="role-icon">🎨</div><div class="role-name">ARTESANO</div><div class="role-function">Crea y embellece</div><div class="role-desc">Dibuja, diseña, hace carteles, cómics, emblemas. Da vida visual a las ideas del equipo.</div></div>
+        <div class="role-card"><div class="role-icon">🎨</div><div class="role-name">ARTESANO</div><div class="role-function">Crea y embellece</div><div class="role-desc">Dibuja, diseña, hace carteles, cómics, escudos. Da vida visual a las ideas del equipo.</div></div>
         <div class="role-card"><div class="role-icon">🛡️</div><div class="role-name">GUARDIÁN</div><div class="role-function">Cuida y protege</div><div class="role-desc">Vela por los materiales, el orden y el respeto. Es el que dice "cuidado" cuando algo no va bien.</div></div>
         <div class="role-card"><div class="role-icon">🔍</div><div class="role-name">EXPLORADOR</div><div class="role-function">Investiga y pregunta</div><div class="role-desc">Busca información, hace preguntas al profesor, encuentra recursos nuevos para el equipo.</div></div>
         <div class="role-card"><div class="role-icon">⚔️</div><div class="role-name">GUERRERO</div><div class="role-function">Actúa y defiende</div><div class="role-desc">Habla en nombre del equipo, presenta trabajos, defiende las ideas de la tribu con respeto.</div></div>
@@ -826,28 +437,159 @@
     </div>
 </section>
 
+<!-- ==================== SECCIÓN JUEGOS ==================== -->
+<div id="juegos" class="section-divider">
+    <span class="divider-label">⚔️ &nbsp; ARENA DE BATALLA &nbsp; ⚔️</span>
+</div>
+<section class="games-section-wrapper">
+    <div class="games-inner">
+        <div class="games-badge"><i class="fas fa-gamepad"></i> Zona de estudiantes</div>
+        <h2 class="games-title">Juegos de <span>Éthykos</span></h2>
+        <p class="games-subtitle">Herramientas interactivas para la clase. Tu profe activa el juego — tú entras y compites.</p>
+
+        <div class="games-grid">
+
+            <!-- BingoVerse -->
+            <div class="game-card">
+                <div class="game-preview">
+                    <div class="browser-bar">
+                        <div class="browser-dots">
+                            <div class="browser-dot dot-red"></div>
+                            <div class="browser-dot dot-yellow"></div>
+                            <div class="browser-dot dot-green"></div>
+                        </div>
+                        <div class="browser-url">bingoverse.vercel.app</div>
+                    </div>
+                    <div class="preview-bingo">
+                        <div class="bingo-title-mini">BINGO</div>
+                        <div class="bingo-grid-mini">
+                            <div class="bingo-cell marked">B</div><div class="bingo-cell">I</div><div class="bingo-cell marked">N</div><div class="bingo-cell">G</div><div class="bingo-cell">O</div>
+                            <div class="bingo-cell">12</div><div class="bingo-cell marked">7</div><div class="bingo-cell">3</div><div class="bingo-cell marked">19</div><div class="bingo-cell">5</div>
+                            <div class="bingo-cell marked">8</div><div class="bingo-cell">14</div><div class="bingo-cell free">FREE</div><div class="bingo-cell">2</div><div class="bingo-cell marked">11</div>
+                            <div class="bingo-cell">6</div><div class="bingo-cell marked">1</div><div class="bingo-cell">9</div><div class="bingo-cell">13</div><div class="bingo-cell marked">4</div>
+                            <div class="bingo-cell marked">10</div><div class="bingo-cell">16</div><div class="bingo-cell marked">18</div><div class="bingo-cell">15</div><div class="bingo-cell">17</div>
+                        </div>
+                        <div class="bingo-subtitle-mini">En vivo con tu clase</div>
+                    </div>
+                </div>
+                <div class="game-card-body">
+                    <div class="game-card-header">
+                        <div class="game-card-icon icon-bingo">🎱</div>
+                        <div>
+                            <div class="game-card-name">BingoVerse</div>
+                            <span class="game-card-tag tag-bingo">Todos los cursos</span>
+                        </div>
+                    </div>
+                    <p class="game-card-desc">Bingo en tiempo real con tu clase. El profe activa la sala, tú entras con tu nombre y marcas los casilleros. ¡Primero en gritar BINGO gana!</p>
+                    <a href="https://bingoverse.vercel.app/" target="_blank" rel="noopener" class="game-card-btn btn-bingo">
+                        <i class="fas fa-play"></i> Abrir BingoVerse
+                    </a>
+                </div>
+            </div>
+
+            <!-- Gózalo -->
+            <div class="game-card">
+                <div class="game-preview">
+                    <div class="browser-bar">
+                        <div class="browser-dots">
+                            <div class="browser-dot dot-red"></div>
+                            <div class="browser-dot dot-yellow"></div>
+                            <div class="browser-dot dot-green"></div>
+                        </div>
+                        <div class="browser-url">gozalo-pi.vercel.app</div>
+                    </div>
+                    <div class="preview-gozalo">
+                        <div class="snakes-board">
+                            <div class="sb-row">
+                                <div class="sb-cell ladder-top">🪜</div><div class="sb-cell">9</div><div class="sb-cell snake-head">🐍</div>
+                            </div>
+                            <div class="sb-row">
+                                <div class="sb-cell">6</div><div class="sb-cell">7</div><div class="sb-cell">8</div>
+                            </div>
+                            <div class="sb-row">
+                                <div class="sb-cell ladder-bot">🪜</div><div class="sb-cell">4</div><div class="sb-cell snake-tail">🎯</div>
+                            </div>
+                            <div class="sb-row">
+                                <div class="sb-cell pawn">⬜</div><div class="sb-cell">2</div><div class="sb-cell">3</div>
+                            </div>
+                        </div>
+                        <div class="gozalo-label">¡GÓZALO!</div>
+                        <div class="gozalo-sub">Serpientes y Escaleras · El Gozo</div>
+                    </div>
+                </div>
+                <div class="game-card-body">
+                    <div class="game-card-header">
+                        <div class="game-card-icon icon-gozalo">🎡</div>
+                        <div>
+                            <div class="game-card-name">¡Gózalo!</div>
+                            <span class="game-card-tag tag-gozalo">Ética · El Gozo</span>
+                        </div>
+                    </div>
+                    <p class="game-card-desc">Serpientes y Escaleras sobre el tema del Gozo, trabajado en clase de ética. Avanza por el tablero tomando decisiones que te elevan... o te hacen retroceder.</p>
+                    <a href="https://gozalo-pi.vercel.app/" target="_blank" rel="noopener" class="game-card-btn btn-gozalo">
+                        <i class="fas fa-play"></i> Abrir ¡Gózalo!
+                    </a>
+                </div>
+            </div>
+
+            <!-- Ethykos Game -->
+            <div class="game-card">
+                <div class="game-preview">
+                    <div class="browser-bar">
+                        <div class="browser-dots">
+                            <div class="browser-dot dot-red"></div>
+                            <div class="browser-dot dot-yellow"></div>
+                            <div class="browser-dot dot-green"></div>
+                        </div>
+                        <div class="browser-url">ethykosgame.vercel.app</div>
+                    </div>
+                    <div class="preview-game">
+                        <div class="game-title-mini">✦ ÉTHYKOS RPG ✦</div>
+                        <div class="game-pixel-world">
+                            <div class="px px-sky"></div><div class="px px-sky"></div><div class="px px-tree"></div><div class="px px-sky"></div><div class="px px-sky"></div><div class="px px-sky"></div><div class="px px-tree"></div><div class="px px-sky"></div><div class="px px-sky"></div><div class="px px-sky"></div>
+                            <div class="px px-sky"></div><div class="px px-tree"></div><div class="px px-tree"></div><div class="px px-tree"></div><div class="px px-sky"></div><div class="px px-sky"></div><div class="px px-tree"></div><div class="px px-tree"></div><div class="px px-sky"></div><div class="px px-sky"></div>
+                            <div class="px px-grass"></div><div class="px px-grass"></div><div class="px px-grass"></div><div class="px px-path"></div><div class="px px-path"></div><div class="px px-water"></div><div class="px px-water"></div><div class="px px-grass"></div><div class="px px-grass"></div><div class="px px-grass"></div>
+                            <div class="px px-grass"></div><div class="px px-hero"></div><div class="px px-grass"></div><div class="px px-path"></div><div class="px px-path"></div><div class="px px-water"></div><div class="px px-grass"></div><div class="px px-grass"></div><div class="px px-grass"></div><div class="px px-grass"></div>
+                        </div>
+                        <div class="game-xp-bar"><div class="game-xp-fill"></div></div>
+                        <div style="color:#94A3B8;font-size:9px;margin-top:2px;">Mundo: Dignidad · Nivel 1</div>
+                    </div>
+                </div>
+                <div class="game-card-body">
+                    <div class="game-card-header">
+                        <div class="game-card-icon icon-game">🏹</div>
+                        <div>
+                            <div class="game-card-name">Éthykos RPG</div>
+                            <span class="game-card-tag tag-game">En construcción</span>
+                        </div>
+                    </div>
+                    <p class="game-card-desc">Un RPG de ética donde exploras mundos construidos sobre valores. Cada decisión importa, cada dilema te hace crecer. Versión inicial disponible.</p>
+                    <a href="https://ethykosgame.vercel.app/" target="_blank" rel="noopener" class="game-card-btn btn-game">
+                        <i class="fas fa-play"></i> Abrir Éthykos RPG
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
 <!-- ==================== FOOTER ==================== -->
 <footer class="footer">
     <div class="footer-content">
-
-        <!-- Columna 1: Logo -->
         <div class="footer-section footer-logo-col">
             <img src="./img/logo.png" alt="ETHYKOS" class="footer-logo-img">
         </div>
-
-        <!-- Columna 2: Créditos -->
         <div class="footer-section footer-credits-col">
             <span class="footer-credits-title">Idea y desarrollo por:</span>
             <p class="footer-credits-line">
                 <span class="footer-copy">©</span> Ronald Rojas Newball (Chrisayuron) &nbsp;2026<br>
-                <b>versión 1.0.0</b>
+                <b>versión 1.2.0</b>
             </p>
             <a href="https://mr-ronald.vercel.app/" target="_blank" rel="noopener noreferrer" class="footer-url">
                 <i class="fas fa-envelope"></i> CONTÁCTAME
             </a>
         </div>
-
-        <!-- Columna 3: Legal -->
         <div class="footer-section footer-legal-col">
             <h4 class="footer-legal-title">Legal</h4>
             <ul class="footer-links">
@@ -856,68 +598,48 @@
                 <li><a href="#" id="linkLicencia" class="footer-link">Licencia</a></li>
             </ul>
         </div>
-
     </div>
 </footer>
 
 <!-- ==================== MODALES LEGALES ==================== -->
-
-<!-- Modal Términos de uso -->
 <div id="modalTerminos" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTerminosTitulo" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-container">
-        <div class="modal-header">
-            <h2 id="modalTerminosTitulo">📜 Términos de uso</h2>
-            <button class="modal-close" aria-label="Cerrar">✕</button>
-        </div>
+        <div class="modal-header"><h2 id="modalTerminosTitulo">📜 Términos de uso</h2><button class="modal-close" aria-label="Cerrar">✕</button></div>
         <div class="modal-body">
             <p>Esta plataforma ha sido desarrollada exclusivamente con fines educativos.</p>
             <p>Su uso debe realizarse de forma responsable y respetando los derechos de terceros.</p>
             <p>No está permitido utilizar la plataforma para actividades ilícitas, fraudulentas o que vulneren la propiedad intelectual de este proyecto.</p>
             <p>El usuario es responsable del contenido de las actividades que cree y comparta mediante la plataforma.</p>
         </div>
-        <div class="modal-footer">
-            <button class="btn-modal-close">Cerrar</button>
-        </div>
+        <div class="modal-footer"><button class="btn-modal-close">Cerrar</button></div>
     </div>
 </div>
 
-<!-- Modal Política de privacidad -->
 <div id="modalPrivacidad" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalPrivacidadTitulo" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-container">
-        <div class="modal-header">
-            <h2 id="modalPrivacidadTitulo">🔒 Política de privacidad</h2>
-            <button class="modal-close" aria-label="Cerrar">✕</button>
-        </div>
+        <div class="modal-header"><h2 id="modalPrivacidadTitulo">🔒 Política de privacidad</h2><button class="modal-close" aria-label="Cerrar">✕</button></div>
         <div class="modal-body">
             <p>ETHYKOS únicamente almacena la información necesaria para el funcionamiento de la plataforma.</p>
             <p>No se comercializan ni comparten datos personales con terceros.</p>
             <p>La información almacenada mediante Firebase es utilizada exclusivamente para brindar las funcionalidades propias del sistema.</p>
         </div>
-        <div class="modal-footer">
-            <button class="btn-modal-close">Cerrar</button>
-        </div>
+        <div class="modal-footer"><button class="btn-modal-close">Cerrar</button></div>
     </div>
 </div>
 
-<!-- Modal Licencia -->
 <div id="modalLicencia" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalLicenciaTitulo" style="display: none;">
     <div class="modal-overlay"></div>
     <div class="modal-container">
-        <div class="modal-header">
-            <h2 id="modalLicenciaTitulo">📄 Licencia</h2>
-            <button class="modal-close" aria-label="Cerrar">✕</button>
-        </div>
+        <div class="modal-header"><h2 id="modalLicenciaTitulo">📄 Licencia</h2><button class="modal-close" aria-label="Cerrar">✕</button></div>
         <div class="modal-body">
             <p>Este proyecto tiene su código fuente publicado públicamente en GitHub con fines de consulta y aprendizaje.</p>
             <p><strong>Todos los derechos</strong> sobre el diseño, la idea, la implementación y el contenido pertenecen a Ronald Rojas Newball.</p>
             <p>La publicación del código no autoriza su copia, redistribución, comercialización o reutilización total o parcial sin autorización expresa del autor.</p>
             <p><strong>Todos los derechos reservados.</strong></p>
         </div>
-        <div class="modal-footer">
-            <button class="btn-modal-close">Cerrar</button>
-        </div>
+        <div class="modal-footer"><button class="btn-modal-close">Cerrar</button></div>
     </div>
 </div>
 
@@ -927,22 +649,17 @@
         <div class="login-icon">🏹🛡️</div>
         <h2>Ética en Acción</h2>
         <div class="login-subtitle">Acceso para docentes</div>
-        
         <div class="input-group">
             <label>📧 Correo electrónico</label>
             <input type="email" id="loginEmail" placeholder="profesor@etica.com" value="">
         </div>
-        
         <div class="input-group">
             <label>🔒 Contraseña</label>
             <div class="password-wrapper">
                 <input type="password" id="loginPassword" placeholder="Ingresa tu contraseña">
-                <button type="button" class="toggle-password" id="togglePasswordBtn">
-                    <i class="fas fa-eye"></i>
-                </button>
+                <button type="button" class="toggle-password" id="togglePasswordBtn"><i class="fas fa-eye"></i></button>
             </div>
         </div>
-        
         <button class="modal-login-btn" id="doLoginBtn">INGRESAR AL DASHBOARD</button>
         <button class="modal-cancel" id="closeLoginModalBtn">Cancelar</button>
         <div id="loginError" class="error-message"></div>
@@ -951,7 +668,6 @@
 
 <!-- ==================== SCRIPTS ==================== -->
 <script>
-    // ==================== CONFIGURACIÓN DE FIREBASE ====================
     const firebaseConfig = {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
         authDomain: "ethicos-a9a66.firebaseapp.com",
@@ -960,10 +676,8 @@
         messagingSenderId: "1038796710548",
         appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
     };
-    console.log("🔥 Configuración de Firebase cargada");
     window.firebaseConfig = firebaseConfig;
 
-    // ==================== ELEMENTOS DEL DOM ====================
     const mostrarLoginBtn = document.getElementById("mostrarLoginBtn");
     const loginModal = document.getElementById("loginModal");
     const closeLoginModalBtn = document.getElementById("closeLoginModalBtn");
@@ -973,155 +687,87 @@
     const loginError = document.getElementById("loginError");
     const togglePasswordBtn = document.getElementById("togglePasswordBtn");
 
-    // ==================== MODALES LEGALES ====================
     const modales = {
         terminos: { btn: document.getElementById('linkTerminos'), modal: document.getElementById('modalTerminos') },
         privacidad: { btn: document.getElementById('linkPrivacidad'), modal: document.getElementById('modalPrivacidad') },
         licencia: { btn: document.getElementById('linkLicencia'), modal: document.getElementById('modalLicencia') }
     };
 
-    function abrirModal(modal) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
+    function abrirModal(modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+    function cerrarModal(modal) { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }
 
-    function cerrarModal(modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    // Configurar eventos de los modales legales
     Object.values(modales).forEach(({ btn, modal }) => {
-        if (btn) {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                abrirModal(modal);
-            });
-        }
+        if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); abrirModal(modal); });
         if (modal) {
             const closeBtn = modal.querySelector('.modal-close');
             const closeFooterBtn = modal.querySelector('.btn-modal-close');
             const overlay = modal.querySelector('.modal-overlay');
-
             if (closeBtn) closeBtn.addEventListener('click', () => cerrarModal(modal));
             if (closeFooterBtn) closeFooterBtn.addEventListener('click', () => cerrarModal(modal));
             if (overlay) overlay.addEventListener('click', () => cerrarModal(modal));
         }
     });
 
-    // Cerrar modales con tecla ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            Object.values(modales).forEach(({ modal }) => {
-                if (modal && modal.style.display === 'flex') {
-                    cerrarModal(modal);
-                }
-            });
-            if (loginModal && loginModal.style.display === 'flex') {
-                loginModal.style.display = 'none';
-            }
+            Object.values(modales).forEach(({ modal }) => { if (modal && modal.style.display === 'flex') cerrarModal(modal); });
+            if (loginModal && loginModal.style.display === 'flex') loginModal.style.display = 'none';
         }
     });
 
-    // ==================== MOSTRAR/OCULTAR CONTRASEÑA ====================
     if (togglePasswordBtn) {
         togglePasswordBtn.addEventListener('click', function() {
             const type = loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
             loginPassword.setAttribute('type', type);
             const icon = this.querySelector('i');
-            if (type === 'text') {
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+            icon.classList.toggle('fa-eye', type === 'password');
+            icon.classList.toggle('fa-eye-slash', type === 'text');
         });
     }
 
-    // ==================== FUNCIONES DEL MODAL LOGIN ====================
     mostrarLoginBtn.onclick = function() {
         loginModal.style.display = 'flex';
         loginError.textContent = '';
         loginPassword.value = '';
         loginPassword.setAttribute('type', 'password');
-        const icon = togglePasswordBtn.querySelector('i');
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
+        togglePasswordBtn.querySelector('i').className = 'fas fa-eye';
     };
 
-    closeLoginModalBtn.onclick = function() {
-        loginModal.style.display = 'none';
-    };
+    closeLoginModalBtn.onclick = function() { loginModal.style.display = 'none'; };
+    window.onclick = function(event) { if (event.target === loginModal) loginModal.style.display = 'none'; };
 
-    window.onclick = function(event) {
-        if (event.target === loginModal) {
-            loginModal.style.display = 'none';
-        }
-    };
-
-    // ==================== FUNCIÓN SCROLL ====================
-    function scrollToSection(id) {
-        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-    }
+    function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
     window.scrollToSection = scrollToSection;
 </script>
 
-<!-- Firebase SDKs - Módulo separado -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-    
+
     const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
-    
-    console.log("🔥 Firebase Auth conectado");
-    
-    // Verificar si ya está logueado
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            window.location.href = "dashboard.html";
-        }
-    });
-    
-    // Login
+
+    onAuthStateChanged(auth, (user) => { if (user) window.location.href = "dashboard.html"; });
+
     window.doLogin = async function() {
         const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value;
         const loginError = document.getElementById("loginError");
-        
-        if (!email || !password) {
-            loginError.textContent = "Ingresa correo y contraseña";
-            return;
-        }
-        
+        if (!email || !password) { loginError.textContent = "Ingresa correo y contraseña"; return; }
         loginError.textContent = "Iniciando sesión...";
         loginError.style.color = "#2563EB";
-        
         try {
             await signInWithEmailAndPassword(auth, email, password);
             window.location.href = "dashboard.html";
         } catch (error) {
-            console.error("Error:", error);
-            if (error.code === 'auth/user-not-found') {
-                loginError.textContent = "Usuario no encontrado. Verifica tus datos.";
-            } else if (error.code === 'auth/wrong-password') {
-                loginError.textContent = "Contraseña incorrecta";
-            } else if (error.code === 'auth/invalid-email') {
-                loginError.textContent = "Correo inválido";
-            } else if (error.code === 'auth/api-key-not-valid') {
-                loginError.textContent = "Error de API key. Contacta al administrador.";
-            } else {
-                loginError.textContent = "Error: " + error.message;
-            }
+            const msgs = { 'auth/user-not-found': 'Usuario no encontrado.', 'auth/wrong-password': 'Contraseña incorrecta.', 'auth/invalid-email': 'Correo inválido.', 'auth/api-key-not-valid': 'Error de API key.' };
+            loginError.textContent = msgs[error.code] || "Error: " + error.message;
             loginError.style.color = "#EF4444";
         }
     };
-    
+
     document.getElementById("doLoginBtn").onclick = window.doLogin;
-    document.getElementById("loginPassword").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") window.doLogin();
-    });
+    document.getElementById("loginPassword").addEventListener("keypress", function(e) { if (e.key === "Enter") window.doLogin(); });
 </script>
 
 </body>
