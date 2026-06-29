@@ -240,6 +240,35 @@
         .btn-gozalo:hover { background: #D97706; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
         .btn-game { background: #7C3AED; color: white; }
         .btn-game:hover { background: #6D28D9; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+        .icon-mono { background: linear-gradient(135deg, #065F46, #059669); }
+        .tag-mono { background: rgba(5,150,105,0.15); color: #6EE7B7; border: 1px solid rgba(5,150,105,0.25); }
+        .btn-mono { background: #059669; color: white; }
+        .btn-mono:hover { background: #047857; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(5,150,105,0.4); }
+        .preview-mono {
+            background: linear-gradient(160deg, #022c22, #064e3b, #065f46);
+            height: calc(100% - 32px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 8px; padding: 14px;
+        }
+        .mono-board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 2px; width: 120px; height: 120px;
+        }
+        .mono-cell {
+            border-radius: 3px; display: flex; align-items: center;
+            justify-content: center; font-size: 8px; font-weight: bold;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.4);
+        }
+        .mono-cell.c-red   { background: rgba(239,68,68,0.35);  border-color: rgba(239,68,68,0.5); }
+        .mono-cell.c-blue  { background: rgba(59,130,246,0.35); border-color: rgba(59,130,246,0.5); }
+        .mono-cell.c-yellow{ background: rgba(234,179,8,0.35);  border-color: rgba(234,179,8,0.5); }
+        .mono-cell.c-green { background: rgba(34,197,94,0.35);  border-color: rgba(34,197,94,0.5); }
+        .mono-cell.c-corner{ background: rgba(255,255,255,0.12);border-color: rgba(255,255,255,0.2); font-size: 10px; }
+        .mono-cell.c-center{ background: rgba(5,150,105,0.4);   border-color: rgba(16,185,129,0.6); color: #6EE7B7; font-size: 9px; grid-column: 2/5; grid-row: 2/5; border-radius: 6px; }
+        .mono-title { color: #6EE7B7; font-size: 12px; font-weight: 800; letter-spacing: 1px; }
+        .mono-sub   { color: #94A3B8; font-size: 9px; }
 
         /* Separador de sección juegos */
         .section-divider {
@@ -566,6 +595,56 @@
                     <p class="game-card-desc">Un RPG de ética donde exploras mundos construidos sobre valores. Cada decisión importa, cada dilema te hace crecer. Versión inicial disponible.</p>
                     <a href="https://ethykosgame.vercel.app/" target="_blank" rel="noopener" class="game-card-btn btn-game">
                         <i class="fas fa-play"></i> Abrir Éthykos RPG
+                    </a>
+                </div>
+            </div>
+
+
+            <!-- Generosopoly -->
+            <div class="game-card">
+                <div class="game-preview">
+                    <div class="browser-bar">
+                        <div class="browser-dots">
+                            <div class="browser-dot dot-red"></div>
+                            <div class="browser-dot dot-yellow"></div>
+                            <div class="browser-dot dot-green"></div>
+                        </div>
+                        <div class="browser-url">generosopoly.vercel.app</div>
+                    </div>
+                    <div class="preview-mono">
+                        <div class="mono-board">
+                            <div class="mono-cell c-corner">🏁</div>
+                            <div class="mono-cell c-red"></div>
+                            <div class="mono-cell c-blue"></div>
+                            <div class="mono-cell c-red"></div>
+                            <div class="mono-cell c-corner">🎲</div>
+                            <div class="mono-cell c-yellow"></div>
+                            <div class="mono-cell c-center">🎁<br>GENERO<br>SOPOLY</div>
+                            <div class="mono-cell c-green"></div>
+                            <div class="mono-cell c-blue"></div>
+                            <div class="mono-cell c-center"></div>
+                            <div class="mono-cell c-center"></div>
+                            <div class="mono-cell c-yellow"></div>
+                            <div class="mono-cell c-corner">💰</div>
+                            <div class="mono-cell c-green"></div>
+                            <div class="mono-cell c-blue"></div>
+                            <div class="mono-cell c-green"></div>
+                            <div class="mono-cell c-corner">⚖️</div>
+                        </div>
+                        <div class="mono-sub">El juego de la generosidad</div>
+                    </div>
+                </div>
+                <div class="game-card-body">
+                    <div class="game-card-header">
+                        <div class="game-card-icon icon-mono">🎁</div>
+                        <div>
+                            <div class="game-card-name">Generosopoly</div>
+                            <span class="game-card-tag tag-mono">Grado 6° · La Generosidad</span>
+                        </div>
+                    </div>
+                    <p class="game-card-desc">Un Monopoly de la generosidad para grado 6°. Compra propiedades, toma decisiones y descubre que dar puede ser más poderoso que acumular.</p>
+                    <a href="https://generosopoly.vercel.app/" target="_blank" rel="noopener" class="game-card-btn btn-mono">
+                        <i class="fas fa-play"></i> Abrir Generosopoly
                     </a>
                 </div>
             </div>
