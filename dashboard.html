@@ -917,19 +917,37 @@
     let qrCanvas = document.createElement('canvas');
     let qrCtx = qrCanvas.getContext('2d');
     async function startQRScanner() {
+        const statusEl = document.getElementById('qr-status-msg');
+        const video = document.getElementById('qr-video');
+        statusEl.textContent = '📷 Activando cámara...';
+        statusEl.className = 'status-msg status-waiting';
         try {
-            qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            const video = document.getElementById('qr-video');
+            // Intentar cámara trasera primero, con fallback a cualquier cámara disponible
+            try {
+                qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+            } catch (e1) {
+                qrStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            }
             video.srcObject = qrStream;
-            video.play();
-            video.addEventListener('loadedmetadata', () => {
-                qrCanvas.width = video.videoWidth;
-                qrCanvas.height = video.videoHeight;
+            await video.play();
+
+            // Esperar a que el video tenga dimensiones reales antes de escanear
+            await new Promise(resolve => {
+                if (video.videoWidth > 0) return resolve();
+                video.addEventListener('loadedmetadata', resolve, { once: true });
             });
-            qrScanInterval = setInterval(() => scanFrame(video), 300);
+
+            qrCanvas.width = video.videoWidth;
+            qrCanvas.height = video.videoHeight;
+            statusEl.textContent = '📷 Esperando código QR...';
+            statusEl.className = 'status-msg status-waiting';
+
+            if (qrScanInterval) clearInterval(qrScanInterval);
+            qrScanInterval = setInterval(() => scanFrame(video), 250);
         } catch(e) {
-            document.getElementById('qr-status-msg').textContent = '⚠️ No se pudo acceder a la cámara';
-            document.getElementById('qr-status-msg').className = 'status-msg status-error';
+            console.error('Error de cámara:', e);
+            statusEl.textContent = '⚠️ No se pudo acceder a la cámara: ' + (e.message||e.name||'desconocido');
+            statusEl.className = 'status-msg status-error';
         }
     }
     function stopQRScanner() {
@@ -937,16 +955,16 @@
         if (qrStream) { qrStream.getTracks().forEach(t=>t.stop()); qrStream=null; }
     }
     let lastScanTime = 0;
-    async function scanFrame(video) {
-        if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
-        qrCanvas.width = video.videoWidth;
-        qrCanvas.height = video.videoHeight;
+    function scanFrame(video) {
+        if (video.readyState !== video.HAVE_ENOUGH_DATA || !video.videoWidth) return;
+        if (qrCanvas.width !== video.videoWidth) qrCanvas.width = video.videoWidth;
+        if (qrCanvas.height !== video.videoHeight) qrCanvas.height = video.videoHeight;
         qrCtx.drawImage(video, 0, 0, qrCanvas.width, qrCanvas.height);
-        const imageData = qrCtx.getImageData(0,0,qrCanvas.width,qrCanvas.height);
-        const code = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts:"attemptBoth" });
-        if (code && Date.now()-lastScanTime > 2000) {
+        const imageData = qrCtx.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+        const code = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+        if (code && code.data && Date.now() - lastScanTime > 2000) {
             lastScanTime = Date.now();
-            await processQRCode(code.data);
+            processQRCode(code.data);
         }
     }
     async function processQRCode(data) {
@@ -1050,19 +1068,39 @@
         for (const s of students) {
             const card = document.createElement('div');
             card.className = 'print-card';
+
             const qrDiv = document.createElement('div');
             qrDiv.style.margin = '0 auto';
             qrDiv.style.width = '90px'; qrDiv.style.height = '90px';
             card.appendChild(qrDiv);
-            card.innerHTML += `<div class="print-name">${escapeHtml(s.name.split(' ').slice(0,3).join(' '))}</div>
-                <div class="print-doc">${escapeHtml(s.document||'')}</div>
-                <div class="print-course">${courseNames[s.course]||s.course}</div>`;
+
+            const nameEl = document.createElement('div');
+            nameEl.className = 'print-name';
+            nameEl.textContent = s.name.split(' ').slice(0,3).join(' ');
+            card.appendChild(nameEl);
+
+            const docEl = document.createElement('div');
+            docEl.className = 'print-doc';
+            docEl.textContent = s.document || '';
+            card.appendChild(docEl);
+
+            const courseEl = document.createElement('div');
+            courseEl.className = 'print-course';
+            courseEl.textContent = courseNames[s.course] || s.course;
+            card.appendChild(courseEl);
+
             grid.appendChild(card);
+
+            // Generar el QR DESPUÉS de insertar qrDiv en el DOM real
             try {
-                new window.QRCode(qrDiv, { text: s.document || s.id, width:90, height:90, colorDark:"#1E293B", colorLight:"#ffffff", correctLevel:window.QRCode.CorrectLevel.H });
-            } catch(e) {}
+                new window.QRCode(qrDiv, { text: String(s.document || s.id), width:90, height:90, colorDark:"#1E293B", colorLight:"#ffffff", correctLevel:window.QRCode.CorrectLevel.H });
+            } catch(e) { console.error('Error generando QR para', s.name, e); }
         }
-        setTimeout(() => { window.print(); printArea.style.display='none'; printArea.innerHTML=''; }, 500);
+        // Esperar a que todos los canvas/imgs terminen de pintarse antes de imprimir
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => { printArea.style.display='none'; printArea.innerHTML=''; }, 300);
+        }, 600);
     };
 
     // ===== INIT =====
