@@ -79,6 +79,65 @@
         .chart-points { width: 60px; text-align: right; font-weight: 700; color: #2563EB; }
         .empty-chart { text-align: center; padding: 30px; color: #94A3B8; }
 
+        /* ===== HISTORIAL DE ASISTENCIA ===== */
+        .history-section {
+            background: #FFFFFF; border-radius: 20px; padding: 18px 24px;
+            margin-bottom: 25px; border: 1px solid #E2E8F0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            display: flex; align-items: center; gap: 16px;
+            cursor: pointer; transition: all 0.25s;
+        }
+        .history-section:hover { border-color: #3B82F6; box-shadow: 0 6px 20px rgba(59,130,246,0.12); transform: translateY(-2px); }
+        .history-section-icon {
+            width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0;
+            background: linear-gradient(135deg, #1D4ED8, #3B82F6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: white;
+        }
+        .history-section-text { flex: 1; }
+        .history-section-title { font-size: 16px; font-weight: 700; color: #1E293B; }
+        .history-section-sub { font-size: 12px; color: #64748B; margin-top: 2px; }
+        .history-section-arrow { color: #94A3B8; font-size: 16px; transition: transform 0.25s; }
+        .history-section:hover .history-section-arrow { transform: translateX(4px); color: #3B82F6; }
+
+        /* Modal selector de tipo de filtro */
+        .filter-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+        .filter-type-card {
+            background: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 16px;
+            padding: 18px 10px; text-align: center; cursor: pointer; transition: all 0.2s;
+        }
+        .filter-type-card:hover { border-color: #3B82F6; background: #EFF6FF; transform: translateY(-2px); }
+        .filter-type-card.active { border-color: #3B82F6; background: #DBEAFE; }
+        .filter-type-card i { font-size: 26px; color: #3B82F6; margin-bottom: 8px; display: block; }
+        .filter-type-card .ft-label { font-size: 12px; font-weight: 600; color: #1E293B; }
+
+        /* Modal de resultados de historial */
+        .modal-content.history-modal { max-width: 800px; }
+        .history-filters-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #E2E8F0; }
+        .history-filter-field { display: flex; flex-direction: column; gap: 4px; }
+        .history-filter-field label { font-size: 11px; color: #64748B; font-weight: 600; }
+        .history-filter-field input, .history-filter-field select {
+            padding: 8px 10px; border: 1px solid #E2E8F0; border-radius: 10px;
+            font-size: 13px; background: #F8FAFC; color: #1E293B; min-width: 140px;
+        }
+        .history-filter-field input:focus, .history-filter-field select:focus { outline: none; border-color: #3B82F6; }
+        .history-clear-btn {
+            background: #F1F5F9; border: none; padding: 8px 16px; border-radius: 10px;
+            color: #64748B; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .history-clear-btn:hover { background: #E2E8F0; color: #1E293B; }
+        .history-results-count { font-size: 13px; color: #64748B; margin-bottom: 10px; }
+        .history-table-wrap { max-height: 420px; overflow-y: auto; border: 1px solid #E2E8F0; border-radius: 12px; }
+        .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .history-table th { background: #F8FAFC; text-align: left; padding: 10px 14px; font-size: 11px; color: #64748B; font-weight: 700; text-transform: uppercase; position: sticky; top: 0; }
+        .history-table td { padding: 10px 14px; border-top: 1px solid #F1F5F9; color: #1E293B; }
+        .history-table tr:hover td { background: #F8FAFC; }
+        .history-table .ht-tribe { color: #2563EB; font-size: 12px; font-weight: 600; }
+        .history-table .ht-empty { color: #94A3B8; font-style: italic; }
+        .history-empty-msg { text-align: center; padding: 40px; color: #94A3B8; }
+        .history-back-link { color: #3B82F6; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px; font-weight: 600; }
+        .history-back-link:hover { text-decoration: underline; }
+
         .tribes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 25px; }
         .tribe-card { background: #FFFFFF; border-radius: 24px; padding: 20px; border: 1px solid #E2E8F0; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         .tribe-card:hover { transform: translateY(-5px); border-color: #3B82F6; box-shadow: 0 10px 25px rgba(59,130,246,0.1); }
@@ -260,6 +319,14 @@
         <div class="chart-title"><i class="fas fa-chart-bar"></i> COMPARATIVA DE PUNTUACIONES</div>
         <div id="chartContainer" class="chart-container"><div class="loading">Cargando gráfico...</div></div>
     </div>
+    <div class="history-section" id="historySectionBtn">
+        <div class="history-section-icon"><i class="fas fa-clock-rotate-left"></i></div>
+        <div class="history-section-text">
+            <div class="history-section-title">Historial de Asistencia</div>
+            <div class="history-section-sub">Consulta registros por estudiante, fecha o curso</div>
+        </div>
+        <div class="history-section-arrow"><i class="fas fa-chevron-right"></i></div>
+    </div>
     <div id="tribesContainer" class="tribes-grid"></div>
 </div>
 
@@ -397,6 +464,77 @@
 <!-- Área de impresión QR -->
 <div id="printArea" style="display:none;"></div>
 
+<!-- Modal: Selección de tipo de filtro de historial -->
+<div id="historyFilterTypeModal" class="modal">
+    <div class="modal-content" style="max-width:480px;">
+        <h2>📋 Historial de Asistencia</h2>
+        <p style="color:#64748B;font-size:13px;margin-top:6px;">¿Cómo deseas consultar el historial?</p>
+        <div class="filter-type-grid">
+            <div class="filter-type-card" data-filter="student">
+                <i class="fas fa-user"></i>
+                <div class="ft-label">Por estudiante</div>
+            </div>
+            <div class="filter-type-card" data-filter="date">
+                <i class="fas fa-calendar-days"></i>
+                <div class="ft-label">Por fecha</div>
+            </div>
+            <div class="filter-type-card" data-filter="course">
+                <i class="fas fa-graduation-cap"></i>
+                <div class="ft-label">Por curso/tribu</div>
+            </div>
+        </div>
+        <div class="modal-buttons" style="margin-top:20px;">
+            <button class="modal-cancel" id="closeHistoryFilterTypeBtn">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Resultados de historial con filtros combinables -->
+<div id="historyResultsModal" class="modal">
+    <div class="modal-content history-modal">
+        <span class="history-back-link" id="historyBackBtn"><i class="fas fa-arrow-left"></i> Cambiar tipo de filtro</span>
+        <h2>📋 Historial de Asistencia</h2>
+
+        <div class="history-filters-bar">
+            <div class="history-filter-field" id="hf-student-wrap" style="display:none;">
+                <label>👤 Estudiante</label>
+                <select id="hf-student"><option value="">Todos</option></select>
+            </div>
+            <div class="history-filter-field" id="hf-course-wrap" style="display:none;">
+                <label>🎓 Curso</label>
+                <select id="hf-course">
+                    <option value="">Todos</option>
+                    <option value="6">6°</option><option value="7">7°</option>
+                    <option value="8">8°</option><option value="9">9°</option>
+                    <option value="10">10°</option><option value="11">11°</option>
+                </select>
+            </div>
+            <div class="history-filter-field" id="hf-datefrom-wrap" style="display:none;">
+                <label>📅 Desde</label>
+                <input type="date" id="hf-dateFrom">
+            </div>
+            <div class="history-filter-field" id="hf-dateto-wrap" style="display:none;">
+                <label>📅 Hasta</label>
+                <input type="date" id="hf-dateTo">
+            </div>
+            <button class="history-clear-btn" id="hf-clearBtn"><i class="fas fa-rotate-left"></i> Limpiar filtros</button>
+            <button class="history-clear-btn" id="hf-repairBtn" style="color:#7C3AED;"><i class="fas fa-wrench"></i> Reparar registros antiguos</button>
+        </div>
+
+        <div class="history-results-count" id="historyResultsCount"></div>
+        <div class="history-table-wrap">
+            <table class="history-table" id="historyTable">
+                <thead><tr><th>Fecha</th><th>Estudiante</th><th>Documento</th><th>Curso</th><th>Tribu</th></tr></thead>
+                <tbody id="historyTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="modal-buttons" style="margin-top:16px;">
+            <button class="modal-cancel" id="closeHistoryResultsBtn">Cerrar</button>
+        </div>
+    </div>
+</div>
+
 <!-- Toast -->
 <div id="toastContainer" class="toast-container"></div>
 
@@ -506,14 +644,14 @@
     async function deleteStudent(id) { await deleteDoc(doc(db, "students", id)); }
 
     // ===== ATTENDANCE =====
-    async function recordAttendance(studentDoc, studentName, tribeId, tribeName) {
+    async function recordAttendance(studentDoc, studentName, tribeId, tribeName, course) {
         const today = new Date().toISOString().slice(0, 10);
         const key = `${studentDoc}_${today}`;
         if (scannedToday.has(key)) return { duplicate: true };
         scannedToday.add(key);
         await addDoc(collection(db, "attendance"), {
             studentDoc, studentName, tribeId: tribeId||null, tribeName: tribeName||null,
-            date: today, timestamp: serverTimestamp()
+            course: course||null, date: today, timestamp: serverTimestamp()
         });
         if (tribeId) await updatePoints(tribeId, 1);
         return { ok: true, tribeName };
@@ -527,6 +665,51 @@
             snap.forEach(d => list.push({ id: d.id, ...d.data() }));
             return list;
         } catch(e) { return []; }
+    }
+    async function getAttendanceHistory(filters) {
+        // filters: { studentDoc, dateFrom, dateTo, course }
+        try {
+            const snap = await getDocs(collection(db, "attendance"));
+            let list = [];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            if (filters.studentDoc) {
+                list = list.filter(r => r.studentDoc === filters.studentDoc);
+            }
+            if (filters.course) {
+                list = list.filter(r => String(r.course) === String(filters.course));
+            }
+            if (filters.dateFrom) {
+                list = list.filter(r => r.date >= filters.dateFrom);
+            }
+            if (filters.dateTo) {
+                list = list.filter(r => r.date <= filters.dateTo);
+            }
+            return list.sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+        } catch(e) { console.error('Error cargando historial:', e); return []; }
+    }
+    async function repairAttendanceCourses() {
+        // Completa el campo 'course' en registros antiguos de asistencia, cruzando por studentDoc
+        const snap = await getDocs(collection(db, "attendance"));
+        const records = [];
+        snap.forEach(d => records.push({ id: d.id, ...d.data() }));
+        const missing = records.filter(r => !r.course);
+        if (!missing.length) return { repaired: 0, notFound: 0 };
+
+        const allStudents = await getStudents(null);
+        const byDoc = {};
+        allStudents.forEach(s => { if (s.document) byDoc[s.document] = s; });
+
+        let repaired = 0, notFound = 0;
+        for (const r of missing) {
+            const student = byDoc[r.studentDoc];
+            if (student && student.course) {
+                await updateDoc(doc(db, "attendance", r.id), { course: student.course });
+                repaired++;
+            } else {
+                notFound++;
+            }
+        }
+        return { repaired, notFound };
     }
 
     // ===== RENDER CHART =====
@@ -1096,7 +1279,7 @@
                     }
                 }
             }
-            const result = await recordAttendance(studentDoc, name, tribeId, tribeName);
+            const result = await recordAttendance(studentDoc, name, tribeId, tribeName, sData.course);
             if (result.duplicate) {
                 statusEl.textContent = `⚠️ ${name} ya registró asistencia hoy`;
                 statusEl.className = 'status-msg status-error';
@@ -1203,6 +1386,145 @@
             setTimeout(() => { printArea.style.display='none'; printArea.innerHTML=''; }, 300);
         }, 600);
     };
+
+    // ===== HISTORIAL DE ASISTENCIA =====
+    let activeHistoryFilters = []; // ej: ['student'], ['date'], ['student','course'], etc.
+    let historyStudentsCache = null;
+
+    document.getElementById("historySectionBtn").onclick = () => {
+        activeHistoryFilters = [];
+        document.querySelectorAll('.filter-type-card').forEach(c => c.classList.remove('active'));
+        openModal("historyFilterTypeModal");
+    };
+    document.getElementById("closeHistoryFilterTypeBtn").onclick = () => closeModal("historyFilterTypeModal");
+
+    document.querySelectorAll('.filter-type-card').forEach(card => {
+        card.addEventListener('click', () => {
+            card.classList.toggle('active');
+            const type = card.dataset.filter;
+            if (card.classList.contains('active')) {
+                if (!activeHistoryFilters.includes(type)) activeHistoryFilters.push(type);
+            } else {
+                activeHistoryFilters = activeHistoryFilters.filter(f => f !== type);
+            }
+        });
+    });
+
+    // Doble clic / clic + Enter no aplica aquí; usamos un botón implícito: al elegir, mostramos botón continuar
+    // Para mantenerlo simple, agregamos un botón "Ver historial" dinámico
+    (function addContinueButton() {
+        const modalContent = document.querySelector('#historyFilterTypeModal .modal-content');
+        const btn = document.createElement('button');
+        btn.className = 'modal-save';
+        btn.style.width = '100%';
+        btn.style.marginTop = '12px';
+        btn.innerHTML = '<i class="fas fa-search"></i> Ver Historial';
+        btn.onclick = async () => {
+            if (!activeHistoryFilters.length) { showToast('Selecciona al menos un tipo de filtro', 'error'); return; }
+            closeModal('historyFilterTypeModal');
+            await openHistoryResultsModal();
+        };
+        modalContent.insertBefore(btn, modalContent.querySelector('.modal-buttons'));
+    })();
+
+    async function openHistoryResultsModal() {
+        // Mostrar/ocultar campos según filtros activos
+        document.getElementById('hf-student-wrap').style.display = activeHistoryFilters.includes('student') ? 'flex' : 'none';
+        document.getElementById('hf-course-wrap').style.display = activeHistoryFilters.includes('course') ? 'flex' : 'none';
+        document.getElementById('hf-datefrom-wrap').style.display = activeHistoryFilters.includes('date') ? 'flex' : 'none';
+        document.getElementById('hf-dateto-wrap').style.display = activeHistoryFilters.includes('date') ? 'flex' : 'none';
+
+        if (activeHistoryFilters.includes('student') && !historyStudentsCache) {
+            historyStudentsCache = await getStudents(null);
+            const sel = document.getElementById('hf-student');
+            sel.innerHTML = '<option value="">Todos</option>' + historyStudentsCache.map(s =>
+                `<option value="${escapeHtml(s.document||'')}">${escapeHtml(s.name)} (${courseNames[s.course]||s.course})</option>`
+            ).join('');
+        }
+
+        openModal('historyResultsModal');
+        await runHistoryQuery();
+    }
+
+    async function runHistoryQuery() {
+        const filters = {};
+        if (activeHistoryFilters.includes('student')) {
+            const v = document.getElementById('hf-student').value;
+            if (v) filters.studentDoc = v;
+        }
+        if (activeHistoryFilters.includes('course')) {
+            const v = document.getElementById('hf-course').value;
+            if (v) filters.course = v;
+        }
+        if (activeHistoryFilters.includes('date')) {
+            const from = document.getElementById('hf-dateFrom').value;
+            const to = document.getElementById('hf-dateTo').value;
+            if (from) filters.dateFrom = from;
+            if (to) filters.dateTo = to;
+        }
+
+        const tbody = document.getElementById('historyTableBody');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#94A3B8;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</td></tr>';
+
+        const records = await getAttendanceHistory(filters);
+
+        document.getElementById('historyResultsCount').textContent = `${records.length} registro${records.length===1?'':'s'} encontrado${records.length===1?'':'s'}`;
+
+        if (!records.length) {
+            tbody.innerHTML = '<tr><td colspan="5"><div class="history-empty-msg"><i class="fas fa-inbox" style="font-size:24px;display:block;margin-bottom:8px;"></i>No hay registros con estos filtros</div></td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = records.map(r => `
+            <tr>
+                <td>${escapeHtml(r.date||'')}</td>
+                <td>${escapeHtml(r.studentName||'')}</td>
+                <td>${escapeHtml(r.studentDoc||'')}</td>
+                <td>${r.course?courseNames[r.course]||r.course:'<span class="ht-empty">—</span>'}</td>
+                <td>${r.tribeName?`<span class="ht-tribe">🏹 ${escapeHtml(r.tribeName)}</span>`:'<span class="ht-empty">Sin tribu</span>'}</td>
+            </tr>`).join('');
+    }
+
+    document.getElementById('hf-student').addEventListener('change', runHistoryQuery);
+    document.getElementById('hf-course').addEventListener('change', runHistoryQuery);
+    document.getElementById('hf-dateFrom').addEventListener('change', runHistoryQuery);
+    document.getElementById('hf-dateTo').addEventListener('change', runHistoryQuery);
+
+    document.getElementById('hf-clearBtn').onclick = () => {
+        document.getElementById('hf-student').value = '';
+        document.getElementById('hf-course').value = '';
+        document.getElementById('hf-dateFrom').value = '';
+        document.getElementById('hf-dateTo').value = '';
+        runHistoryQuery();
+    };
+
+    document.getElementById('hf-repairBtn').onclick = async () => {
+        if (!confirm('Esto completará el curso de registros antiguos de asistencia que no lo tengan, buscando cada estudiante por su número de documento. ¿Continuar?')) return;
+        const btn = document.getElementById('hf-repairBtn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Reparando...';
+        try {
+            const { repaired, notFound } = await repairAttendanceCourses();
+            if (repaired === 0 && notFound === 0) {
+                showToast('No había registros pendientes de reparar ✅', 'success');
+            } else {
+                showToast(`Reparados: ${repaired}${notFound ? ` · Sin coincidencia: ${notFound}` : ''}`, 'success');
+            }
+            await runHistoryQuery();
+        } catch(e) {
+            showToast('Error al reparar registros', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    };
+
+    document.getElementById('historyBackBtn').onclick = () => {
+        closeModal('historyResultsModal');
+        openModal('historyFilterTypeModal');
+    };
+    document.getElementById('closeHistoryResultsBtn').onclick = () => closeModal('historyResultsModal');
 
     // ===== INIT =====
     async function initDashboard() {
