@@ -895,7 +895,10 @@
     };
 
     // ===== ATTENDANCE QR =====
-    document.getElementById("attendanceBtn").onclick = () => { openModal("attendanceModal"); startQRScanner(); loadAttendanceLog(); loadQRGeneratorGrid(); };
+    document.getElementById("attendanceBtn").onclick = () => {
+        try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
+        openModal("attendanceModal"); startQRScanner(); loadAttendanceLog(); loadQRGeneratorGrid();
+    };
     document.getElementById("closeAttendanceBtn").onclick = () => { stopQRScanner(); closeModal("attendanceModal"); };
 
     async function loadAttendanceLog() {
@@ -985,6 +988,81 @@
             processQRCode(code.data);
         }
     }
+    // ===== FEEDBACK SONORO Y VISUAL =====
+    let audioCtx = null;
+    function playBeep(type) {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if (type === 'success') {
+                // Doble beep ascendente, alegre
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.setValueAtTime(1175, now + 0.1);
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(0.25, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+                osc.start(now); osc.stop(now + 0.24);
+            } else if (type === 'duplicate') {
+                // Tono medio, de advertencia
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(520, now);
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(0.2, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+                osc.start(now); osc.stop(now + 0.32);
+            } else {
+                // Tono grave doble, de error
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(220, now);
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(0.18, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+                osc.start(now); osc.stop(now + 0.17);
+                setTimeout(() => {
+                    const osc2 = audioCtx.createOscillator();
+                    const gain2 = audioCtx.createGain();
+                    osc2.connect(gain2); gain2.connect(audioCtx.destination);
+                    osc2.type = 'square';
+                    osc2.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    gain2.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 0.02);
+                    gain2.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+                    osc2.start(); osc2.stop(audioCtx.currentTime + 0.17);
+                }, 180);
+            }
+        } catch(e) { /* audio no disponible, se ignora silenciosamente */ }
+    }
+    function vibrateDevice(pattern) {
+        if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch(e) {} }
+    }
+    function flashFrame(type) {
+        const frame = document.querySelector('.qr-frame');
+        if (!frame) return;
+        const color = type === 'success' ? '#10B981' : type === 'duplicate' ? '#F59E0B' : '#EF4444';
+        frame.style.transition = 'none';
+        frame.style.borderColor = color;
+        frame.style.boxShadow = `0 0 0 4000px rgba(0,0,0,0.3), 0 0 30px 8px ${color}`;
+        setTimeout(() => {
+            frame.style.transition = 'all 0.4s ease';
+            frame.style.borderColor = '#3B82F6';
+            frame.style.boxShadow = '0 0 0 4000px rgba(0,0,0,0.3)';
+        }, 350);
+    }
+    function notifyResult(type) {
+        // type: 'success' | 'duplicate' | 'error'
+        playBeep(type);
+        flashFrame(type);
+        if (type === 'success') vibrateDevice([80]);
+        else if (type === 'duplicate') vibrateDevice([60, 60, 60]);
+        else vibrateDevice([150, 80, 150]);
+    }
+
     async function processQRCode(data) {
         // El QR contiene únicamente el número de documento
         const studentDoc = data.trim();
@@ -995,6 +1073,7 @@
             if (snap.empty) {
                 statusEl.textContent = `❌ Documento no encontrado: ${studentDoc}`;
                 statusEl.className = 'status-msg status-error';
+                notifyResult('error');
                 return;
             }
             let sData = { id: snap.docs[0].id, ...snap.docs[0].data() };
@@ -1004,6 +1083,7 @@
             if (scannedToday.has(key)) {
                 statusEl.textContent = `⚠️ ${name} ya registró asistencia hoy`;
                 statusEl.className = 'status-msg status-error';
+                notifyResult('duplicate');
                 return;
             }
             // Buscar tribu del estudiante
@@ -1020,15 +1100,18 @@
             if (result.duplicate) {
                 statusEl.textContent = `⚠️ ${name} ya registró asistencia hoy`;
                 statusEl.className = 'status-msg status-error';
+                notifyResult('duplicate');
             } else {
                 statusEl.textContent = `✅ ¡${name} registrado! ${tribeName?'(+1pt a '+tribeName+')':''}`;
                 statusEl.className = 'status-msg status-success';
+                notifyResult('success');
                 await loadAttendanceLog();
                 await renderChart();
             }
         } catch(e) {
             statusEl.textContent = `❌ Error al registrar`;
             statusEl.className = 'status-msg status-error';
+            notifyResult('error');
         }
     }
 
