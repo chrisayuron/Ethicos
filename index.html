@@ -269,6 +269,32 @@
         .mono-cell.c-center{ background: rgba(5,150,105,0.4);   border-color: rgba(16,185,129,0.6); color: #6EE7B7; font-size: 9px; grid-column: 2/5; grid-row: 2/5; border-radius: 6px; }
         .mono-title { color: #6EE7B7; font-size: 12px; font-weight: 800; letter-spacing: 1px; }
         .mono-sub   { color: #94A3B8; font-size: 9px; }
+        .icon-battle { background: linear-gradient(135deg, #9F1239, #E11D48); }
+        .tag-battle  { background: rgba(225,29,72,0.15); color: #FDA4AF; border: 1px solid rgba(225,29,72,0.25); }
+        .btn-battle  { background: #E11D48; color: white; }
+        .btn-battle:hover { background: #BE123C; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(225,29,72,0.4); }
+        .preview-battle {
+            background: linear-gradient(160deg, #1a0a0f, #3b0a1a, #1a0a2e);
+            height: calc(100% - 32px); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 10px; padding: 14px;
+            position: relative; overflow: hidden;
+        }
+        .battle-cards {
+            display: flex; align-items: center; gap: 6px; position: relative;
+        }
+        .battle-card-mini {
+            width: 44px; height: 62px; border-radius: 6px;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; gap: 3px; font-size: 16px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .bc-left  { background: linear-gradient(135deg, #1e3a5f, #2563EB); transform: rotate(-8deg); }
+        .bc-right { background: linear-gradient(135deg, #5f1e1e, #DC2626); transform: rotate(8deg); }
+        .bc-label { font-size: 7px; font-weight: 700; color: rgba(255,255,255,0.7); }
+        .battle-vs { font-size: 18px; font-weight: 900; color: #FCD34D; text-shadow: 0 0 10px rgba(252,211,77,0.6); z-index: 1; }
+        .battle-title { color: #FDA4AF; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
+        .battle-sub   { color: #94A3B8; font-size: 9px; }
 
         /* Separador de sección juegos */
         .section-divider {
@@ -645,6 +671,43 @@
                     <p class="game-card-desc">Un Monopoly de la generosidad para grado 6°. Compra propiedades, toma decisiones y descubre que dar puede ser más poderoso que acumular.</p>
                     <a href="https://generosopoly.vercel.app/" target="_blank" rel="noopener" class="game-card-btn btn-mono">
                         <i class="fas fa-play"></i> Abrir Generosopoly
+                    </a>
+                </div>
+            </div>
+
+
+            <!-- Generosity Battle -->
+            <div class="game-card">
+                <div class="game-preview">
+                    <div class="browser-bar">
+                        <div class="browser-dots">
+                            <div class="browser-dot dot-red"></div>
+                            <div class="browser-dot dot-yellow"></div>
+                            <div class="browser-dot dot-green"></div>
+                        </div>
+                        <div class="browser-url">generosity-battle.vercel.app</div>
+                    </div>
+                    <div class="preview-battle">
+                        <div class="battle-cards">
+                            <div class="battle-card-mini bc-left">🤝<div class="bc-label">DAR</div></div>
+                            <div class="battle-vs">VS</div>
+                            <div class="battle-card-mini bc-right">⚔️<div class="bc-label">DUELO</div></div>
+                        </div>
+                        <div class="battle-title">GENEROSITY BATTLE</div>
+                        <div class="battle-sub">Duelo de acciones generosas</div>
+                    </div>
+                </div>
+                <div class="game-card-body">
+                    <div class="game-card-header">
+                        <div class="game-card-icon icon-battle">⚔️</div>
+                        <div>
+                            <div class="game-card-name">Generosity Battle</div>
+                            <span class="game-card-tag tag-battle">Grado 6° · La Generosidad</span>
+                        </div>
+                    </div>
+                    <p class="game-card-desc">Un duelo de cartas donde las armas son acciones generosas. Dos jugadores se enfrentan eligiendo qué tan generosos pueden ser. ¡El más generoso gana!</p>
+                    <a href="https://generosity-battle.vercel.app/" target="_blank" rel="noopener" class="game-card-btn btn-battle">
+                        <i class="fas fa-play"></i> Abrir Generosity Battle
                     </a>
                 </div>
             </div>
