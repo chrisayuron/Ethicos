@@ -296,6 +296,24 @@
         .battle-title { color: #FDA4AF; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
         .battle-sub   { color: #94A3B8; font-size: 9px; }
 
+        /* Portal banner */
+        .student-portal-banner {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(124,58,237,0.15); border: 1px solid rgba(196,181,253,0.3);
+            border-radius: 20px; padding: 18px 24px; margin-bottom: 28px;
+            text-decoration: none; transition: all 0.25s; gap: 16px;
+        }
+        .student-portal-banner:hover {
+            background: rgba(124,58,237,0.25); border-color: rgba(196,181,253,0.6);
+            transform: translateY(-2px); box-shadow: 0 8px 24px rgba(124,58,237,0.2);
+        }
+        .spb-left { display: flex; align-items: center; gap: 16px; }
+        .spb-icon { font-size: 36px; }
+        .spb-title { font-size: 17px; font-weight: 700; color: #C4B5FD; }
+        .spb-sub { font-size: 13px; color: #94A3B8; margin-top: 3px; }
+        .spb-arrow { font-size: 24px; color: #C4B5FD; font-weight: 700; flex-shrink: 0; transition: transform 0.2s; }
+        .student-portal-banner:hover .spb-arrow { transform: translateX(4px); }
+
         /* Separador de sección juegos */
         .section-divider {
             text-align: center;
@@ -406,6 +424,7 @@
         <a onclick="scrollToSection('elementos')">Elementos</a>
         <a onclick="scrollToSection('roles')">Roles</a>
         <a onclick="scrollToSection('juegos')">Juegos</a>
+        <a href="./student.html" style="color:#7C3AED;font-weight:700;">🎓 Acceso Estudiantes</a>
     </div>
     <button class="login-btn" id="mostrarLoginBtn">
         <i class="fas fa-user-shield"></i> Acceso Docente
@@ -501,6 +520,18 @@
         <div class="games-badge"><i class="fas fa-gamepad"></i> Zona de estudiantes</div>
         <h2 class="games-title">Juegos de <span>Éthykos</span></h2>
         <p class="games-subtitle">Herramientas interactivas para la clase. Tu profe activa el juego — tú entras y compites.</p>
+
+        <!-- Portal acceso directo -->
+        <a href="./student.html" class="student-portal-banner">
+            <div class="spb-left">
+                <div class="spb-icon">👤</div>
+                <div>
+                    <div class="spb-title">Acceso Estudiantes</div>
+                    <div class="spb-sub">Ve tus puntos, nivel, tribu, ranking y recompensas disponibles</div>
+                </div>
+            </div>
+            <div class="spb-arrow">→</div>
+        </a>
 
         <div class="games-grid">
 

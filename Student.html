@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏹 Éthykos · Mi Perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="./img/logo.png" type="image/png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #F1F5F9; min-height: 100vh; color: #1E293B; }
+
+        /* ── LOGIN ─────────────────────────────────────────── */
+        .login-screen {
+            min-height: 100vh;
+            background: linear-gradient(160deg, #0F172A 0%, #1E1B4B 60%, #0F172A 100%);
+            display: flex; align-items: center; justify-content: center; padding: 24px;
+        }
+        .login-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 28px; padding: 40px 36px;
+            width: 100%; max-width: 420px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .login-logo { text-align: center; margin-bottom: 28px; }
+        .login-logo img { height: 64px; filter: drop-shadow(0 4px 12px rgba(139,92,246,0.4)); }
+        .login-logo h1 { color: #E2E8F0; font-size: 22px; font-weight: 800; margin-top: 12px; }
+        .login-logo p { color: #94A3B8; font-size: 14px; margin-top: 4px; }
+        .login-label { color: #CBD5E1; font-size: 13px; font-weight: 500; display: block; margin-bottom: 8px; }
+        .login-input {
+            width: 100%; padding: 14px 16px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px; color: #F1F5F9; font-size: 16px; font-family: 'Inter', sans-serif;
+            transition: all 0.3s; margin-bottom: 20px;
+        }
+        .login-input:focus { outline: none; border-color: #8B5CF6; background: rgba(139,92,246,0.1); }
+        .login-input::placeholder { color: #64748B; }
+        .login-btn {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, #7C3AED, #3B82F6);
+            border: none; border-radius: 40px; color: white;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: all 0.3s; font-family: 'Inter', sans-serif;
+            box-shadow: 0 4px 20px rgba(124,58,237,0.4);
+        }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(124,58,237,0.5); }
+        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .login-error { color: #FCA5A5; font-size: 13px; text-align: center; margin-top: 14px; display: none; }
+        .login-hint { color: #64748B; font-size: 12px; text-align: center; margin-top: 16px; }
+
+        /* ── PORTAL HEADER ──────────────────────────────────── */
+        .portal-header {
+            background: #FFFFFF; padding: 12px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 3px solid #7C3AED; box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+            gap: 12px; flex-wrap: wrap;
+        }
+        .portal-header-logo { display: flex; align-items: center; gap: 12px; }
+        .portal-header-logo img { height: 40px; }
+        .portal-header-logo span { font-weight: 700; font-size: 16px; color: #1E293B; }
+        .portal-user-chip {
+            background: linear-gradient(135deg, #7C3AED, #3B82F6);
+            color: white; padding: 6px 16px; border-radius: 30px;
+            font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+        }
+        .logout-link { color: #64748B; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; border: none; background: none; font-family: inherit; }
+        .logout-link:hover { color: #EF4444; }
+
+        /* ── MAIN LAYOUT ────────────────────────────────────── */
+        .portal-main { max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+
+        /* ── HERO CARD ──────────────────────────────────────── */
+        .hero-card {
+            background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #1E1B4B 100%);
+            border-radius: 24px; padding: 28px 28px 24px;
+            margin-bottom: 20px; position: relative; overflow: hidden;
+            border: 1px solid rgba(139,92,246,0.3);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.2);
+        }
+        .hero-card::before {
+            content: ''; position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.15) 0%, transparent 60%);
+        }
+        .hero-top { display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+        .hero-avatar {
+            width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #7C3AED, #3B82F6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px; border: 3px solid rgba(196,181,253,0.5);
+            box-shadow: 0 0 20px rgba(139,92,246,0.4);
+        }
+        .hero-info { flex: 1; }
+        .hero-name { font-size: 24px; font-weight: 800; color: #F1F5F9; }
+        .hero-meta { color: #A5B4FC; font-size: 14px; margin-top: 4px; }
+        .hero-tribe {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 600;
+            color: #C4B5FD; margin-top: 8px;
+        }
+        .hero-level-row { margin-top: 20px; }
+        .hero-level-label { color: #A5B4FC; font-size: 12px; font-weight: 600; margin-bottom: 6px; display: flex; justify-content: space-between; }
+        .hero-bar-wrap { height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .hero-bar-fill { height: 100%; background: linear-gradient(90deg, #7C3AED, #C4B5FD); border-radius: 10px; transition: width 0.6s ease; }
+        .hero-level-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(124,58,237,0.3); border: 1px solid rgba(196,181,253,0.3);
+            border-radius: 30px; padding: 6px 16px; margin-top: 10px;
+            font-size: 15px; font-weight: 700; color: #C4B5FD;
+        }
+
+        /* ── STATS ROW ──────────────────────────────────────── */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+        .stat-card {
+            background: #FFFFFF; border-radius: 18px; padding: 18px 16px;
+            border: 1px solid #E2E8F0; text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: #7C3AED; }
+        .stat-icon { font-size: 26px; margin-bottom: 6px; }
+        .stat-value { font-size: 28px; font-weight: 800; color: #1E293B; }
+        .stat-label { font-size: 11px; color: #64748B; font-weight: 600; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* ── SECTION CARDS ──────────────────────────────────── */
+        .section-card {
+            background: #FFFFFF; border-radius: 20px; padding: 22px 24px;
+            margin-bottom: 20px; border: 1px solid #E2E8F0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .section-card-title { font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+
+        /* ── LEVELS JOURNEY ─────────────────────────────────── */
+        .levels-journey { display: flex; flex-direction: column; gap: 10px; }
+        .level-step {
+            display: flex; align-items: center; gap: 14px; padding: 12px 14px;
+            border-radius: 14px; border: 1px solid #E2E8F0; transition: all 0.2s;
+        }
+        .level-step.achieved { background: #F5F3FF; border-color: #C4B5FD; }
+        .level-step.current { background: linear-gradient(135deg, #EDE9FE, #DDD6FE); border-color: #7C3AED; box-shadow: 0 2px 12px rgba(124,58,237,0.15); }
+        .level-step.locked { opacity: 0.45; }
+        .level-step-icon { font-size: 24px; width: 36px; text-align: center; }
+        .level-step-info { flex: 1; }
+        .level-step-name { font-size: 14px; font-weight: 700; color: #1E293B; }
+        .level-step-pts { font-size: 12px; color: #64748B; }
+        .level-step-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+        .badge-achieved { background: #DDD6FE; color: #5B21B6; }
+        .badge-current { background: #7C3AED; color: white; }
+        .badge-locked { background: #F1F5F9; color: #94A3B8; }
+
+        /* ── REWARDS SHOP ───────────────────────────────────── */
+        .rewards-grid-student { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+        .reward-card-student {
+            background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 14px;
+            padding: 14px; display: flex; flex-direction: column; gap: 6px;
+        }
+        .reward-card-student.locked { opacity: 0.5; background: #F8FAFC; border-color: #E2E8F0; }
+        .rc-icon { font-size: 26px; }
+        .rc-name { font-size: 12px; font-weight: 700; color: #1E293B; }
+        .rc-desc { font-size: 10px; color: #64748B; flex: 1; }
+        .rc-cost { font-size: 13px; font-weight: 800; color: #D97706; margin-top: 4px; }
+        .rc-status { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-top: 2px; }
+        .rc-status.can { background: #D1FAE5; color: #065F46; }
+        .rc-status.cant { background: #FEE2E2; color: #991B1B; }
+
+        /* ── RANKING TABLE ──────────────────────────────────── */
+        .ranking-wrap { max-height: 320px; overflow-y: auto; border: 1px solid #E2E8F0; border-radius: 12px; }
+        .ranking-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .ranking-tbl th { background: #F8FAFC; padding: 10px 14px; text-align: left; font-size: 11px; color: #64748B; font-weight: 700; text-transform: uppercase; position: sticky; top: 0; }
+        .ranking-tbl td { padding: 10px 14px; border-top: 1px solid #F1F5F9; }
+        .ranking-tbl tr.me td { background: #F5F3FF !important; font-weight: 700; }
+        .ranking-tbl tr:hover td { background: #FFFBEB; }
+        .r-pos { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+        .r-pos.g { background: #FEF3C7; color: #D97706; }
+        .r-pos.s { background: #F1F5F9; color: #64748B; }
+        .r-pos.b { background: #FEF3C7; color: #B45309; }
+        .r-pos.n { background: #F8FAFC; color: #94A3B8; }
+        .r-lvl { display: inline-flex; align-items: center; gap: 4px; background: #EDE9FE; color: #6D28D9; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+        .r-me-tag { background: #7C3AED; color: white; font-size: 9px; padding: 1px 6px; border-radius: 10px; margin-left: 6px; }
+
+        /* ── TRIBE INFO ─────────────────────────────────────── */
+        .tribe-info-card {
+            display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+            padding: 16px; background: #F8FAFC; border-radius: 16px; margin-bottom: 14px;
+            border: 1px solid #E2E8F0;
+        }
+        .tribe-emblem-wrap img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid #7C3AED; }
+        .tribe-emblem-wrap .no-img { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg,#7C3AED,#3B82F6); display: flex; align-items: center; justify-content: center; font-size: 30px; }
+        .tribe-details-name { font-size: 20px; font-weight: 800; color: #1E293B; }
+        .tribe-details-cry { color: #64748B; font-size: 13px; font-style: italic; margin-top: 3px; }
+        .tribe-score { font-size: 32px; font-weight: 800; color: #7C3AED; }
+        .tribe-score-label { font-size: 11px; color: #64748B; font-weight: 600; }
+        .tribe-members-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tribe-member-chip {
+            background: #F1F5F9; border: 1px solid #E2E8F0; border-radius: 20px;
+            padding: 4px 12px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px;
+        }
+        .tribe-member-chip.me { background: #EDE9FE; border-color: #C4B5FD; color: #5B21B6; font-weight: 700; }
+        .member-role-tag { font-size: 10px; background: #DBEAFE; color: #1D4ED8; padding: 1px 6px; border-radius: 10px; }
+
+        /* ── ATTENDANCE HISTORY ─────────────────────────────── */
+        .att-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+        .att-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: #F0FDF4; border-radius: 10px; border-left: 3px solid #10B981; font-size: 13px; }
+        .att-row .att-d { font-weight: 600; color: #1E293B; }
+        .att-row .att-t { color: #059669; font-size: 11px; }
+        .att-empty { text-align: center; color: #94A3B8; padding: 20px; font-size: 13px; }
+
+        /* ── LOADING / ERROR ────────────────────────────────── */
+        .portal-loading {
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 16px;
+            background: linear-gradient(160deg, #0F172A, #1E1B4B);
+        }
+        .portal-loading .spin { font-size: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .portal-loading p { color: #A5B4FC; font-size: 16px; }
+
+        /* ── TOAST ──────────────────────────────────────────── */
+        .toast-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast-msg { background: #1E293B; color: white; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: fadeUp 0.3s ease; }
+        .toast-msg.ok { background: #059669; }
+        @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+        /* ── RESPONSIVE ─────────────────────────────────────── */
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: repeat(3,1fr); gap: 8px; }
+            .stat-value { font-size: 22px; }
+            .hero-card { padding: 20px; }
+            .rewards-grid-student { grid-template-columns: repeat(2,1fr); }
+            .portal-main { padding: 16px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loadingScreen" class="portal-loading">
+    <div class="spin">🏹</div>
+    <p>Cargando Éthykos...</p>
+</div>
+
+<!-- Login -->
+<div id="loginScreen" class="login-screen" style="display:none;">
+    <div class="login-card">
+        <div class="login-logo">
+            <img src="./img/logo.png" alt="Éthykos" onerror="this.style.display='none'">
+            <h1>Éthykos</h1>
+            <p>Portal del Estudiante</p>
+        </div>
+        <label class="login-label">🪪 Número de documento</label>
+        <input type="text" id="docInput" class="login-input" placeholder="Ingresa tu número de documento" inputmode="numeric">
+        <button class="login-btn" id="loginBtn" onclick="doLogin()">
+            <i class="fas fa-arrow-right"></i> Ingresar
+        </button>
+        <div id="loginError" class="login-error"></div>
+        <p class="login-hint">Usa el mismo número que está en tu carné QR</p>
+    </div>
+</div>
+
+<!-- Portal -->
+<div id="portalScreen" style="display:none;">
+
+    <!-- Header -->
+    <div class="portal-header">
+        <div class="portal-header-logo">
+            <img src="./img/logo.png" alt="Éthykos" onerror="this.style.display='none'">
+            <span>Éthykos</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div class="portal-user-chip">
+                <i class="fas fa-user"></i>
+                <span id="headerName">—</span>
+            </div>
+            <a href="./index.html" style="color:#64748B;font-size:13px;text-decoration:none;display:flex;align-items:center;gap:5px;" title="Volver al inicio">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+            <button class="logout-link" onclick="doLogout()">
+                <i class="fas fa-sign-out-alt"></i> Salir
+            </button>
+        </div>
+    </div>
+
+    <div class="portal-main">
+
+        <!-- Hero: nivel y progreso -->
+        <div class="hero-card">
+            <div class="hero-top">
+                <div class="hero-avatar" id="heroAvatar">🌱</div>
+                <div class="hero-info">
+                    <div class="hero-name" id="heroName">—</div>
+                    <div class="hero-meta" id="heroMeta">—</div>
+                    <div class="hero-tribe" id="heroTribe" style="display:none;">
+                        <i class="fas fa-shield-halved"></i>
+                        <span id="heroTribeName">—</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-level-row">
+                <div class="hero-level-label">
+                    <span id="levelLabel">Nivel 1 · Aprendiz</span>
+                    <span id="levelPcts">0%</span>
+                </div>
+                <div class="hero-bar-wrap">
+                    <div class="hero-bar-fill" id="levelBar" style="width:0%"></div>
+                </div>
+                <div class="hero-level-badge" id="levelBadge">🌱 Aprendiz</div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-value" id="statLevel">1</div>
+                <div class="stat-label">Nivel</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-value" id="statPts">0</div>
+                <div class="stat-label">Puntos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🪙</div>
+                <div class="stat-value" id="statCoins">0</div>
+                <div class="stat-label">Monedas</div>
+            </div>
+        </div>
+
+        <!-- Tribu -->
+        <div class="section-card" id="tribeSection" style="display:none;">
+            <div class="section-card-title"><i class="fas fa-shield-halved" style="color:#7C3AED;"></i> Mi Tribu</div>
+            <div class="tribe-info-card">
+                <div class="tribe-emblem-wrap" id="tribeEmblem"></div>
+                <div>
+                    <div class="tribe-details-name" id="tribeDetailName">—</div>
+                    <div class="tribe-details-cry" id="tribeDetailCry"></div>
+                </div>
+                <div style="margin-left:auto;text-align:right;">
+                    <div class="tribe-score-label">PUNTUACIÓN</div>
+                    <div class="tribe-score" id="tribeScore">0</div>
+                </div>
+            </div>
+            <div style="font-size:13px;font-weight:600;color:#64748B;margin-bottom:8px;">Integrantes</div>
+            <div class="tribe-members-list" id="tribeMembersList"></div>
+        </div>
+
+        <!-- Recompensas disponibles -->
+        <div class="section-card">
+            <div class="section-card-title"><i class="fas fa-store" style="color:#D97706;"></i> Tienda de Recompensas <span style="font-size:13px;font-weight:500;color:#64748B;">(pide al profe que canjee)</span></div>
+            <div class="rewards-grid-student" id="rewardsGrid"></div>
+        </div>
+
+        <!-- Camino de niveles -->
+        <div class="section-card">
+            <div class="section-card-title"><i class="fas fa-mountain" style="color:#7C3AED;"></i> Camino de Niveles</div>
+            <div class="levels-journey" id="levelsJourney"></div>
+        </div>
+
+        <!-- Asistencia -->
+        <div class="section-card">
+            <div class="section-card-title"><i class="fas fa-calendar-check" style="color:#10B981;"></i> Mi Asistencia</div>
+            <div class="att-list" id="attList"></div>
+        </div>
+
+    </div><!-- /portal-main -->
+</div><!-- /portalScreen -->
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Firebase -->
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
+        authDomain: "ethicos-a9a66.firebaseapp.com",
+        projectId: "ethicos-a9a66",
+        storageBucket: "ethicos-a9a66.firebasestorage.app",
+        messagingSenderId: "1038796710548",
+        appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
+    };
+    window.firebaseConfig = firebaseConfig;
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const app = initializeApp(window.firebaseConfig);
+const db = getFirestore(app);
+
+// ── CONSTANTS ───────────────────────────────────────────────
+const ETHICS_LEVELS = [
+    { min: 0,   name: "Aprendiz",         icon: "🌱" },
+    { min: 50,  name: "Curioso/a",        icon: "🔍" },
+    { min: 120, name: "Reflexivo/a",      icon: "💭" },
+    { min: 220, name: "Comprometido/a",   icon: "🤝" },
+    { min: 350, name: "Ético/a Activo/a", icon: "🔥" },
+    { min: 500, name: "Guía Ética",       icon: "🌟" }
+];
+const REWARDS = [
+    { id:'pc',      icon:'💻', name:'Cambiar de computador',             cost:15 },
+    { id:'turn',    icon:'🔄', name:'Cambiar turno de actividad',        cost:20 },
+    { id:'order',   icon:'📋', name:'Elegir orden de participación',     cost:25 },
+    { id:'chest',   icon:'📦', name:'Abrir Cofre Misterioso',            cost:30 },
+    { id:'plus2',   icon:'➕', name:'+2 puntos a una actividad',          cost:20 },
+    { id:'plus3',   icon:'➕', name:'+3 puntos a una actividad',          cost:30 },
+    { id:'grade',   icon:'📈', name:'Mejorar tu calificación',           cost:40 },
+    { id:'double',  icon:'🌀', name:'Duplicar monedas siguiente misión', cost:25 },
+    { id:'gift',    icon:'🎁', name:'Otorgar 10 pts a un compañero',     cost:15 },
+    { id:'recover', icon:'🛡️', name:'Recuperar hasta 5 pts perdidos',   cost:20 },
+    { id:'time',    icon:'⏰', name:'Tiempo extra para entregar',        cost:35 },
+    { id:'early',   icon:'🚪', name:'Salir más temprano de clase',       cost:50 },
+];
+const COURSE_NAMES = { 6:'6°', 7:'7°', 8:'8°', 9:'9°', 10:'10°', 11:'11°' };
+
+// ── SESSION ──────────────────────────────────────────────────
+const SESSION_KEY = 'ethykos_student_session';
+let currentStudent = null;
+
+function saveSession(student) {
+    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ id: student.id, document: student.document })); } catch(e) {}
+}
+function loadSession() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch(e) { return null; }
+}
+function clearSession() {
+    try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+// ── UTILS ────────────────────────────────────────────────────
+function getLevelInfo(points) {
+    const pts = points || 0;
+    let idx = 0;
+    ETHICS_LEVELS.forEach((l, i) => { if (pts >= l.min) idx = i; });
+    const cur = ETHICS_LEVELS[idx];
+    const nxt = ETHICS_LEVELS[idx + 1] || null;
+    const pct = nxt ? Math.min(100, Math.round(((pts - cur.min) / (nxt.min - cur.min)) * 100)) : 100;
+    return { levelNumber: idx+1, name: cur.name, icon: cur.icon, points: pts, nextName: nxt?.name||null, nextMin: nxt?.min||null, pctToNext: pct };
+}
+function escHtml(t) {
+    const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML;
+}
+function toast(msg, type='') {
+    const w = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = 'toast-msg' + (type==='ok' ? ' ok' : '');
+    el.textContent = msg;
+    w.appendChild(el);
+    setTimeout(() => el.remove(), 3000);
+}
+function show(id) { document.getElementById(id).style.display=''; }
+function hide(id) { document.getElementById(id).style.display='none'; }
+
+// ── BOOT ─────────────────────────────────────────────────────
+async function boot() {
+    const sess = loadSession();
+    if (sess?.document) {
+        try {
+            const student = await findStudent(sess.document);
+            if (student) { currentStudent = student; await renderPortal(); return; }
+        } catch(e) {}
+    }
+    hide('loadingScreen'); show('loginScreen');
+    document.getElementById('docInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+}
+
+async function findStudent(docNumber) {
+    const q = query(collection(db, 'students'), where('document', '==', String(docNumber)));
+    const snap = await getDocs(q);
+    if (snap.empty) return null;
+    return { id: snap.docs[0].id, ...snap.docs[0].data() };
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────
+window.doLogin = async function() {
+    const doc_ = document.getElementById('docInput').value.trim();
+    const errEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    errEl.style.display = 'none';
+    if (!doc_) { errEl.textContent = 'Ingresa tu número de documento'; errEl.style.display='block'; return; }
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
+    try {
+        const student = await findStudent(doc_);
+        if (!student) {
+            errEl.textContent = '❌ Documento no encontrado. Verifica el número o consulta a tu profe.';
+            errEl.style.display = 'block';
+        } else {
+            currentStudent = student;
+            saveSession(student);
+            await renderPortal();
+        }
+    } catch(e) {
+        errEl.textContent = 'Error de conexión. Intenta de nuevo.';
+        errEl.style.display = 'block';
+    } finally {
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-arrow-right"></i> Ingresar';
+    }
+};
+
+window.doLogout = function() {
+    clearSession(); currentStudent = null;
+    hide('portalScreen'); show('loginScreen');
+    document.getElementById('docInput').value = '';
+};
+
+// ── RENDER PORTAL ─────────────────────────────────────────────
+async function renderPortal() {
+    hide('loadingScreen'); hide('loginScreen'); show('portalScreen');
+    const s = currentStudent;
+    const lvl = getLevelInfo(s.individualPoints);
+    const rp = s.rewardPoints || 0;
+
+    // Header
+    document.getElementById('headerName').textContent = s.name.split(' ')[0];
+
+    // Hero
+    document.getElementById('heroAvatar').textContent = lvl.icon;
+    document.getElementById('heroName').textContent = s.name;
+    document.getElementById('heroMeta').textContent =
+        `${COURSE_NAMES[s.course]||s.course} · Doc. ${s.document||''}`;
+    document.getElementById('levelLabel').textContent =
+        `Nivel ${lvl.levelNumber} · ${lvl.name}`;
+    document.getElementById('levelPcts').textContent =
+        lvl.nextName ? `${lvl.pctToNext}% hacia ${lvl.nextName}` : '¡Nivel máximo!';
+    document.getElementById('levelBar').style.width = lvl.pctToNext + '%';
+    document.getElementById('levelBadge').textContent = `${lvl.icon} ${lvl.name}`;
+
+    // Stats
+    document.getElementById('statLevel').textContent = lvl.levelNumber;
+    document.getElementById('statPts').textContent = lvl.points;
+    document.getElementById('statCoins').textContent = rp;
+
+    // Levels journey
+    renderLevelsJourney(lvl.levelNumber, lvl.points);
+
+    // Rewards
+    renderRewardsGrid(rp);
+
+    // Load async data
+    await Promise.all([
+        loadTribeData(),
+        loadAttendance()
+    ]);
+}
+
+function renderLevelsJourney(currentLevelNum, pts) {
+    const container = document.getElementById('levelsJourney');
+    container.innerHTML = ETHICS_LEVELS.map((lvl, i) => {
+        const num = i + 1;
+        const next = ETHICS_LEVELS[i+1];
+        const isAchieved = num < currentLevelNum;
+        const isCurrent = num === currentLevelNum;
+        const isLocked = num > currentLevelNum;
+        const cls = isCurrent ? 'current' : isAchieved ? 'achieved' : 'locked';
+        const badge = isCurrent ? '<span class="level-step-badge badge-current">← Estás aquí</span>'
+            : isAchieved ? '<span class="level-step-badge badge-achieved">✓ Logrado</span>'
+            : '<span class="level-step-badge badge-locked">🔒 Bloqueado</span>';
+        const ptsText = next ? `Desde ${lvl.min} pts · Siguiente: ${next.min} pts` : `Desde ${lvl.min} pts · Nivel máximo`;
+        return `<div class="level-step ${cls}">
+            <div class="level-step-icon">${lvl.icon}</div>
+            <div class="level-step-info">
+                <div class="level-step-name">Nivel ${num} · ${lvl.name}</div>
+                <div class="level-step-pts">${ptsText}</div>
+            </div>
+            ${badge}
+        </div>`;
+    }).join('');
+}
+
+function renderRewardsGrid(balance) {
+    const grid = document.getElementById('rewardsGrid');
+    grid.innerHTML = REWARDS.map(r => {
+        const can = balance >= r.cost;
+        return `<div class="reward-card-student ${can?'':'locked'}">
+            <div class="rc-icon">${r.icon}</div>
+            <div class="rc-name">${r.name}</div>
+            <div class="rc-cost">🪙 ${r.cost} monedas</div>
+            <span class="rc-status ${can?'can':'cant'}">${can?'✓ Puedes canjearlo':'Monedas insuficientes'}</span>
+        </div>`;
+    }).join('');
+}
+
+async function loadTribeData() {
+    try {
+        const snap = await getDocs(collection(db, 'tribes'));
+        let myTribe = null;
+        snap.forEach(d => {
+            const t = { id: d.id, ...d.data() };
+            if ((t.members||[]).some(m => m.studentId === currentStudent.id || m.name === currentStudent.name)) {
+                myTribe = t;
+            }
+        });
+        if (!myTribe) return;
+
+        // Hero tribe chip
+        document.getElementById('heroTribeName').textContent = myTribe.name;
+        document.getElementById('heroTribe').style.display = 'inline-flex';
+
+        // Tribe section
+        document.getElementById('tribeSection').style.display = '';
+
+        // Emblem
+        const emblemWrap = document.getElementById('tribeEmblem');
+        emblemWrap.innerHTML = myTribe.imageData
+            ? `<img src="${myTribe.imageData}" alt="${escHtml(myTribe.name)}">`
+            : `<div class="no-img">🛡️</div>`;
+
+        document.getElementById('tribeDetailName').textContent = myTribe.name;
+        document.getElementById('tribeDetailCry').textContent = myTribe.warCry ? `"${myTribe.warCry}"` : '';
+        document.getElementById('tribeScore').textContent = myTribe.points || 0;
+
+        // Members
+        const membersList = document.getElementById('tribeMembersList');
+        membersList.innerHTML = (myTribe.members || []).map(m => {
+            const isMe = m.studentId === currentStudent.id || m.name === currentStudent.name;
+            return `<div class="tribe-member-chip ${isMe?'me':''}">
+                ${isMe ? '👤 ' : ''}${escHtml(m.name)}
+                <span class="member-role-tag">${escHtml(m.role)}</span>
+            </div>`;
+        }).join('');
+    } catch(e) { console.error('Error loading tribe:', e); }
+}
+
+
+async function loadAttendance() {
+    try {
+        const q = query(collection(db, 'attendance'), where('studentDoc', '==', String(currentStudent.document)));
+        const snap = await getDocs(q);
+        const list = [];
+        snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+        list.sort((a,b) => (b.date||'').localeCompare(a.date||''));
+
+        const container = document.getElementById('attList');
+        if (!list.length) {
+            container.innerHTML = '<div class="att-empty">📭 Sin registros de asistencia aún</div>';
+            return;
+        }
+        container.innerHTML = list.map(r =>
+            `<div class="att-row">
+                <span class="att-d">📅 ${r.date}</span>
+                <span class="att-t">✅ Asistió${r.tribeName?' · +1pt a '+escHtml(r.tribeName):''}</span>
+            </div>`
+        ).join('');
+    } catch(e) { console.error('Error loading attendance:', e); }
+}
+
+// ── START ────────────────────────────────────────────────────
+boot();
+</script>
+</body>
+</html>
