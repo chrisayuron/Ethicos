@@ -223,6 +223,26 @@
         .toast-msg.ok { background: #059669; }
         @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 
+        /* ── NOTIFICATIONS ─────────────────────────────────── */
+        .notif-bell-wrap { position:relative; display:inline-flex; }
+        .notif-badge { position:absolute; top:-4px; right:-4px; background:#EF4444; color:white; font-size:10px; font-weight:800; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; border:2px solid white; }
+        .notif-btn { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:8px 14px; color:#C4B5FD; font-size:18px; cursor:pointer; transition:all 0.2s; }
+        .notif-btn:hover { background:rgba(124,58,237,0.2); }
+        .notif-panel { position:fixed; top:70px; right:16px; width:320px; background:#FFFFFF; border-radius:20px; border:1px solid #E2E8F0; box-shadow:0 8px 30px rgba(0,0,0,0.15); z-index:999; display:none; max-height:420px; overflow-y:auto; }
+        .notif-panel.open { display:block; animation:fadeDown 0.2s ease; }
+        @keyframes fadeDown { from{opacity:0;transform:translateY(-8px);} to{opacity:1;transform:translateY(0);} }
+        .notif-panel-header { padding:16px 18px 12px; font-size:15px; font-weight:700; color:#1E293B; border-bottom:1px solid #F1F5F9; display:flex; justify-content:space-between; align-items:center; }
+        .notif-clear { font-size:12px; color:#3B82F6; cursor:pointer; font-weight:600; }
+        .notif-clear:hover { text-decoration:underline; }
+        .notif-item { padding:12px 18px; border-bottom:1px solid #F8FAFC; display:flex; gap:12px; align-items:flex-start; }
+        .notif-item.unread { background:#F5F3FF; }
+        .notif-item-icon { font-size:22px; flex-shrink:0; margin-top:2px; }
+        .notif-item-body { flex:1; }
+        .notif-item-title { font-size:13px; font-weight:600; color:#1E293B; }
+        .notif-item-sub { font-size:12px; color:#64748B; margin-top:2px; }
+        .notif-item-time { font-size:10px; color:#94A3B8; margin-top:3px; }
+        .notif-empty { padding:30px; text-align:center; color:#94A3B8; font-size:13px; }
+
         /* ── RESPONSIVE ─────────────────────────────────────── */
         @media (max-width: 600px) {
             .stats-row { grid-template-columns: repeat(3,1fr); gap: 8px; }
@@ -269,6 +289,17 @@
             <span>Éthykos</span>
         </div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div class="notif-bell-wrap">
+                <button class="notif-btn" onclick="toggleNotifPanel()" id="notifBtn" title="Notificaciones">🔔</button>
+                <div class="notif-badge" id="notifBadge" style="display:none;">0</div>
+            </div>
+            <div id="notifPanel" class="notif-panel">
+                <div class="notif-panel-header">
+                    🔔 Notificaciones
+                    <span class="notif-clear" onclick="clearNotifs()">Marcar todo como leído</span>
+                </div>
+                <div id="notifList"><div class="notif-empty">Sin notificaciones nuevas</div></div>
+            </div>
             <div class="portal-user-chip">
                 <i class="fas fa-user"></i>
                 <span id="headerName">—</span>
@@ -428,6 +459,113 @@ function clearSession() {
     try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
 }
 
+// ── NOTIFICATIONS ────────────────────────────────────────────
+const NOTIF_KEY = 'ethykos_notifs_';
+const SNAPSHOT_KEY = 'ethykos_snapshot_';
+
+function getStoredSnapshot(studentId) {
+    try { return JSON.parse(localStorage.getItem(SNAPSHOT_KEY + studentId) || 'null'); } catch(e) { return null; }
+}
+function saveSnapshot(studentId, data) {
+    try { localStorage.setItem(SNAPSHOT_KEY + studentId, JSON.stringify(data)); } catch(e) {}
+}
+function getStoredNotifs(studentId) {
+    try { return JSON.parse(localStorage.getItem(NOTIF_KEY + studentId) || '[]'); } catch(e) { return []; }
+}
+function saveNotifs(studentId, notifs) {
+    try { localStorage.setItem(NOTIF_KEY + studentId, JSON.stringify(notifs.slice(0, 30))); } catch(e) {}
+}
+
+function generateNotifs(studentId, prev, current, prevTribePts, currentTribePts) {
+    const notifs = getStoredNotifs(studentId);
+    const now = new Date().toISOString();
+
+    // Level up
+    if (prev && current.individualPoints > prev.individualPoints) {
+        const prevLvl = getLevelInfo(prev.individualPoints);
+        const curLvl = getLevelInfo(current.individualPoints);
+        if (curLvl.levelNumber > prevLvl.levelNumber) {
+            notifs.unshift({ id: Date.now()+'_lvl', icon:'⬆️', title:`¡Subiste a ${curLvl.name}!`, sub:`Ahora eres ${curLvl.icon} ${curLvl.name}`, time: now, read: false });
+        }
+        const gained = current.individualPoints - prev.individualPoints;
+        notifs.unshift({ id: Date.now()+'_pts', icon:'⭐', title:`+${gained} puntos de nivel`, sub:`Total: ${current.individualPoints} pts`, time: now, read: false });
+    }
+
+    // Reward points gained
+    if (prev && current.rewardPoints > prev.rewardPoints) {
+        const gained = current.rewardPoints - prev.rewardPoints;
+        notifs.unshift({ id: Date.now()+'_rp', icon:'🪙', title:`+${gained} monedas recibidas`, sub:`Saldo actual: ${current.rewardPoints} 🪙`, time: now, read: false });
+    }
+
+    // Reward redeemed
+    if (prev && current.rewardPoints < prev.rewardPoints) {
+        const spent = prev.rewardPoints - current.rewardPoints;
+        notifs.unshift({ id: Date.now()+'_red', icon:'🎁', title:`Canje realizado (-${spent} 🪙)`, sub:`Saldo actual: ${current.rewardPoints} 🪙`, time: now, read: false });
+    }
+
+    // Tribe points gained
+    if (prevTribePts !== null && currentTribePts > prevTribePts) {
+        const gained = currentTribePts - prevTribePts;
+        notifs.unshift({ id: Date.now()+'_tri', icon:'🏆', title:`Tu tribu ganó ${gained} punto${gained!==1?'s':''}`, sub:`Puntuación de tribu: ${currentTribePts}`, time: now, read: false });
+    }
+
+    saveNotifs(studentId, notifs);
+    return notifs;
+}
+
+function renderNotifPanel(notifs) {
+    const list = document.getElementById('notifList');
+    const badge = document.getElementById('notifBadge');
+    const unread = notifs.filter(n => !n.read).length;
+
+    if (unread > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = unread > 9 ? '9+' : unread;
+    } else {
+        badge.style.display = 'none';
+    }
+
+    if (!notifs.length) {
+        list.innerHTML = '<div class="notif-empty">Sin notificaciones</div>';
+        return;
+    }
+    list.innerHTML = notifs.slice(0,20).map(n => {
+        const d = new Date(n.time);
+        const timeStr = `${d.getDate()}/${d.getMonth()+1} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        return `<div class="notif-item ${n.read?'':'unread'}">
+            <div class="notif-item-icon">${n.icon}</div>
+            <div class="notif-item-body">
+                <div class="notif-item-title">${escHtml(n.title)}</div>
+                <div class="notif-item-sub">${escHtml(n.sub)}</div>
+                <div class="notif-item-time">${timeStr}</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+window.toggleNotifPanel = function() {
+    const panel = document.getElementById('notifPanel');
+    panel.classList.toggle('open');
+};
+
+window.clearNotifs = function() {
+    if (!currentStudent) return;
+    const notifs = getStoredNotifs(currentStudent.id).map(n => ({...n, read: true}));
+    saveNotifs(currentStudent.id, notifs);
+    renderNotifPanel(notifs);
+    document.getElementById('notifBadge').style.display = 'none';
+    document.getElementById('notifPanel').classList.remove('open');
+};
+
+// Close panel on outside click
+document.addEventListener('click', e => {
+    const panel = document.getElementById('notifPanel');
+    const btn = document.getElementById('notifBtn');
+    if (panel && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+        panel.classList.remove('open');
+    }
+});
+
 // ── UTILS ────────────────────────────────────────────────────
 function getLevelInfo(points) {
     const pts = points || 0;
@@ -537,11 +675,25 @@ async function renderPortal() {
     // Rewards
     renderRewardsGrid(rp);
 
-    // Load async data
-    await Promise.all([
+    // Load async data + notifications
+    const prevSnapshot = getStoredSnapshot(s.id);
+    const [tribeResult] = await Promise.all([
         loadTribeData(),
         loadAttendance()
     ]);
+
+    // Generate and show notifications based on snapshot diff
+    const notifs = generateNotifs(
+        s.id,
+        prevSnapshot?.student || null,
+        s,
+        prevSnapshot?.tribePts ?? null,
+        tribeResult?.points ?? null
+    );
+    renderNotifPanel(notifs);
+
+    // Save new snapshot
+    saveSnapshot(s.id, { student: { individualPoints: s.individualPoints, rewardPoints: s.rewardPoints }, tribePts: tribeResult?.points ?? null });
 }
 
 function renderLevelsJourney(currentLevelNum, pts) {
@@ -591,7 +743,7 @@ async function loadTribeData() {
                 myTribe = t;
             }
         });
-        if (!myTribe) return;
+        if (!myTribe) return { points: null };
 
         // Hero tribe chip
         document.getElementById('heroTribeName').textContent = myTribe.name;

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏹 Éthykos · Modo Proyector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="shortcut icon" href="./img/logo.png" type="image/png">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(160deg, #0F172A 0%, #1E1B4B 60%, #0F172A 100%);
+            min-height: 100vh; color: #F1F5F9; overflow: hidden;
+        }
+
+        /* ── STARS BG ── */
+        .stars { position:fixed; inset:0; pointer-events:none; z-index:0; }
+        .star { position:absolute; border-radius:50%; background:white; animation: twinkle 3s infinite alternate; }
+        @keyframes twinkle { from{opacity:0.2;} to{opacity:0.8;} }
+
+        /* ── LAYOUT ── */
+        .projector-wrap { position:relative; z-index:1; display:flex; flex-direction:column; height:100vh; padding:20px 28px; gap:16px; }
+
+        /* ── HEADER ── */
+        .proj-header { display:flex; justify-content:space-between; align-items:center; flex-shrink:0; }
+        .proj-logo { display:flex; align-items:center; gap:14px; }
+        .proj-logo img { height:44px; filter:drop-shadow(0 0 12px rgba(139,92,246,0.6)); }
+        .proj-logo-text { font-size:22px; font-weight:800; color:#C4B5FD; letter-spacing:1px; }
+        .proj-grade-selector { display:flex; gap:8px; flex-wrap:wrap; }
+        .proj-grade-btn {
+            background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15);
+            border-radius:20px; padding:6px 18px; font-size:15px; font-weight:700;
+            color:#94A3B8; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif;
+        }
+        .proj-grade-btn:hover { background:rgba(139,92,246,0.2); color:#C4B5FD; }
+        .proj-grade-btn.active { background:linear-gradient(135deg,#7C3AED,#3B82F6); color:white; border-color:transparent; box-shadow:0 2px 12px rgba(124,58,237,0.4); }
+        .proj-controls { display:flex; gap:10px; align-items:center; }
+        .proj-ctrl-btn {
+            background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+            border-radius:12px; padding:8px 16px; font-size:13px; font-weight:600;
+            color:#94A3B8; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif;
+            display:flex; align-items:center; gap:6px;
+        }
+        .proj-ctrl-btn:hover { background:rgba(255,255,255,0.15); color:#F1F5F9; }
+        .proj-ctrl-btn.active { background:rgba(239,68,68,0.2); border-color:rgba(239,68,68,0.4); color:#FCA5A5; }
+
+        /* ── MAIN CONTENT ── */
+        .proj-main { flex:1; display:grid; grid-template-columns:1fr 320px; gap:20px; min-height:0; }
+
+        /* ── TRIBES SCENE ── */
+        .proj-scene { display:flex; flex-direction:column; gap:14px; min-height:0; }
+        .proj-scene-title { font-size:13px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:1.5px; }
+
+        /* ── TRIBE CARDS ── */
+        .tribes-display { flex:1; display:grid; gap:14px; min-height:0; overflow-y:auto; }
+        .tribe-proj-card {
+            background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
+            border-radius:20px; padding:18px 22px;
+            display:flex; align-items:center; gap:20px;
+            transition:all 0.4s; position:relative; overflow:hidden;
+        }
+        .tribe-proj-card.leader {
+            border-color:rgba(251,191,36,0.5);
+            background:rgba(251,191,36,0.07);
+            box-shadow:0 0 30px rgba(251,191,36,0.1);
+        }
+        .tribe-proj-card::before {
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background:linear-gradient(90deg, rgba(139,92,246,0.05) 0%, transparent 100%);
+        }
+        .tribe-emblem {
+            width:64px; height:64px; border-radius:50%; flex-shrink:0;
+            object-fit:cover; border:3px solid rgba(196,181,253,0.4);
+            box-shadow:0 0 16px rgba(124,58,237,0.3);
+        }
+        .tribe-emblem-placeholder {
+            width:64px; height:64px; border-radius:50%; flex-shrink:0;
+            background:linear-gradient(135deg,#7C3AED,#3B82F6);
+            display:flex; align-items:center; justify-content:center; font-size:30px;
+            border:3px solid rgba(196,181,253,0.4);
+        }
+        .tribe-proj-info { flex:1; }
+        .tribe-proj-name { font-size:24px; font-weight:800; color:#F1F5F9; }
+        .tribe-proj-cry { font-size:13px; color:#94A3B8; font-style:italic; margin-top:2px; }
+        .tribe-proj-members { font-size:12px; color:#64748B; margin-top:4px; }
+        .tribe-proj-score-wrap { text-align:right; flex-shrink:0; }
+        .tribe-proj-score { font-size:48px; font-weight:900; line-height:1; }
+        .tribe-proj-pts-label { font-size:11px; color:#64748B; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+        .tribe-proj-bar-wrap { height:8px; background:rgba(255,255,255,0.08); border-radius:8px; overflow:hidden; margin-top:8px; width:120px; }
+        .tribe-proj-bar-fill { height:100%; border-radius:8px; transition:width 0.8s ease; }
+        .leader-crown { position:absolute; top:12px; right:18px; font-size:22px; }
+
+        /* ── SIDEBAR ── */
+        .proj-sidebar { display:flex; flex-direction:column; gap:14px; min-height:0; }
+
+        /* ── SPOTLIGHT ── */
+        .spotlight-card {
+            background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+            border-radius:20px; padding:18px; flex-shrink:0;
+        }
+        .spotlight-title { font-size:12px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+        .spotlight-title .dot { width:8px; height:8px; border-radius:50%; background:#EF4444; animation:pulse-dot 1.5s infinite; }
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.5;transform:scale(1.3);} }
+        .spotlight-empty { color:#475569; font-size:13px; text-align:center; padding:10px 0; }
+        .spotlight-select { width:100%; padding:8px 10px; background:#1E293B; border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:#F1F5F9; font-size:13px; font-family:'Inter',sans-serif; margin-bottom:8px; }
+        .spotlight-select option { background:#1E293B; color:#F1F5F9; }
+        .spotlight-display {
+            background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(59,130,246,0.2));
+            border:1px solid rgba(196,181,253,0.3); border-radius:14px; padding:14px;
+            text-align:center; display:none;
+        }
+        .spotlight-display.visible { display:block; }
+        .spotlight-stu-name { font-size:18px; font-weight:800; color:#F1F5F9; margin-bottom:4px; }
+        .spotlight-stu-level { font-size:28px; margin:6px 0; }
+        .spotlight-stu-info { font-size:13px; color:#A5B4FC; }
+        .spotlight-stu-pts { font-size:22px; font-weight:900; color:#C4B5FD; margin-top:4px; }
+
+        /* ── CLOCK ── */
+        .clock-card {
+            background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+            border-radius:20px; padding:18px; text-align:center; flex-shrink:0;
+        }
+        .clock-time { font-size:48px; font-weight:900; color:#F1F5F9; letter-spacing:2px; font-variant-numeric:tabular-nums; }
+        .clock-date { font-size:13px; color:#64748B; margin-top:4px; }
+
+        /* ── TIMER ── */
+        .timer-card {
+            background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+            border-radius:20px; padding:18px; flex-shrink:0;
+        }
+        .timer-display { font-size:42px; font-weight:900; color:#6EE7B7; text-align:center; letter-spacing:2px; font-variant-numeric:tabular-nums; }
+        .timer-display.warning { color:#FCA5A5; }
+        .timer-controls { display:flex; gap:8px; margin-top:12px; justify-content:center; flex-wrap:wrap; }
+        .timer-btn { border:none; border-radius:10px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; }
+        .timer-preset { background:rgba(255,255,255,0.08); color:#94A3B8; }
+        .timer-preset:hover { background:rgba(255,255,255,0.15); color:#F1F5F9; }
+        .timer-start { background:#059669; color:white; } .timer-start:hover { background:#047857; }
+        .timer-pause { background:#D97706; color:white; } .timer-pause:hover { background:#B45309; }
+        .timer-reset { background:rgba(239,68,68,0.2); color:#FCA5A5; border:1px solid rgba(239,68,68,0.3); } .timer-reset:hover { background:rgba(239,68,68,0.35); }
+
+        /* ── LOADING ── */
+        .proj-loading { position:fixed; inset:0; background:linear-gradient(160deg,#0F172A,#1E1B4B); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:100; }
+        .proj-loading .spin { font-size:48px; animation:spinA 1s linear infinite; }
+        @keyframes spinA { to{transform:rotate(360deg);} }
+        .proj-loading p { color:#A5B4FC; font-size:18px; }
+
+        /* ── TOAST ── */
+        .toast-wrap { position:fixed; bottom:20px; right:20px; z-index:999; display:flex; flex-direction:column; gap:8px; }
+        .toast-item { background:#1E293B; color:white; padding:10px 16px; border-radius:12px; font-size:13px; font-weight:500; box-shadow:0 4px 20px rgba(0,0,0,0.3); animation:fadeUp2 0.3s ease; }
+        .toast-item.ok { background:#059669; }
+        @keyframes fadeUp2 { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+        /* ── FULLSCREEN BTN ── */
+        @media (max-width:900px) { .proj-main { grid-template-columns:1fr; } .proj-sidebar { flex-direction:row; flex-wrap:wrap; } }
+    </style>
+</head>
+<body>
+
+<div id="projLoading" class="proj-loading">
+    <div class="spin">🏹</div>
+    <p>Cargando modo proyector...</p>
+</div>
+
+<div id="projApp" style="display:none;">
+    <!-- Stars -->
+    <div class="stars" id="starsContainer"></div>
+
+    <div class="projector-wrap">
+        <!-- Header -->
+        <div class="proj-header">
+            <div class="proj-logo">
+                <img src="./img/logo.png" alt="Éthykos" onerror="this.style.display='none'">
+                <span class="proj-logo-text">ÉTHYKOS</span>
+            </div>
+            <div class="proj-grade-selector" id="gradeSelector"></div>
+            <div class="proj-controls">
+                <button class="proj-ctrl-btn" onclick="toggleFullscreen()" id="fsBtn">
+                    <i class="fas fa-expand"></i> Pantalla completa
+                </button>
+                <a href="./dashboard.html" class="proj-ctrl-btn">
+                    <i class="fas fa-arrow-left"></i> Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="proj-main">
+            <!-- Tribes -->
+            <div class="proj-scene">
+                <div class="proj-scene-title"><i class="fas fa-shield-halved"></i> Puntuación de Tribus</div>
+                <div class="tribes-display" id="tribesDisplay">
+                    <div style="color:#475569;text-align:center;padding:40px;">Selecciona un curso arriba</div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="proj-sidebar">
+                <!-- Clock -->
+                <div class="clock-card">
+                    <div class="clock-time" id="clockTime">00:00</div>
+                    <div class="clock-date" id="clockDate">—</div>
+                </div>
+
+                <!-- Timer -->
+                <div class="timer-card">
+                    <div class="timer-display" id="timerDisplay">05:00</div>
+                    <div class="timer-controls">
+                        <button class="timer-btn timer-preset" onclick="setTimer(5)">5'</button>
+                        <button class="timer-btn timer-preset" onclick="setTimer(10)">10'</button>
+                        <button class="timer-btn timer-preset" onclick="setTimer(15)">15'</button>
+                        <button class="timer-btn timer-preset" onclick="setTimer(20)">20'</button>
+                        <button class="timer-btn timer-preset" onclick="setTimer(25)">25'</button>
+                        <button class="timer-btn timer-preset" onclick="setTimer(30)">30'</button>
+                        <button class="timer-btn timer-preset" onclick="setTimer(35)">35'</button>
+                        <button class="timer-btn timer-preset" onclick="setTimer(40)">40'</button>
+                    </div>
+                    <div class="timer-controls" style="margin-top:8px;">
+                        <button class="timer-btn timer-start" id="timerStartBtn" onclick="startTimer()"><i class="fas fa-play"></i> Iniciar</button>
+                        <button class="timer-btn timer-pause" id="timerPauseBtn" onclick="pauseTimer()" style="display:none;"><i class="fas fa-pause"></i> Pausar</button>
+                        <button class="timer-btn timer-reset" onclick="resetTimer()"><i class="fas fa-rotate-left"></i></button>
+                    </div>
+                </div>
+
+                <!-- Spotlight -->
+                <div class="spotlight-card" style="flex:1;">
+                    <div class="spotlight-title">
+                        <span class="dot"></span> Destacar estudiante
+                    </div>
+                    <select class="spotlight-select" id="spotlightSelect" onchange="updateSpotlight()">
+                        <option value="">— Seleccionar —</option>
+                    </select>
+                    <div class="spotlight-display" id="spotlightDisplay">
+                        <div class="spotlight-stu-level" id="spotlightIcon">🌱</div>
+                        <div class="spotlight-stu-name" id="spotlightName">—</div>
+                        <div class="spotlight-stu-info" id="spotlightInfo">—</div>
+                        <div class="spotlight-stu-pts" id="spotlightPts">0 pts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
+        authDomain: "ethicos-a9a66.firebaseapp.com",
+        projectId: "ethicos-a9a66",
+        storageBucket: "ethicos-a9a66.firebasestorage.app",
+        messagingSenderId: "1038796710548",
+        appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
+    };
+    window.firebaseConfig = firebaseConfig;
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+const app = initializeApp(window.firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// ── CONSTANTS ────────────────────────────────────────────────
+const COURSE_NAMES = {6:'6°',7:'7°',8:'8°',9:'9°',10:'10°',11:'11°'};
+const ETHICS_LEVELS = [
+    {min:0,   name:'Aprendiz',        icon:'🌱'},
+    {min:50,  name:'Curioso/a',       icon:'🔍'},
+    {min:120, name:'Reflexivo/a',     icon:'💭'},
+    {min:220, name:'Comprometido/a',  icon:'🤝'},
+    {min:350, name:'Ético/a Activo/a',icon:'🔥'},
+    {min:500, name:'Guía Ética',      icon:'🌟'},
+];
+const PALETTES = [
+    {bar:'#8B5CF6',glow:'rgba(139,92,246,0.4)',score:'#C4B5FD'},
+    {bar:'#3B82F6',glow:'rgba(59,130,246,0.4)', score:'#93C5FD'},
+    {bar:'#10B981',glow:'rgba(16,185,129,0.4)', score:'#6EE7B7'},
+    {bar:'#F59E0B',glow:'rgba(245,158,11,0.4)', score:'#FDE68A'},
+    {bar:'#EF4444',glow:'rgba(239,68,68,0.4)',  score:'#FCA5A5'},
+    {bar:'#06B6D4',glow:'rgba(6,182,212,0.4)',  score:'#A5F3FC'},
+];
+
+// ── STATE ────────────────────────────────────────────────────
+let currentGrade = null;
+let tribesUnsub = null;
+let allStudents = [];
+let timerSeconds = 300;
+let timerInterval = null;
+let timerRunning = false;
+let timerInitial = 300;
+
+// ── UTILS ────────────────────────────────────────────────────
+function getLevelInfo(pts) {
+    pts = pts || 0; let idx = 0;
+    ETHICS_LEVELS.forEach((l,i) => { if(pts >= l.min) idx = i; });
+    return { ...ETHICS_LEVELS[idx], levelNumber: idx+1 };
+}
+function escH(t) { const d=document.createElement('div'); d.textContent=t||''; return d.innerHTML; }
+function toast(msg, type='') {
+    const w=document.getElementById('toastWrap');
+    const el=document.createElement('div'); el.className='toast-item'+(type==='ok'?' ok':'');
+    el.textContent=msg; w.appendChild(el); setTimeout(()=>el.remove(),3000);
+}
+
+// ── STARS ────────────────────────────────────────────────────
+function generateStars() {
+    const c = document.getElementById('starsContainer');
+    for(let i=0;i<60;i++){
+        const s=document.createElement('div'); s.className='star';
+        s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s;`;
+        c.appendChild(s);
+    }
+}
+
+// ── AUTH ─────────────────────────────────────────────────────
+onAuthStateChanged(auth, user => {
+    if (!user) { window.location.href='index.html'; return; }
+    init();
+});
+
+// ── INIT ─────────────────────────────────────────────────────
+async function init() {
+    generateStars();
+    buildGradeSelector();
+    startClock();
+    await loadAllStudents();
+    document.getElementById('projLoading').style.display='none';
+    document.getElementById('projApp').style.display='';
+}
+
+function buildGradeSelector() {
+    const c = document.getElementById('gradeSelector');
+    c.innerHTML = Object.entries(COURSE_NAMES).map(([g,label]) =>
+        `<button class="proj-grade-btn" data-grade="${g}" onclick="selectGrade(${g})">${label}</button>`
+    ).join('');
+}
+
+window.selectGrade = function(grade) {
+    currentGrade = grade;
+    document.querySelectorAll('.proj-grade-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.grade) === grade);
+    });
+    subscribeTribes(grade);
+};
+
+// ── REAL-TIME TRIBES ─────────────────────────────────────────
+function subscribeTribes(grade) {
+    if (tribesUnsub) tribesUnsub();
+    const q = query(collection(db, 'tribes'), where('grade', '==', grade));
+    tribesUnsub = onSnapshot(q, snap => {
+        const tribes = [];
+        snap.forEach(d => tribes.push({id:d.id,...d.data()}));
+        renderTribes(tribes.sort((a,b)=>(b.points||0)-(a.points||0)));
+    });
+}
+
+function renderTribes(tribes) {
+    const c = document.getElementById('tribesDisplay');
+    if (!tribes.length) {
+        c.innerHTML = '<div style="color:#475569;text-align:center;padding:40px;font-size:16px;">No hay tribus en este curso</div>';
+        return;
+    }
+    // Adjust grid rows
+    c.style.gridTemplateRows = `repeat(${tribes.length}, 1fr)`;
+    const maxPts = Math.max(...tribes.map(t=>t.points||0), 1);
+
+    c.innerHTML = tribes.map((tribe, i) => {
+        const pts = tribe.points || 0;
+        const pct = Math.round((pts/maxPts)*100);
+        const pal = PALETTES[i % PALETTES.length];
+        const isLeader = i === 0 && pts > 0;
+        const emblem = tribe.imageData
+            ? `<img src="${tribe.imageData}" class="tribe-emblem" alt="">`
+            : `<div class="tribe-emblem-placeholder">🛡️</div>`;
+        const memberCount = (tribe.members||[]).length;
+        return `<div class="tribe-proj-card ${isLeader?'leader':''}">
+            ${isLeader ? '<div class="leader-crown">🏆</div>' : ''}
+            ${emblem}
+            <div class="tribe-proj-info">
+                <div class="tribe-proj-name">${escH(tribe.name)}</div>
+                ${tribe.warCry?`<div class="tribe-proj-cry">"${escH(tribe.warCry)}"</div>`:''}
+                <div class="tribe-proj-members">${memberCount} integrante${memberCount!==1?'s':''}</div>
+                <div class="tribe-proj-bar-wrap" style="margin-top:8px;">
+                    <div class="tribe-proj-bar-fill" style="width:${pct}%;background:${pal.bar};"></div>
+                </div>
+            </div>
+            <div class="tribe-proj-score-wrap">
+                <div class="tribe-proj-score" style="color:${pal.score};text-shadow:0 0 20px ${pal.glow};">${pts}</div>
+                <div class="tribe-proj-pts-label">puntos</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ── STUDENTS FOR SPOTLIGHT ───────────────────────────────────
+async function loadAllStudents() {
+    try {
+        const snap = await getDocs(collection(db,'students'));
+        allStudents = [];
+        snap.forEach(d => allStudents.push({id:d.id,...d.data()}));
+        allStudents.sort((a,b)=>a.name.localeCompare(b.name));
+        const sel = document.getElementById('spotlightSelect');
+        sel.innerHTML = '<option value="">— Seleccionar —</option>'
+            + allStudents.map(s=>`<option value="${s.id}">${escH(s.name)} (${COURSE_NAMES[s.course]||s.course})</option>`).join('');
+    } catch(e) {}
+}
+
+window.updateSpotlight = function() {
+    const sel = document.getElementById('spotlightSelect');
+    const display = document.getElementById('spotlightDisplay');
+    const s = allStudents.find(x=>x.id===sel.value);
+    if (!s) { display.classList.remove('visible'); return; }
+    const lvl = getLevelInfo(s.individualPoints);
+    document.getElementById('spotlightIcon').textContent = lvl.icon;
+    document.getElementById('spotlightName').textContent = s.name;
+    document.getElementById('spotlightInfo').textContent = `${COURSE_NAMES[s.course]||s.course} · ${lvl.name}`;
+    document.getElementById('spotlightPts').textContent = `${s.individualPoints||0} pts · 🪙 ${s.rewardPoints||0}`;
+    display.classList.add('visible');
+};
+
+// ── CLOCK ────────────────────────────────────────────────────
+function startClock() {
+    function tick() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2,'0');
+        const m = String(now.getMinutes()).padStart(2,'0');
+        document.getElementById('clockTime').textContent = `${h}:${m}`;
+        const days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+        const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+        document.getElementById('clockDate').textContent =
+            `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+    }
+    tick(); setInterval(tick, 1000);
+}
+
+// ── TIMER ────────────────────────────────────────────────────
+function updateTimerDisplay() {
+    const m = Math.floor(timerSeconds/60);
+    const s = timerSeconds % 60;
+    const el = document.getElementById('timerDisplay');
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.classList.toggle('warning', timerSeconds <= 30 && timerSeconds > 0);
+}
+window.setTimer = function(minutes) {
+    resetTimer(); timerSeconds = minutes*60; timerInitial = minutes*60; updateTimerDisplay();
+};
+window.startTimer = function() {
+    if (timerRunning || timerSeconds <= 0) return;
+    timerRunning = true;
+    document.getElementById('timerStartBtn').style.display='none';
+    document.getElementById('timerPauseBtn').style.display='';
+    timerInterval = setInterval(() => {
+        timerSeconds--;
+        updateTimerDisplay();
+        if (timerSeconds <= 0) {
+            clearInterval(timerInterval); timerRunning = false;
+            document.getElementById('timerStartBtn').style.display='';
+            document.getElementById('timerPauseBtn').style.display='none';
+            document.getElementById('timerDisplay').textContent = '⏰ ¡Tiempo!';
+            document.getElementById('timerDisplay').classList.add('warning');
+            toast('⏰ ¡Se acabó el tiempo!');
+        }
+    }, 1000);
+};
+window.pauseTimer = function() {
+    clearInterval(timerInterval); timerRunning = false;
+    document.getElementById('timerStartBtn').style.display='';
+    document.getElementById('timerPauseBtn').style.display='none';
+};
+window.resetTimer = function() {
+    clearInterval(timerInterval); timerRunning = false;
+    timerSeconds = timerInitial;
+    updateTimerDisplay();
+    document.getElementById('timerDisplay').classList.remove('warning');
+    document.getElementById('timerStartBtn').style.display='';
+    document.getElementById('timerPauseBtn').style.display='none';
+};
+
+// ── FULLSCREEN ───────────────────────────────────────────────
+window.toggleFullscreen = function() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(()=>{});
+        document.getElementById('fsBtn').innerHTML='<i class="fas fa-compress"></i> Salir';
+    } else {
+        document.exitFullscreen();
+        document.getElementById('fsBtn').innerHTML='<i class="fas fa-expand"></i> Pantalla completa';
+    }
+};
+</script>
+</body>
+</html>
