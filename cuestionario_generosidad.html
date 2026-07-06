@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Generosidad</title>
+    <style>
+        /* Estilos CSS integrados */
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            padding-top: 80px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            width: 95%;
+            max-width: 750px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .instructions {
+            background-color: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .instructions h2 {
+            color: #0056b3;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .instructions p, .instructions ul {
+            color: #333;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .instructions ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #e0e0e0;
+            height: 40px;
+            overflow: hidden;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 0.95em;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 10px;
+            width: 0%;
+            background-color: #4CAF50;
+            transition: width 0.4s ease-in-out;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            text-align: left;
+            padding: 20px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .question-block:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-block p {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 1.1em;
+        }
+        
+        /* Estilos para campos de texto y select */
+        .question-block input[type="text"],
+        .question-block select {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .question-block input[type="text"]:focus,
+        .question-block select:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.2);
+            outline: none;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 6px;
+            transition: background-color 0.2s, border-color 0.2s;
+            border: 1px solid #e9e9e9;
+        }
+
+        .options label:hover {
+            background-color: #f5f5f5;
+            border-color: #c0c0c0;
+        }
+
+        .options input[type="radio"] {
+            margin-right: 12px;
+            accent-color: #28a745;
+            transform: scale(1.2);
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 25px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #results {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+        #results h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        #scoreText {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        #feedbackText {
+            margin-top: 20px;
+            line-height: 1.7;
+            color: #555;
+            font-size: 1.05em;
+        }
+
+        #feedbackText h3 {
+            color: #28a745;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        #feedbackText h4 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+
+        #feedbackText h4 svg {
+            margin-right: 8px;
+        }
+
+        #feedbackText ul {
+            list-style-type: disc;
+            margin-left: 25px;
+            padding-left: 0;
+        }
+
+        #feedbackText li {
+            margin-bottom: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #scoreCanvas {
+            display: block;
+            margin: 20px auto;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            font-family: 'Inter', Arial, sans-serif;
+        }
+
+        .modal-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-around;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator">
+        <span id="progressText">0 de 25 preguntas respondidas</span>
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="container">
+        <h1>¿Qué tan generoso(a) eres?</h1>
+
+        <div class="instructions">
+            <h2>¡Bienvenido/a al Cuestionario de Generosidad!</h2>
+            <p>Este cuestionario te ayudará a reflexionar sobre tus actitudes y acciones relacionadas con la generosidad y a descubrir tus fortalezas y oportunidades de mejora.</p>
+            <h3>Instrucciones:</h3>
+            <ul>
+                <li>Completa tus datos (nombres, apellidos y curso).</li>
+                <li>Lee cada pregunta con mucha atención.</li>
+                <li>Selecciona la opción que mejor describa lo que harías o cómo te sientes en cada situación.</li>
+                <li>Recuerda que no hay respuestas 'correctas' o 'incorrectas' absolutas, ¡lo importante es que seas honesto/a contigo mismo/a!</li>
+                <li>Una vez que respondas todas las preguntas, haz clic en el botón "Ver resultados".</li>
+                <li>¡Diviértete y aprende mucho sobre la generosidad!</li>
+            </ul>
+        </div>
+
+        <form id="generosityForm">
+            <!-- Los campos de estudiante y las preguntas se cargarán aquí -->
+        </form>
+        <button type="button" id="submitBtn">Ver y Enviar Resultados</button>
+        <div id="results" class="hidden">
+            <h2>Tus Resultados</h2>
+            <canvas id="scoreCanvas" width="200" height="200"></canvas>
+            <p id="scoreText"></p>
+            <div id="feedbackText"></div>
+            <button type="button" id="goHomeBtn">Regresar al inicio</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript integrado
+        document.addEventListener('DOMContentLoaded', () => {
+            const questions = [
+                {
+                    question: "¿Con qué frecuencia compartes tus cosas (comida, juguetes, materiales) con otros sin que te lo pidan?",
+                    options: [
+                        { text: "Casi nunca", score: 1 },
+                        { text: "A veces", score: 2 },
+                        { text: "Frecuentemente", score: 3 },
+                        { text: "Casi siempre", score: 4 }
+                    ]
+                },
+                {
+                    question: "Si ves a alguien que necesita ayuda, como cargar algo pesado o recoger algo que se le cayó, ¿qué haces?",
+                    options: [
+                        { text: "Espero a que alguien más ayude", score: 1 },
+                        { text: "Lo pienso, pero no siempre actúo", score: 2 },
+                        { text: "Ofrezco mi ayuda si estoy cerca", score: 3 },
+                        { text: "Siempre me ofrezco a ayudar de inmediato", score: 4 }
+                    ]
+                },
+                {
+                    question: "¿Cómo reaccionas cuando un compañero necesita copiar tus apuntes porque estuvo ausente?",
+                    options: [
+                        { text: "Le digo que no puedo o pongo excusas", score: 1 },
+                        { text: "Se los presto, pero de mala gana", score: 2 },
+                        { text: "Se los presto sin problema", score: 3 },
+                        { text: "Se los presto y me ofrezco a explicarle si tiene dudas", score: 4 }
+                    ]
+                },
+                {
+                    question: "Cuando tienes algo que te gusta mucho, ¿estás dispuesto(a) a dárselo a alguien que lo necesita más que tú?",
+                    options: [
+                        { text: "No, me cuesta mucho desprenderse de mis cosas", score: 1 },
+                        { text: "A veces, si realmente es necesario", score: 2 },
+                        { text: "Sí, si la necesidad es clara", score: 3 },
+                        { text: "Sí, siempre que pueda ayudar", score: 4 }
+                    ]
+                },
+                {
+                    question: "¿Qué tan dispuesto(a) estás a dedicar tu tiempo para ayudar a otros (voluntariado, cuidar a alguien, etc.)?",
+                    options: [
+                        { text: "No me gusta dedicar mi tiempo a esas cosas", score: 1 },
+                        { text: "Muy poco, solo si es estrictamente necesario", score: 2 },
+                        { text: "Estoy dispuesto(a) a veces, si el tiempo me lo permite", score: 3 },
+                        { text: "Muy dispuesto(a), siempre busco oportunidades para ayudar", score: 4 }
+                    ]
+                },
+                {
+                    question: "Si tienes la oportunidad de donar algo (ropa, juguetes, libros) que ya no usas, ¿lo haces?",
+                    options: [
+                        { text: "No, prefiero conservarlo o tirarlo", score: 1 },
+                        { text: "A veces, si es fácil de hacer", score: 2 },
+                        { text: "Sí, cuando tengo la oportunidad", score: 3 },
+                        { text: "Siempre busco activamente oportunidades para donar", score: 4 }
+                    ]
+                },
+                {
+                    question: "¿Con qué frecuencia escuchas atentamente cuando alguien comparte un problema, sin interrumpir o dar consejos no solicitados?",
+                    options: [
+                        { text: "Casi nunca", score: 1 },
+                        { text: "A veces", score: 2 },
+                        { text: "Frecuentemente", score: 3 },
+                        { text: "Casi siempre", score: 4 }
+                    ]
+                },
+                {
+                    question: "Si ves a un amigo luchando con una tarea escolar, ¿cuál es tu primera reacción?",
+                    options: [
+                        { text: "Me mantengo al margen, es su problema", score: 1 },
+                        { text: "Espero a que me pida ayuda", score: 2 },
+                        { text: "Ofrezco mi ayuda si veo que lo necesita mucho", score: 3 },
+                        { text: "Me acerco y pregunto si necesita ayuda de inmediato", score: 4 }
+                    ]
+                },
+                {
+                    question: "Cuando recibes un cumplido o reconocimiento por un trabajo en equipo, ¿reconoces a los demás que contribuyeron?",
+                    options: [
+                        { text: "No siempre, me enfoco en mi parte", score: 1 },
+                        { text: "A veces lo hago, si me acuerdo", score: 2 },
+                        { text: "Sí, intento reconocer a los demás", score: 3 },
+                        { text: "Siempre destaco la contribución de los demás", score: 4 }
+                    ]
+                },
+                {
+                    question: "¿Qué tan dispuesto(a) estás a perdonar a alguien que te ha hecho un daño?",
+                    options: [
+                        { text: "Me cuesta mucho perdonar", score: 1 },
+                        { text: "Me toma tiempo, pero eventually perdono", score: 2 },
+                        { text: "Estoy dispuesto(a) a perdonar si la persona se disculpa", score: 3 },
+                        { text: "Soy rápido(a) en perdonar y dejar ir el rencor", score: 4 }
+                    ]
+                },
+                {
+                    question: "Si tienes un dulce o un juguete extra y ves a un amigo que no tiene, ¿qué haces?",
+                    options: [
+                        { text: "Lo guardo para mí", score: 1 },
+                        { text: "Solo lo comparto si me lo pide", score: 2 },
+                        { text: "Le ofrezco un poco si creo que le gustaría", score: 3 },
+                        { text: "Le ofrezco la mitad o todo, sin que me lo pida", score: 4 }
+                    ]
+                },
+                {
+                    question: "Cuando hay tareas en casa o en el aula, ¿te ofreces a ayudar aunque no sea tu turno?",
+                    options: [
+                        { text: "No, solo hago lo que me toca", score: 1 },
+                        { text: "A veces, si no tengo nada más que hacer", score: 2 },
+                        { text: "Sí, si veo que alguien necesita una mano", score: 3 },
+                        { text: "Siempre busco maneras de ayudar y colaborar", score: 4 }
+                    ]
+                },
+                {
+                    question: "Si un compañero olvida su lápiz o borrador, ¿qué haces?",
+                    options: [
+                        { text: "Le digo que no tengo uno extra", score: 1 },
+                        { text: "Le presto uno si insiste mucho", score: 2 },
+                        { text: "Le presto uno sin problema", score: 3 },
+                        { text: "Le ofrezco uno antes de que me lo pida", score: 4 }
+                    ]
+                },
+                {
+                    question: "Cuando un compañero nuevo llega a la clase, ¿qué tan fácil te resulta invitarlo a jugar o unirse al grupo?",
+                    options: [
+                        { text: "Me cuesta mucho, prefiero quedarme con mis amigos", score: 1 },
+                        { text: "A veces lo hago, si me lo piden", score: 2 },
+                        { text: "Intento incluirlo si veo que está solo", score: 3 },
+                        { text: "Siempre busco la forma de que se sienta bienvenido y lo invito a participar", score: 4 }
+                    ]
+                },
+                {
+                    question: "¿Con qué frecuencia le dices a alguien algo bueno que ha hecho o que te gusta de él/ella?",
+                    options: [
+                        { text: "Casi nunca", score: 1 },
+                        { text: "A veces", score: 2 },
+                        { text: "Frecuentemente", score: 3 },
+                        { text: "Casi siempre", score: 4 }
+                    ]
+                },
+                {
+                    question: "Un compañero está triste porque perdió su lápiz favorito. ¿Qué haces?",
+                    options: [
+                        { text: "No es mi problema, que pida uno prestado.", score: 1 },
+                        { text: "Le digo 'qué pena', pero no hago nada más.", score: 2 },
+                        { text: "Le ofrezco prestarle un lápiz mío para que pueda seguir trabajando.", score: 3 },
+                        { text: "Le ofrezco mi lápiz y le pregunto si quiere que lo ayude a buscar el suyo.", score: 4 }
+                    ]
+                },
+                {
+                    question: "Estás en el recreo y ves a un grupo de compañeros jugando un juego, pero uno está solo mirando. ¿Qué haces?",
+                    options: [
+                        { text: "Sigo jugando con mis amigos y no le presto atención.", score: 1 },
+                        { text: "Pienso que debería unirse, pero no digo nada.", score: 2 },
+                        { text: "Le digo a mis amigos que invitemos al compañero a jugar.", score: 3 },
+                        { text: "Me acerco al compañero que está solo y lo invito directamente a unirse a nuestro juego.", score: 4 }
+                    ]
+                },
+                {
+                    question: "Un amigo te presta su juguete favorito, pero por accidente se te cae y se rompe un poco. ¿Qué haces?",
+                    options: [
+                        { text: "Lo escondo y espero que no se dé cuenta.", score: 1 },
+                        { text: "Se lo devuelvo y le digo que se rompió, pero no me ofrezco a arreglarlo.", score: 2 },
+                        { text: "Se lo devuelvo, le pido disculpas y me ofrezco a intentar arreglarlo o a comprarle uno nuevo.", score: 3 },
+                        { text: "Se lo devuelvo de inmediato, le pido disculpas sinceras, le explico lo que pasó y me ofrezco a arreglarlo o a reemplazarlo asumiendo mi responsabilidad.", score: 4 }
+                    ]
+                },
+                {
+                    question: "Tu maestra pide voluntarios para ayudar a organizar los libros de la biblioteca después de clase. ¿Qué haces?",
+                    options: [
+                        { text: "Pienso que es mucho trabajo y no me ofrezco.", score: 1 },
+                        { text: "Me ofrezco solo si mis amigos también lo hacen.", score: 2 },
+                        { text: "Me ofrezco a ayudar por un rato si no tengo planes.", score: 3 },
+                        { text: "Me ofrezco de inmediato, sabiendo que es una buena forma de ayudar a la comunidad escolar.", score: 4 }
+                    ]
+                },
+                {
+                    question: "Un compañero te cuenta que está preocupado por algo que le pasó en casa. ¿Qué haces?",
+                    options: [
+                        { text: "Cambio de tema porque no sé qué decir o me siento incómodo(a).", score: 1 },
+                        { text: "Le digo 'lo siento' y me voy.", score: 2 },
+                        { text: "Lo escucho un poco, pero luego le doy un consejo rápido para que se le pase.", score: 3 },
+                        { text: "Lo escucho con atención, le hago preguntas para entender y le ofrezco mi apoyo, haciéndole saber que estoy ahí para él/ella.", score: 4 }
+                    ]
+                },
+                {
+                    question: "Estás caminando por el pasillo y ves a un compañero que se le caen todos sus libros al suelo. ¿Qué haces?",
+                    options: [
+                        { text: "Sigo mi camino, seguro alguien más lo ayudará.", score: 1 },
+                        { text: "Lo miro, pero no hago nada.", score: 2 },
+                        { text: "Me detengo y le pregunto si necesita ayuda para recogerlos.", score: 3 },
+                        { text: "Me agacho de inmediato y lo ayudo a recoger todos sus libros.", score: 4 }
+                    ]
+                },
+                {
+                    question: "Tienes un paquete de galletas que te encantan, y un amigo te pregunta si le puedes dar una. ¿Qué haces?",
+                    options: [
+                        { text: "Le digo que no, son mis favoritas.", score: 1 },
+                        { text: "Le doy una, pero me quejo un poco.", score: 2 },
+                        { text: "Le ofrezco una o dos sin problema.", score: 3 },
+                        { text: "Le ofrezco la mitad del paquete o le pregunto cuántas quiere.", score: 4 }
+                    ]
+                },
+                {
+                    question: "Tu equipo de trabajo escolar está teniendo problemas para ponerse de acuerdo en una idea. Tú tienes una buena idea. ¿Qué haces?",
+                    options: [
+                        { text: "Me guardo mi idea, no quiero discutir.", score: 1 },
+                        { text: "Espero a que alguien más proponga algo.", score: 2 },
+                        { text: "Comparto mi idea, pero si no les gusta, no insisto.", score: 3 },
+                        { text: "Comparto mi idea con entusiasmo y explico cómo podría ayudar al equipo, invitando a los demás a mejorarla.", score: 4 }
+                    ]
+                },
+                {
+                    question: "En clase, la maestra pregunta si alguien puede explicar un tema que a ti te resulta fácil, pero a otros no. ¿Qué haces?",
+                    options: [
+                        { text: "Me quedo callado(a), no quiero ser el/la único(a) en hablar.", score: 1 },
+                        { text: "Pienso en levantar la mano, pero me da pena.", score: 2 },
+                        { text: "Levanto la mano y explico el tema de forma sencilla.", score: 3 },
+                        { text: "Levanto la mano, explico el tema con paciencia y me ofrezco a ayudar a los compañeros que tengan dudas después.", score: 4 }
+                    ]
+                },
+                {
+                    question: "En casa, tus padres están muy ocupados y necesitan ayuda con una tarea (ej. poner la mesa, sacar la basura). ¿Qué haces?",
+                    options: [
+                        { text: "Espero a que me lo pidan directamente.", score: 1 },
+                        { text: "Hago lo que me toca, pero no más.", score: 2 },
+                        { text: "Me ofrezco a ayudar con una cosa que vea que necesitan.", score: 3 },
+                        { text: "Pregunto proactivamente en qué puedo ayudar y me ofrezco a hacer varias cosas para aligerarles la carga.", score: 4 }
+                    ]
+                }
+            ];
+
+            const form = document.getElementById('generosityForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const resultsDiv = document.getElementById('results');
+            const scoreText = document.getElementById('scoreText');
+            const feedbackText = document.getElementById('feedbackText');
+            const goHomeBtn = document.getElementById('goHomeBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const scoreCanvas = document.getElementById('scoreCanvas');
+            const ctx = scoreCanvas.getContext('2d');
+            
+            let studentFirstName = '';
+            let studentLastName = '';
+            let studentCourse = '';
+
+            function loadQuestions() {
+                form.innerHTML = '';
+                
+                // *** INICIO DE LA MODIFICACIÓN: Añadir campos de estudiante ***
+                form.insertAdjacentHTML('beforeend', `
+                    <div class="question-block">
+                        <p>Nombres</p>
+                        <input type="text" id="studentFirstName" name="studentFirstName" placeholder="Escribe tus nombres aquí" required>
+                    </div>
+                    <div class="question-block">
+                        <p>Apellidos</p>
+                        <input type="text" id="studentLastName" name="studentLastName" placeholder="Escribe tus apellidos aquí" required>
+                    </div>
+                    <div class="question-block">
+                        <p>¿A qué curso perteneces?</p>
+                        <select id="studentCourse" name="studentCourse" required>
+                            <option value="">Selecciona tu curso</option>
+                            <option value="T">Transición</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                        </select>
+                    </div>
+                `);
+                // *** FIN DE LA MODIFICACIÓN ***
+                
+                questions.forEach((q, index) => {
+                    const questionBlock = document.createElement('div');
+                    questionBlock.classList.add('question-block');
+                    questionBlock.innerHTML = `
+                        <p>${index + 1}. ${q.question}</p>
+                        <div class="options">
+                            ${q.options.map((option, optIndex) => `
+                                <label>
+                                    <input type="radio" name="question${index}" value="${option.score}" required>
+                                    ${option.text}
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+                    form.appendChild(questionBlock);
+                });
+                updateProgressBar();
+            }
+            
+            function updateProgressBar() {
+                const totalQuestions = questions.length;
+                let answeredQuestions = 0;
+                questions.forEach((q, index) => {
+                    if (document.querySelector(`input[name="question${index}"]:checked`)) {
+                        answeredQuestions++;
+                    }
+                });
+                const progress = (answeredQuestions / totalQuestions) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${answeredQuestions} de ${totalQuestions} preguntas respondidas`;
+            }
+
+            form.addEventListener('change', updateProgressBar);
+            
+            function drawScoreVisualization(score, maxScore) {
+                const centerX = scoreCanvas.width / 2;
+                const centerY = scoreCanvas.height / 2;
+                const radius = Math.min(centerX, centerY) - 10;
+
+                ctx.clearRect(0, 0, scoreCanvas.width, scoreCanvas.height);
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 15;
+                ctx.stroke();
+
+                const endAngle = (score / maxScore) * 2 * Math.PI;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle - Math.PI / 2);
+                ctx.strokeStyle = '#28a745';
+                ctx.lineWidth = 15;
+                ctx.stroke();
+
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 24px Inter, Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${Math.round((score / maxScore) * 100)}%`, centerX, centerY);
+            }
+
+            function getFeedback(score, maxScore) {
+                const scorePercentage = (score / maxScore) * 100;
+                let feedback = "";
+                let strengths = [];
+                let opportunities = [];
+
+                if (scorePercentage >= 80) {
+                    feedback = "¡Felicidades! **Eres una persona muy generosa.**";
+                    strengths.push("Gran disposición para compartir tus cosas y ayudar a los demás.");
+                    strengths.push("Tienes iniciativa para ofrecer ayuda y tiempo.");
+                    opportunities.push("Asegúrate de también cuidar tus propias necesidades.");
+                } else if (scorePercentage >= 60) {
+                    feedback = "¡Muy bien! **Tienes una buena inclinación a la generosidad.**";
+                    strengths.push("Dispuesto(a) a ayudar y compartir cuando es necesario.");
+                    opportunities.push("Puedes buscar más oportunidades activas para ser generoso(a).");
+                } else if (scorePercentage >= 40) {
+                    feedback = "Estás en el camino. **Puedes mejorar tu generosidad.**";
+                    strengths.push("Tienes potencial para desarrollar más la generosidad y la empatía.");
+                    opportunities.push("A veces te cuesta desprenderte de tus cosas, pero puedes practicar.");
+                } else {
+                    feedback = "Es un buen momento para **reflexionar sobre la generosidad.**";
+                    strengths.push("Reconoces la importancia de la generosidad, aunque te cueste aplicarla.");
+                    opportunities.push("Necesitas practicar más la empatía y la acción desinteresada.");
+                }
+
+                let feedbackHtml = `<h3>${feedback}</h3>`;
+                if (strengths.length > 0) {
+                    feedbackHtml += `<h4>Fortalezas:</h4><ul>`;
+                    strengths.forEach(s => feedbackHtml += `<li>${s}</li>`);
+                    feedbackHtml += "</ul>";
+                }
+                if (opportunities.length > 0) {
+                    feedbackHtml += `<h4>Oportunidades de mejora:</h4><ul>`;
+                    opportunities.forEach(w => feedbackHtml += `<li>${w}</li>`);
+                    feedbackHtml += "</ul>";
+                }
+                feedbackHtml += "<p>Recuerda que la generosidad se cultiva día a día.</p>";
+                return feedbackHtml;
+            }
+
+            // --- NUEVA LÓGICA DE MODALES Y ENVÍO ---
+
+            function showModal(message) {
+                const modalOverlay = document.createElement('div');
+                modalOverlay.classList.add('modal-overlay');
+                modalOverlay.innerHTML = `
+                    <div class="modal-content">
+                        <p style="font-size: 1.1em; margin-bottom: 20px; color: #333;">${message}</p>
+                        <button id="modalCloseBtn">Entendido</button>
+                    </div>
+                `;
+                document.body.appendChild(modalOverlay);
+
+                document.getElementById('modalCloseBtn').addEventListener('click', () => {
+                    document.body.removeChild(modalOverlay);
+                });
+            }
+            
+            function showConfirmationModal(message, onConfirm) {
+                const modalOverlay = document.createElement('div');
+                modalOverlay.classList.add('modal-overlay');
+                modalOverlay.innerHTML = `
+                    <div class="modal-content">
+                        <p style="font-size: 1.1em; margin-bottom: 20px; color: #333;">${message}</p>
+                        <div class="modal-buttons">
+                            <button id="modalCancelBtn" style="background-color: #6c757d;">Cancelar</button>
+                            <button id="modalConfirmBtn" style="background-color: #28a745;">Confirmar y Enviar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modalOverlay);
+
+                document.getElementById('modalCancelBtn').addEventListener('click', () => {
+                    document.body.removeChild(modalOverlay);
+                });
+                document.getElementById('modalConfirmBtn').addEventListener('click', () => {
+                    document.body.removeChild(modalOverlay);
+                    onConfirm();
+                });
+            }
+
+            function displayResults(scoreData) {
+                scoreText.textContent = `Tu puntuación es: ${scoreData.totalScore} de ${scoreData.maxScore} puntos.`;
+                feedbackText.innerHTML = scoreData.feedback;
+                drawScoreVisualization(scoreData.totalScore, scoreData.maxScore);
+
+                form.classList.add('hidden');
+                submitBtn.classList.add('hidden');
+                resultsDiv.classList.remove('hidden');
+            }
+
+            async function calculateAndSendResults() {
+                // 1. Validación y Recopilación de Datos
+                // *** INICIO DE LA MODIFICACIÓN: Validación de campos de estudiante ***
+                studentFirstName = document.getElementById('studentFirstName').value.trim();
+                studentLastName = document.getElementById('studentLastName').value.trim();
+                studentCourse = document.getElementById('studentCourse').value;
+
+                if (!studentFirstName || !studentLastName) {
+                    showModal("Por favor, ingresa tus nombres y apellidos.");
+                    return;
+                }
+                if (!studentCourse) {
+                    showModal("Por favor, selecciona tu curso.");
+                    return;
+                }
+                // *** FIN DE LA MODIFICACIÓN ***
+
+                let totalScore = 0;
+                let allAnswered = true;
+                const detailedAnswers = {};
+
+                questions.forEach((q, index) => {
+                    const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                    if (selectedOption) {
+                        const scoreValue = parseInt(selectedOption.value);
+                        totalScore += scoreValue;
+                        detailedAnswers[`Pregunta ${index + 1}`] = {
+                            pregunta: q.question,
+                            respuesta: q.options.find(opt => opt.score === scoreValue).text,
+                            puntaje: scoreValue
+                        };
+                    } else {
+                        allAnswered = false;
+                    }
+                });
+
+                if (!allAnswered) {
+                    showModal('Por favor, responde todas las preguntas antes de continuar.');
+                    return;
+                }
+                
+                const maxScore = questions.length * 4;
+                const feedback = getFeedback(totalScore, maxScore);
+
+                const resultsData = {
+                    // *** INICIO DE LA MODIFICACIÓN: Usar campos estandarizados ***
+                    studentFirstName: studentFirstName,
+                    studentLastName: studentLastName,
+                    course: studentCourse,
+                    // *** FIN DE LA MODIFICACIÓN ***
+                    score: totalScore,
+                    maxScore: maxScore,
+                    feedback: feedback,
+                    timestamp: new Date().toISOString(),
+                    detailedAnswers: detailedAnswers,
+                    quizType: "Generosidad"
+                };
+
+                // 3. Envío al Servidor
+                try {
+                    await window.submitQuizResult(resultsData);
+                    displayResults({ totalScore, maxScore, feedback });
+                } catch (error) {
+                    console.error('Error:', error);
+                    showModal('No se pudo guardar tu resultado. Verifica tu conexión a internet e inténtalo de nuevo.');
+                }
+            }
+
+            submitBtn.addEventListener('click', () => {
+                showConfirmationModal(
+                    '¿Estás seguro de que deseas ver y enviar tus resultados? Una vez enviados, no podrás cambiar tus respuestas.',
+                    calculateAndSendResults
+                );
+            });
+            
+            goHomeBtn.addEventListener('click', () => {
+                window.location.href = '/';
+            });
+
+            loadQuestions();
+        });
+    </script>
+
+<!-- Firebase (Éthykos - ethicos-a9a66) -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
+        authDomain: "ethicos-a9a66.firebaseapp.com",
+        projectId: "ethicos-a9a66",
+        storageBucket: "ethicos-a9a66.firebasestorage.app",
+        messagingSenderId: "1038796710548",
+        appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Guarda un resultado de cuestionario en la colección "quizResults".
+    // Cualquiera puede crear (estudiantes sin login); solo un profesor
+    // autenticado puede leer (ver reglas de Firestore).
+    window.submitQuizResult = async function (data) {
+        await addDoc(collection(db, "quizResults"), {
+            ...data,
+            createdAt: serverTimestamp()
+        });
+    };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Inteligencias Múltiples</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos generales del cuerpo y layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem 0;
+            padding-top: 80px; /* Espacio para la barra de progreso fija */
+            box-sizing: border-box;
+        }
+
+        /* Barra de progreso fija */
+        .progress-bar-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .progress-bar-inner {
+            height: 8px;
+            width: 0%;
+            background-color: #4f46e5;
+            transition: width 0.3s ease-in-out;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .progress-text {
+            text-align: center;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        /* Contenedor principal */
+        .container {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem;
+        }
+
+        /* Estilos de botones */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 15px 0 rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+        }
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        /* Estilos del Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 24rem;
+            margin: 1rem;
+            transform: scale(1);
+            transition: transform 0.3s ease-out;
+        }
+
+        /* Estilos para la sección de resultados */
+        .result-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease-in-out;
+        }
+        .result-bar-bg {
+            width: 100%;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            height: 0.625rem;
+        }
+        .result-bar-fill {
+            background-color: #3b82f6;
+            height: 0.625rem;
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+        }
+        
+        /* ¡NUEVO! Estilo para destacar las fortalezas */
+        .result-card.is-top-talent {
+            border-left: 5px solid #f59e0b; /* Borde dorado */
+            box-shadow: 0 4px 12px 0 rgba(245, 158, 11, 0.2);
+        }
+        .talent-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            text-align: left;
+        }
+        .talent-details strong {
+            color: #1f2937;
+        }
+
+        /* Estilos para las opciones de respuesta */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        @media (min-width: 640px) {
+            .options-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .option-btn {
+            padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db;
+            background-color: white; color: #374151; font-size: 0.875rem;
+            font-weight: 500; text-align: left; transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .option-btn:hover { background-color: #f9fafb; }
+        .option-btn:focus { outline: 2px solid transparent; outline-offset: 2px; box-shadow: 0 0 0 2px #3b82f6; }
+        .option-btn.selected { background-color: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="progress-bar-container">
+        <div class="progress-bar-inner" id="progressBar"></div>
+        <div class="progress-text" id="progressText">0% completado</div>
+    </div>
+
+    <div class="container">
+        <div id="quiz-section" class="space-y-6">
+            <h1 class="text-3xl font-bold text-center text-gray-800">Cuestionario de Talentos</h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 md:gap-x-6 gap-y-4">
+                <!-- *** INICIO DE LA MODIFICACIÓN *** -->
+                <div class="form-group">
+                    <label for="studentFirstName" class="block text-gray-700 font-medium mb-1">Nombres:</label>
+                    <input type="text" id="studentFirstName" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Escribe tus nombres" required>
+                </div>
+                <div class="form-group">
+                    <label for="studentLastName" class="block text-gray-700 font-medium mb-1">Apellidos:</label>
+                    <input type="text" id="studentLastName" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Escribe tus apellidos" required>
+                </div>
+                <!-- *** FIN DE LA MODIFICACIÓN *** -->
+
+                <div class="form-group">
+                    <label for="course" class="block text-gray-700 font-medium mb-1">Curso:</label>
+                    <select id="course" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        <option value="">Selecciona tu curso</option>
+                        <option value="T">Transición</option><option value="1">1</option><option value="2">2</option>
+                        <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                        <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+                        <option value="9">9</option><option value="10">10</option><option value="11">11</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="questions-container" class="space-y-4 pt-4">
+                </div>
+            
+            <div class="flex justify-center mt-8 space-x-4">
+                <button id="submitBtn" class="btn btn-primary">Ver mis resultados y guardar</button>
+            </div>
+        </div>
+
+        <div id="results-section" class="hidden text-center space-y-6">
+            <h2 class="text-3xl font-bold text-green-600 mb-6">¡Descubre tus Talentos!</h2>
+            <div id="results-breakdown" class="text-left space-y-8">
+                </div>
+            <div class="flex justify-center mt-8">
+                <button onclick="window.location.href='/'" class="btn btn-secondary">Volver al inicio</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="text-xl font-bold text-gray-800 mb-2"></h3>
+            <p id="modalMessage" class="text-gray-600 mb-6"></p>
+            <div id="modalButtons" class="flex justify-center space-x-4"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const quizSection = document.getElementById('quiz-section');
+            const resultsSection = document.getElementById('results-section');
+            // *** INICIO DE LA MODIFICACIÓN ***
+            const studentFirstNameInput = document.getElementById('studentFirstName');
+            const studentLastNameInput = document.getElementById('studentLastName');
+            // *** FIN DE LA MODIFICACIÓN ***
+            const courseSelect = document.getElementById('course');
+            const questionsContainer = document.getElementById('questions-container');
+            const submitBtn = document.getElementById('submitBtn');
+            const resultsBreakdown = document.getElementById('results-breakdown');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalButtons = document.getElementById('modalButtons');
+            
+            const questions = [
+                // Inteligencia Lingüística
+                {"id": "q1", "text": "¿Disfrutas escribiendo historias, poemas o ensayos?", "dimension": "Lingüística", "options": [{"text": "Sí, mucho", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "A veces", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, en absoluto", "score": 12}]},
+                {"id": "q2", "text": "¿Te resulta fácil explicar ideas complejas a otras personas?", "dimension": "Lingüística", "options": [{"text": "Sí, muy fácil", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces me cuesta", "score": 16}, {"text": "Generalmente me cuesta", "score": 14}, {"text": "No, me resulta muy difícil", "score": 12}]},
+                {"id": "q3", "text": "¿Te gusta leer libros y revistas sobre una variedad de temas?", "dimension": "Lingüística", "options": [{"text": "Me encanta", "score": 20}, {"text": "Sí, a menudo", "score": 18}, {"text": "A veces, si el tema es interesante", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gusta leer", "score": 12}]},
+                {"id": "q4", "text": "¿Juegas con palabras o disfrutas los juegos de palabras como los crucigramas?", "dimension": "Lingüística", "options": [{"text": "Siempre que puedo", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me divierte", "score": 12}]},
+                {"id": "q5", "text": "¿Tienes una buena memoria para nombres, lugares, fechas y detalles sin usar trucos?", "dimension": "Lingüística", "options": [{"text": "Sí, muy buena", "score": 20}, {"text": "Buena, por lo general sí", "score": 18}, {"text": "A veces me cuesta recordarlos", "score": 16}, {"text": "Tiendo a olvidarlos", "score": 14}, {"text": "Me es muy difícil recordarlos", "score": 12}]},
+                
+                // Inteligencia Lógico-matemática
+                {"id": "q6", "text": "¿Te gusta resolver acertijos, problemas de lógica o rompecabezas?", "dimension": "Lógico-matemática", "options": [{"text": "Sí, mucho", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "A veces, si son fáciles", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gustan", "score": 12}]},
+                {"id": "q7", "text": "¿Te sientes cómodo trabajando con números y datos?", "dimension": "Lógico-matemática", "options": [{"text": "Sí, me siento muy cómodo", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces me cuesta un poco", "score": 16}, {"text": "Generalmente me cuesta", "score": 14}, {"text": "No, me siento muy incómodo", "score": 12}]},
+                {"id": "q8", "text": "¿Te gusta organizar la información de forma lógica y secuencial?", "dimension": "Lógico-matemática", "options": [{"text": "Sí, mucho", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "A veces me cuesta", "score": 16}, {"text": "Generalmente me cuesta", "score": 14}, {"text": "No, prefiero el desorden", "score": 12}]},
+                {"id": "q9", "text": "¿Eres bueno detectando patrones y relaciones entre cosas?", "dimension": "Lógico-matemática", "options": [{"text": "Sí, muy bueno", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, me es muy difícil", "score": 12}]},
+                {"id": "q10", "text": "¿Te preguntas cómo funcionan las cosas y te gusta hacer experimentos?", "dimension": "Lógico-matemática", "options": [{"text": "Sí, siempre", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "A veces", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, nunca me he preguntado", "score": 12}]},
+
+                // Inteligencia Espacial
+                {"id": "q11", "text": "¿Te resulta fácil leer mapas, gráficos y diagramas?", "dimension": "Espacial", "options": [{"text": "Sí, muy fácil", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces, si el mapa es detallado", "score": 16}, {"text": "Generalmente me cuesta", "score": 14}, {"text": "No, me resulta muy difícil", "score": 12}]},
+                {"id": "q12", "text": "¿Disfrutas armando rompecabezas, maquetas o Legos?", "dimension": "Espacial", "options": [{"text": "Sí, mucho", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "A veces, si son sencillos", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me divierte", "score": 12}]},
+                {"id": "q13", "text": "¿Tienes buena orientación y te resulta fácil encontrar un lugar nuevo?", "dimension": "Espacial", "options": [{"text": "Sí, muy buena", "score": 20}, {"text": "Buena, por lo general no me pierdo", "score": 18}, {"text": "Me cuesta un poco", "score": 16}, {"text": "Suelo perderme fácilmente", "score": 14}, {"text": "Siempre me pierdo", "score": 12}]},
+                {"id": "q14", "text": "¿Te gusta dibujar, pintar o hacer bocetos?", "dimension": "Espacial", "options": [{"text": "Sí, me encanta", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gusta", "score": 12}]},
+                {"id": "q15", "text": "¿Imaginas fácilmente cómo se verían las cosas desde un ángulo diferente?", "dimension": "Espacial", "options": [{"text": "Sí, con mucha facilidad", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces me cuesta", "score": 16}, {"text": "Casi nunca", "score": 14}, {"text": "No, me es muy difícil", "score": 12}]},
+
+                // Inteligencia Kinestésica
+                {"id": "q16", "text": "¿Te gusta participar en deportes o actividades físicas?", "dimension": "Kinestésica", "options": [{"text": "Sí, mucho", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gusta", "score": 12}]},
+                {"id": "q17", "text": "¿Aprendes mejor haciendo o experimentando, en lugar de solo leer o escuchar?", "dimension": "Kinestésica", "options": [{"text": "Sí, haciendo y practicando", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "Depende de la materia", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, aprendo mejor leyendo", "score": 12}]},
+                {"id": "q18", "text": "¿Te sientes cómodo usando las manos para construir o reparar cosas?", "dimension": "Kinestésica", "options": [{"text": "Sí, muy cómodo", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces me cuesta", "score": 16}, {"text": "Generalmente me cuesta", "score": 14}, {"text": "No, me siento muy torpe", "score": 12}]},
+                {"id": "q19", "text": "¿Expresas tus emociones o ideas a través de gestos o expresiones corporales?", "dimension": "Kinestésica", "options": [{"text": "Sí, de forma natural", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, soy muy expresivo con palabras", "score": 12}]},
+                {"id": "q20", "text": "¿Disfrutas actividades como bailar, actuar o practicar alguna disciplina de movimiento?", "dimension": "Kinestésica", "options": [{"text": "Sí, mucho", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gusta el movimiento", "score": 12}]},
+
+                // Inteligencia Musical
+                {"id": "q21", "text": "¿Reconoces fácilmente melodías y ritmos?", "dimension": "Musical", "options": [{"text": "Sí, muy fácil", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces, si la canción es conocida", "score": 16}, {"text": "Generalmente me cuesta", "score": 14}, {"text": "No, me resulta muy difícil", "score": 12}]},
+                {"id": "q22", "text": "¿Disfrutas tocando un instrumento musical o cantando?", "dimension": "Musical", "options": [{"text": "Sí, me encanta", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gusta", "score": 12}]},
+                {"id": "q23", "text": "¿Sueles tararear o silbar melodías sin darte cuenta?", "dimension": "Musical", "options": [{"text": "Sí, muy a menudo", "score": 20}, {"text": "Con frecuencia", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Casi nunca", "score": 14}, {"text": "No, no lo hago", "score": 12}]},
+                {"id": "q24", "text": "¿Eres bueno detectando cuando un sonido está desafinado o fuera de ritmo?", "dimension": "Musical", "options": [{"text": "Sí, muy bueno", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, me es muy difícil", "score": 12}]},
+                {"id": "q25", "text": "¿La música te ayuda a estudiar, relajarte o cambiar tu estado de ánimo?", "dimension": "Musical", "options": [{"text": "Siempre", "score": 20}, {"text": "Casi siempre", "score": 18}, {"text": "A veces", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no tiene gran efecto en mí", "score": 12}]},
+
+                // Inteligencia Interpersonal
+                {"id": "q26", "text": "¿Te resulta fácil entender los sentimientos y motivaciones de otras personas?", "dimension": "Interpersonal", "options": [{"text": "Sí, muy fácil", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces, si hablo mucho con ellos", "score": 16}, {"text": "Generalmente me cuesta", "score": 14}, {"text": "No, me resulta muy difícil", "score": 12}]},
+                {"id": "q27", "text": "¿Disfrutas trabajando en equipo o en grupos de estudio?", "dimension": "Interpersonal", "options": [{"text": "Sí, mucho", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "A veces, si me llevo bien con el equipo", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, prefiero trabajar solo", "score": 12}]},
+                {"id": "q28", "text": "¿Eres bueno mediando en conflictos entre amigos?", "dimension": "Interpersonal", "options": [{"text": "Sí, muy bueno", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces, pero no siempre tengo éxito", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, me siento incómodo", "score": 12}]},
+                {"id": "q29", "text": "¿Te gusta ayudar y enseñar a otros?", "dimension": "Interpersonal", "options": [{"text": "Sí, me encanta", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gusta", "score": 12}]},
+                {"id": "q30", "text": "¿Eres de las personas a quienes la gente acude para pedir un consejo?", "dimension": "Interpersonal", "options": [{"text": "Sí, a menudo", "score": 20}, {"text": "Con frecuencia", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, nunca me piden consejos", "score": 12}]},
+
+                // Inteligencia Intrapersonal
+                {"id": "q31", "text": "¿Te gusta pasar tiempo a solas para reflexionar o meditar?", "dimension": "Intrapersonal", "options": [{"text": "Sí, me encanta", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, me siento incómodo solo", "score": 12}]},
+                {"id": "q32", "text": "¿Eres consciente de tus propias fortalezas y debilidades?", "dimension": "Intrapersonal", "options": [{"text": "Sí, muy consciente", "score": 20}, {"text": "Bastante consciente", "score": 18}, {"text": "Más o menos", "score": 16}, {"text": "No, me es difícil", "score": 14}, {"text": "No, para nada", "score": 12}]},
+                {"id": "q33", "text": "¿Puedes controlar tus emociones y reacciones ante los problemas?", "dimension": "Intrapersonal", "options": [{"text": "Sí, muy bien", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces me cuesta", "score": 16}, {"text": "Generalmente me cuesta", "score": 14}, {"text": "No, mis emociones me controlan", "score": 12}]},
+                {"id": "q34", "text": "¿Tienes metas y planes claros para tu vida?", "dimension": "Intrapersonal", "options": [{"text": "Sí, muy claros", "score": 20}, {"text": "Bastante claros", "score": 18}, {"text": "Tengo una idea, pero no son claros", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no tengo planes", "score": 12}]},
+                {"id": "q35", "text": "¿Te resulta fácil aprender de tus errores?", "dimension": "Intrapersonal", "options": [{"text": "Sí, muy fácil", "score": 20}, {"text": "Normalmente sí", "score": 18}, {"text": "A veces me cuesta", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, me es muy difícil", "score": 12}]},
+                
+                // Inteligencia Naturalista
+                {"id": "q36", "text": "¿Te gusta pasar tiempo al aire libre y en la naturaleza?", "dimension": "Naturalista", "options": [{"text": "Sí, me encanta", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez en cuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gusta", "score": 12}]},
+                {"id": "q37", "text": "¿Disfrutas cuidando plantas o animales?", "dimension": "Naturalista", "options": [{"text": "Sí, mucho", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "A veces, si tengo el tiempo", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me gusta cuidarlos", "score": 12}]},
+                {"id": "q38", "text": "¿Te fijas en los cambios del clima, las estaciones o los ciclos de la naturaleza?", "dimension": "Naturalista", "options": [{"text": "Sí, siempre", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "De vez encuando", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, nunca me fijo", "score": 12}]},
+                {"id": "q39", "text": "¿Te gusta clasificar y organizar elementos naturales (rocas, hojas, conchas)?", "dimension": "Naturalista", "options": [{"text": "Sí, me parece fascinante", "score": 20}, {"text": "A menudo", "score": 18}, {"text": "A veces", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, no me interesa", "score": 12}]},
+                {"id": "q40", "text": "¿Sientes una conexión especial con el mundo natural?", "dimension": "Naturalista", "options": [{"text": "Sí, muy fuerte", "score": 20}, {"text": "Bastante fuerte", "score": 18}, {"text": "Más o menos", "score": 16}, {"text": "Pocas veces", "score": 14}, {"text": "No, en absoluto", "score": 12}]}
+            ];
+            
+            // ¡NUEVO! Información adicional para cada inteligencia
+            const intelligenceDescriptions = {
+                "Lingüística": { 
+                    "title": "Inteligencia Lingüística", 
+                    "description": "Tienes una gran facilidad para usar las palabras, tanto al escribir como al hablar. Te destacas en la comunicación y en la comprensión de la información verbal.",
+                    "materias": "Lenguaje, Ciencias Sociales, Filosofía, Historia.",
+                    "habilidades": "Creatividad para escribir, buena memoria, facilidad para debatir y argumentar, contar historias. Ideal para ser periodista, abogado, escritor o profesor."
+                },
+                "Lógico-matemática": { 
+                    "title": "Inteligencia Lógico-matemática", 
+                    "description": "Eres muy bueno resolviendo problemas, pensando de manera abstracta y analizando la información. Te sientes atraído por la ciencia, las matemáticas y los desafíos lógicos.",
+                    "materias": "Matemáticas, Física, Química, Informática, Lógica.",
+                    "habilidades": "Orden, disciplina, resolución de problemas, pensamiento crítico, programación. Ideal para ser científico, ingeniero, analista de datos o programador."
+                },
+                "Espacial": { 
+                    "title": "Inteligencia Espacial", 
+                    "description": "Tienes una gran capacidad para visualizar objetos en 3D, pensar en imágenes y orientarte en el espacio. Te resultan fáciles los mapas, los diseños y el arte.",
+                    "materias": "Arte, Diseño, Geometría, Geografía.",
+                    "habilidades": "Creatividad, sentido de la orientación, imaginación, diseño gráfico, dibujo. Ideal para ser arquitecto, artista, diseñador o fotógrafo."
+                },
+                "Kinestésica": { 
+                    "title": "Inteligencia Corporal-Kinestésica", 
+                    "description": "Aprendes mejor a través del movimiento y la experiencia física. Tienes una gran coordinación y control de tu cuerpo.",
+                    "materias": "Educación Física, Danza, Teatro, Tecnología.",
+                    "habilidades": "Coordinación, destreza manual, equilibrio, expresión corporal. Ideal para ser deportista, bailarín, actor, cirujano o artesano."
+                },
+                "Musical": { 
+                    "title": "Inteligencia Musical", 
+                    "description": "Eres sensible al ritmo, la melodía y el tono. Tienes facilidad para reconocer y crear música.",
+                    "materias": "Música, Artes, Física (acústica).",
+                    "habilidades": "Sentido del ritmo, buen oído, creatividad, disciplina para practicar. Ideal para ser músico, compositor, productor musical o crítico de música."
+                },
+                "Interpersonal": { 
+                    "title": "Inteligencia Interpersonal", 
+                    "description": "Comprendes y te relacionas muy bien con los demás. Eres empático, comunicativo y bueno trabajando en equipo.",
+                    "materias": "Ciencias Sociales, Ética, Psicología.",
+                    "habilidades": "Liderazgo, empatía, trabajo en equipo, comunicación, resolución de conflictos. Ideal para ser psicólogo, profesor, líder de proyectos o diplomático."
+                },
+                "Intrapersonal": { 
+                    "title": "Inteligencia Intrapersonal", 
+                    "description": "Tienes un profundo conocimiento de ti mismo, de tus emociones, tus fortalezas y debilidades. Eres reflexivo e independiente.",
+                    "materias": "Filosofía, Ética, Psicología.",
+                    "habilidades": "Autodisciplina, autoconocimiento, establecimiento de metas, independencia. Ideal para ser filósofo, escritor, emprendedor o investigador."
+                },
+                "Naturalista": { 
+                    "title": "Inteligencia Naturalista", 
+                    "description": "Tienes una gran conexión con el mundo natural y te resulta fácil identificar y clasificar la flora, la fauna y otros elementos de la naturaleza.",
+                    "materias": "Ciencias Naturales, Biología, Ecología, Geología.",
+                    "habilidades": "Observación, clasificación, cuidado del medio ambiente, exploración. Ideal para ser biólogo, ecólogo, veterinario o geólogo."
+                }
+            };
+
+            function updateProgressBar() {
+                const totalQuestions = questions.length;
+                if (totalQuestions === 0) return;
+                const answeredQuestions = document.querySelectorAll('.option-btn.selected').length;
+                const progress = (answeredQuestions / totalQuestions) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${answeredQuestions} de ${totalQuestions} (${Math.round(progress)}%) completado`;
+            }
+
+            function showModal(message, title = 'Mensaje', type = 'alert', confirmAction = null) {
+                modal.classList.remove('hidden');
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalButtons.innerHTML = '';
+                
+                if (type === 'confirm') {
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.textContent = 'Sí';
+                    confirmBtn.className = 'btn btn-primary';
+                    confirmBtn.onclick = () => { hideModal(); confirmAction(); };
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.textContent = 'No';
+                    cancelBtn.className = 'btn btn-secondary';
+                    cancelBtn.onclick = hideModal;
+                    modalButtons.appendChild(confirmBtn);
+                    modalButtons.appendChild(cancelBtn);
+                } else {
+                    const okBtn = document.createElement('button');
+                    okBtn.textContent = 'Cerrar';
+                    okBtn.className = 'btn btn-primary';
+                    okBtn.onclick = hideModal;
+                    modalButtons.appendChild(okBtn);
+                }
+            }
+            
+            function hideModal() { modal.classList.add('hidden'); }
+
+            function renderQuestions() {
+                questions.forEach(q => {
+                    const questionCard = document.createElement('div');
+                    questionCard.className = 'bg-gray-50 p-6 rounded-xl shadow-inner border border-gray-200';
+                    const questionText = document.createElement('div');
+                    questionText.className = 'text-gray-800 font-semibold mb-4 text-lg';
+                    questionText.textContent = q.text;
+                    questionCard.appendChild(questionText);
+                    const optionsContainer = document.createElement('div');
+                    optionsContainer.className = 'options-grid';
+                    q.options.forEach(option => {
+                        const optionBtn = document.createElement('button');
+                        optionBtn.type = 'button';
+                        optionBtn.className = 'option-btn';
+                        optionBtn.textContent = option.text;
+                        optionBtn.dataset.score = option.score;
+                        optionBtn.dataset.questionId = q.id;
+                        optionBtn.addEventListener('click', () => { selectOption(optionBtn); });
+                        optionsContainer.appendChild(optionBtn);
+                    });
+                    questionCard.appendChild(optionsContainer);
+                    questionsContainer.appendChild(questionCard);
+                });
+            }
+
+            function selectOption(button) {
+                const questionId = button.dataset.questionId;
+                document.querySelectorAll(`button[data-question-id="${questionId}"]`).forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                updateProgressBar();
+            }
+
+            async function calculateAndSendResults() {
+                // *** INICIO DE LA MODIFICACIÓN ***
+                const studentFirstName = studentFirstNameInput.value.trim();
+                const studentLastName = studentLastNameInput.value.trim();
+                const course = courseSelect.value;
+                const selectedAnswers = document.querySelectorAll('.option-btn.selected');
+
+                if (studentFirstName === '' || studentLastName === '' || course === '') {
+                    showModal('Por favor, completa tus nombres, apellidos y selecciona tu curso.');
+                    return;
+                }
+                // *** FIN DE LA MODIFICACIÓN ***
+                if (selectedAnswers.length !== questions.length) {
+                    showModal('Por favor, responde todas las preguntas.');
+                    return;
+                }
+
+                const scoresByDimension = {};
+                const maxScoresByDimension = {};
+                const dimensions = Object.keys(intelligenceDescriptions);
+                dimensions.forEach(dim => {
+                    scoresByDimension[dim] = 0;
+                    maxScoresByDimension[dim] = 0;
+                });
+                
+                selectedAnswers.forEach(btn => {
+                    const question = questions.find(q => q.id === btn.dataset.questionId);
+                    const score = parseInt(btn.dataset.score);
+                    scoresByDimension[question.dimension] += score;
+                    const maxPossibleScore = question.options.reduce((max, option) => Math.max(max, option.score), 0);
+                    maxScoresByDimension[question.dimension] += maxPossibleScore;
+                });
+                
+                const dataToSend = { /* ... Se arma más adelante con los datos calculados ... */ };
+
+                try {
+                    // El envío se hace al final, después de mostrar los resultados.
+                    
+                    quizSection.classList.add('hidden');
+                    resultsSection.classList.remove('hidden');
+
+                    // ¡NUEVO! Lógica para encontrar y destacar las fortalezas
+                    const resultsArray = [];
+                    dimensions.forEach(dim => {
+                        const totalScore = scoresByDimension[dim];
+                        const maxScore = maxScoresByDimension[dim];
+                        const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
+                        resultsArray.push({ dimension: dim, percentage: percentage });
+                    });
+                    
+                    // Ordenar de mayor a menor
+                    resultsArray.sort((a, b) => b.percentage - a.percentage);
+                    
+                    // Obtener los nombres de las 3 inteligencias más altas
+                    const top3Dimensions = resultsArray.slice(0, 3).map(r => r.dimension);
+
+                    let resultsHtml = '';
+                    resultsArray.forEach(result => {
+                        const dim = result.dimension;
+                        const percentage = result.percentage;
+                        const info = intelligenceDescriptions[dim];
+                        const isTop = top3Dimensions.includes(dim);
+                        
+                        // Si es una fortaleza, añade la clase 'is-top-talent'
+                        const cardClass = isTop ? 'result-card is-top-talent' : 'result-card';
+                        
+                        resultsHtml += `
+                            <div class="${cardClass}">
+                                <h3 class="text-xl font-bold text-gray-800">
+                                    ${isTop ? '⭐ ' : ''}${info.title}
+                                </h3>
+                                <p class="text-sm text-gray-500 mb-4">${percentage.toFixed(0)}% de potencial</p>
+                                <div class="result-bar-bg">
+                                    <div class="result-bar-fill" style="width: ${percentage}%;"></div>
+                                </div>
+                                <p class="mt-4 text-gray-600 text-sm leading-relaxed">${info.description}</p>
+                                
+                                ${isTop ? `
+                                <div class="talent-details">
+                                    <p><strong>Materias asociadas:</strong> ${info.materias}</p>
+                                    <p class="mt-2"><strong>Habilidades y tareas:</strong> ${info.habilidades}</p>
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    resultsBreakdown.innerHTML = resultsHtml;
+                    
+                    // --- Guardado de datos después de mostrar resultados ---
+                    const detailedAnswers = {};
+                    dimensions.forEach(dim => {
+                        const totalScore = scoresByDimension[dim];
+                        const maxScore = maxScoresByDimension[dim];
+                        const percentage = maxScore > 0 ? (totalScore / maxScore) * 100 : 0;
+                        detailedAnswers[intelligenceDescriptions[dim].title] = {
+                            pregunta: `Potencial en ${intelligenceDescriptions[dim].title}`,
+                            respuesta: `${percentage.toFixed(0)}% (${totalScore} de ${maxScore})`
+                        };
+                    });
+                    
+                    // *** INICIO DE LA MODIFICACIÓN ***
+                    dataToSend.studentFirstName = studentFirstName;
+                    dataToSend.studentLastName = studentLastName;
+                    // *** FIN DE LA MODIFICACIÓN ***
+                    dataToSend.course = course; dataToSend.score = 0; dataToSend.maxScore = 0;
+                    dataToSend.feedback = 'Análisis completo de inteligencias múltiples.';
+                    dataToSend.detailedAnswers = detailedAnswers;
+                    dataToSend.timestamp = new Date().toISOString();
+                    dataToSend.quizType = 'Cuestionario Talentos';
+                    
+                    await window.submitQuizResult(dataToSend);
+
+                    console.log('Resultados guardados con éxito en Firestore.');
+
+                } catch (error) {
+                    showModal(`Hubo un problema al procesar o guardar los resultados. Por favor, inténtalo de nuevo. Error: ${error.message}`, 'Error');
+                    console.error('Error en calculateAndSendResults:', error);
+                }
+            }
+
+            submitBtn.addEventListener('click', () => {
+                showModal('¿Estás seguro de que deseas enviar tus respuestas? No podrás cambiarlas después.', 'Confirmación', 'confirm', calculateAndSendResults);
+            });
+
+            renderQuestions();
+            updateProgressBar();
+        });
+    </script>
+
+<!-- Firebase (Éthykos - ethicos-a9a66) -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
+        authDomain: "ethicos-a9a66.firebaseapp.com",
+        projectId: "ethicos-a9a66",
+        storageBucket: "ethicos-a9a66.firebasestorage.app",
+        messagingSenderId: "1038796710548",
+        appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Guarda un resultado de cuestionario en la colección "quizResults".
+    // Cualquiera puede crear (estudiantes sin login); solo un profesor
+    // autenticado puede leer (ver reglas de Firestore).
+    window.submitQuizResult = async function (data) {
+        await addDoc(collection(db, "quizResults"), {
+            ...data,
+            createdAt: serverTimestamp()
+        });
+    };
+</script>
+
+</body>
+</html>

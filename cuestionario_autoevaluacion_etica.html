@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario de Autoevaluación de Ética</title>
+    <style>
+        /* Estilos CSS integrados */
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            padding-top: 80px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            width: 95%;
+            max-width: 750px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .instructions {
+            background-color: #e6f7ff;
+            border: 1px solid #0056b3;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .instructions h2 {
+            color: #0056b3;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .instructions p, .instructions ul {
+            color: #333;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .instructions ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            padding-left: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .progress-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #e0e0e0;
+            height: 40px;
+            overflow: hidden;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-weight: bold;
+            font-size: 0.95em;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 10px;
+            width: 0%;
+            background-color: #0056b3;
+            transition: width 0.4s ease-in-out;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .question-block {
+            margin-bottom: 25px;
+            text-align: left;
+            padding: 20px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .question-block:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-block p {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 1.1em;
+        }
+
+        .question-block input[type="text"],
+        .question-block input[type="number"],
+        .question-block select,
+        .question-block textarea {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .question-block input[type="text"]:focus,
+        .question-block input[type="number"]:focus,
+        .question-block select:focus,
+        .question-block textarea:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.2);
+            outline: none;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .optional-section-header {
+            background-color: #f0f8ff;
+            border-left: 5px solid #007bff;
+            padding: 15px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #0056b3;
+            font-size: 1.1em;
+            border-radius: 8px;
+        }
+
+
+        button {
+            background-color: #0056b3;
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 25px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button.secondary {
+            background-color: #6c757d;
+        }
+
+        button:hover {
+            background-color: #003f80;
+            transform: translateY(-2px);
+        }
+        
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #results {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+        #results h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        #scoreText {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        #feedbackText {
+            margin-top: 20px;
+            line-height: 1.7;
+            color: #555;
+            font-size: 1.05em;
+        }
+
+        #feedbackText h3 {
+            color: #0056b3;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+        }
+
+        #feedbackText h4 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+
+        #feedbackText h4 svg {
+            margin-right: 8px;
+        }
+
+        #feedbackText ul {
+            list-style-type: disc;
+            margin-left: 25px;
+            padding-left: 0;
+        }
+
+        #feedbackText li {
+            margin-bottom: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #scoreCanvas {
+            display: block;
+            margin: 20px auto;
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            font-family: 'Inter', Arial, sans-serif;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+             transform: scale(1);
+        }
+        .modal-buttons {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator">
+        <span id="progressText">0 de 10 preguntas respondidas</span>
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="container">
+        <h1>Cuestionario de Autoevaluación de Ética</h1>
+
+        <div class="instructions">
+            <h2>¡Hola! Es hora de tu Autoevaluación de Ética.</h2>
+            <p>Este cuestionario te ayudará a reflexionar sobre tu **comportamiento ético y tus valores** durante las clases. Tu honestidad es muy importante para tu propio crecimiento.</p>
+            <h3>Criterios de evaluación:</h3>
+            <ul>
+                <li>Valora cada uno de los 5 ítems con un valor entre **1 (muy bajo)** y **20 (excelente)**.</li>
+                <li>El objetivo es obtener un máximo de **100 puntos** en total para estos 5 ítems.</li>
+            </ul>
+            <h3>Instrucciones generales:</h3>
+            <ul>
+                <li>Lee cada pregunta con mucha atención y piensa en tu experiencia real en clase.</li>
+                <li>Sé honesto/a contigo mismo/a. Este cuestionario es para tu aprendizaje y crecimiento.</li>
+                <li>Una vez que respondas todas las preguntas, haz clic en el botón "Ver y Enviar Resultados".</li>
+                <li>Se te pedirá confirmar el envío. Una vez confirmado, tus resultados se guardarán y podrás ver tu retroalimentación.</li>
+                <li>¡Gracias por tu participación!</li>
+            </ul>
+        </div>
+
+        <form id="autoevaluacionEticaForm">
+            <!-- Las preguntas se cargarán aquí con JavaScript -->
+        </form>
+        <button type="button" id="submitBtn">Ver y Enviar Resultados</button>
+        <div id="results" class="hidden">
+            <h2>Tus Resultados</h2>
+            <canvas id="scoreCanvas" width="200" height="200"></canvas>
+            <p id="scoreText"></p>
+            <div id="feedbackText"></div>
+            <button type="button" id="resetBtn">Volver al Menú Principal</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- CONFIGURACIÓN ---
+            const questions = [
+                // 5 Preguntas de Calificación (1-20)
+                { type: "number", question: "Participación activa: Durante las clases mantuve una buena disposición y participé activamente de las dinámicas de todas las actividades (preguntando y aportando ideas).", name: "q1_participacion", min: 1, max: 20, placeholder: "1-20", required: true },
+                { type: "number", question: "Uso del material de clase: Siempre tuve la mejor disposición para el trabajo en clase, cuidé mi cuaderno y los elementos necesarios para las actividades.", name: "q2_material", min: 1, max: 20, placeholder: "1-20", required: true },
+                { type: "number", question: "Trabajo autónomo y responsabilidad: Presté atención a todas las explicaciones del profesor, en caso de dudas pregunté y trabajé con responsabilidad en clase sin entretenerme en otras cosas.", name: "q3_autonomia", min: 1, max: 20, placeholder: "1-20", required: true },
+                { type: "number", question: "Seguimiento de instrucciones: Estuve atento y seguí las indicaciones del profesor para el desarrollo de las actividades.", name: "q4_instrucciones", min: 1, max: 20, placeholder: "1-20", required: true },
+                { type: "number", question: "Respeto por el desarrollo de la clase: Llegué a tiempo a clase y mantuve el orden de mi puesto; fui respetuoso al hablar con el profesor y con mis compañeros. No interferí con la clase o la concentración de mis compañeros al hablar o hacer otras cosas.", name: "q5_respeto", min: 1, max: 20, placeholder: "1-20", required: true },
+                // 5 Preguntas de Opinión (no calificables)
+                { type: "textarea", question: "¿Cuál fue la actividad o tema que más te gustó o te pareció más provechoso en clase?", name: "q6_gusto_provecho", placeholder: "Escribe tu opinión aquí..." },
+                { type: "textarea", question: "¿Qué sugerencias tienes para que las clases sean aún más interesantes o para mejorar el ambiente de aprendizaje?", name: "q7_sugerencias_clase", placeholder: "Escribe tus sugerencias aquí..." },
+                { type: "textarea", question: "¿Hubo algo que te resultó difícil o que crees que se podría explicar de otra manera?", name: "q8_dificultades", placeholder: "Escribe tu respuesta aquí..." },
+                { type: "textarea", question: "¿Qué crees que podrías hacer tú para mejorar tu propio aprendizaje en clase?", name: "q9_mejora_personal", placeholder: "Escribe tu respuesta aquí..." },
+                { type: "textarea", question: "¿Hay algo más que quieras compartir sobre tu experiencia en las clases?", name: "q10_comentarios_extra", placeholder: "Escribe aquí tu opinión..." }
+            ];
+
+            // --- ELEMENTOS DEL DOM ---
+            const form = document.getElementById('autoevaluacionEticaForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const resultsDiv = document.getElementById('results');
+            const scoreText = document.getElementById('scoreText');
+            const feedbackText = document.getElementById('feedbackText');
+            const resetBtn = document.getElementById('resetBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const scoreCanvas = document.getElementById('scoreCanvas');
+            const ctx = scoreCanvas.getContext('2d');
+
+            // --- FUNCIONES PRINCIPALES ---
+
+            function loadQuestions() {
+                form.innerHTML = ''; 
+                
+                // *** INICIO DE LA MODIFICACIÓN ***
+                form.insertAdjacentHTML('beforeend', `
+                    <div class="question-block">
+                        <p>Nombres</p>
+                        <input type="text" id="studentFirstName" name="studentFirstName" placeholder="Escribe tus nombres aquí" required>
+                    </div>
+                    <div class="question-block">
+                        <p>Apellidos</p>
+                        <input type="text" id="studentLastName" name="studentLastName" placeholder="Escribe tus apellidos aquí" required>
+                    </div>
+                    <div class="question-block">
+                        <p>¿A qué curso perteneces?</p>
+                        <select id="studentCourse" name="studentCourse" required>
+                            <option value="">Selecciona tu curso</option>
+                            ${Array.from({ length: 11 }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join('')}
+                        </select>
+                    </div>
+                `);
+                 // *** FIN DE LA MODIFICACIÓN ***
+
+                questions.slice(0, 5).forEach((q, i) => {
+                    form.insertAdjacentHTML('beforeend', `
+                        <div class="question-block">
+                            <p>${i + 1}. ${q.question}</p>
+                            <input type="number" name="${q.name}" min="${q.min}" max="${q.max}" placeholder="${q.placeholder}" required>
+                        </div>
+                    `);
+                });
+                
+                // PREGUNTAS EXTRAS - OPINION
+                form.insertAdjacentHTML('beforeend', `
+                    <div class="optional-section-header">
+                        <h3>¡Cuéntame más! (Respuestas opcionales)</h3>
+                        <p>Tus opiniones me ayudan a mejorar la clase. ¡Anímate a compartir!</p>
+                    </div>
+                `);
+                questions.slice(5).forEach((q, i) => {
+                    form.insertAdjacentHTML('beforeend', `
+                        <div class="question-block">
+                            <p>${i + 6}. ${q.question}</p>
+                            <textarea name="${q.name}" placeholder="${q.placeholder}"></textarea>
+                        </div>
+                    `);
+                });
+                updateProgressBar();
+            }
+
+            function updateProgressBar() {
+                const totalRequired = 5 + 3; // 5 preguntas + nombre + apellido + curso
+                let answeredCount = 0;
+                // *** INICIO DE LA MODIFICACIÓN ***
+                if (document.getElementById('studentFirstName').value.trim() !== '') answeredCount++;
+                if (document.getElementById('studentLastName').value.trim() !== '') answeredCount++;
+                 // *** FIN DE LA MODIFICACIÓN ***
+                if (document.getElementById('studentCourse').value.trim() !== '') answeredCount++;
+                
+                const answeredRequiredQuestions = Array.from(form.querySelectorAll('input[type="number"][required]')).filter(el => el.value.trim() !== '').length;
+                answeredCount += answeredRequiredQuestions;
+
+                const progress = (answeredCount / totalRequired) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${answeredRequiredQuestions} de 5 preguntas de calificación respondidas`;
+            }
+
+            function validateForm() {
+                 // *** INICIO DE LA MODIFICACIÓN ***
+                if (!document.getElementById('studentFirstName').value.trim() || !document.getElementById('studentLastName').value.trim()) {
+                    showInfoModal("Por favor, ingresa tus nombres y apellidos.");
+                    return false;
+                }
+                 // *** FIN DE LA MODIFICACIÓN ***
+                if (!document.getElementById('studentCourse').value.trim()) {
+                    showInfoModal("Por favor, selecciona tu curso.");
+                    return false;
+                }
+                for (let i = 0; i < 5; i++) {
+                    const q = questions[i];
+                    const inputElement = form.querySelector(`[name="${q.name}"]`);
+                    const value = inputElement.value.trim();
+                    if (value === '') {
+                        showInfoModal(`Por favor, responde la pregunta obligatoria número ${i + 1}.`);
+                        return false;
+                    }
+                    const numValue = parseInt(value);
+                    if (isNaN(numValue) || numValue < q.min || numValue > q.max) {
+                        showInfoModal(`Por favor, ingresa un número válido entre ${q.min} y ${q.max} para la pregunta ${i + 1}.`);
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function handleFormSubmission() {
+                if (!validateForm()) return;
+
+                showConfirmationModal(
+                    "¿Estás seguro de que deseas enviar tus resultados?",
+                    "Tus respuestas se guardarán permanentemente.",
+                    async () => {
+                        const success = await sendResultsToServer();
+                        if (success) {
+                            displayResults();
+                        }
+                    }
+                );
+            }
+
+            async function sendResultsToServer() {
+                const formData = new FormData(form);
+                
+                // *** INICIO DE LA MODIFICACIÓN ***
+                const resultsData = {
+                    studentFirstName: formData.get('studentFirstName'),
+                    studentLastName: formData.get('studentLastName'),
+                    course: formData.get('studentCourse'),
+                    score: 0,
+                    maxScore: 100,
+                    feedback: '',
+                    timestamp: new Date().toISOString(),
+                    detailedAnswers: {},
+                    quizType: "Autoevaluación de Ética"
+                };
+                // *** FIN DE LA MODIFICACIÓN ***
+
+                let totalScore = 0;
+                questions.forEach((q, i) => {
+                    const answer = formData.get(q.name);
+                    if (q.type === 'number') {
+                        const score = parseInt(answer) || 0;
+                        totalScore += score;
+                        resultsData.detailedAnswers[`Pregunta ${i + 1}`] = { question: q.question, answer: score, score: score };
+                    } else if (answer) {
+                        resultsData.detailedAnswers[`Pregunta ${i + 1}`] = { question: q.question, answer: answer };
+                    }
+                });
+
+                resultsData.score = totalScore;
+                resultsData.feedback = getFeedback(totalScore, 100);
+
+                try {
+                    showInfoModal("Enviando tus resultados...", false);
+                    await window.submitQuizResult(resultsData);
+                    closeModal();
+                    return true;
+                } catch (error) {
+                    console.error('Error de conexión:', error);
+                    closeModal();
+                    showInfoModal('No se pudo guardar tu resultado. Por favor, verifica tu conexión a internet e inténtalo de nuevo.');
+                    return false;
+                }
+            }
+            
+            function displayResults() {
+                const formData = new FormData(form);
+                let totalGradedScore = 0;
+                questions.slice(0, 5).forEach(q => {
+                    totalGradedScore += parseInt(formData.get(q.name)) || 0;
+                });
+
+                const maxPossibleScore = 100;
+                scoreText.textContent = `Tu calificación de autoevaluación es: ${totalGradedScore} de ${maxPossibleScore} puntos.`;
+                feedbackText.innerHTML = getFeedback(totalGradedScore, maxPossibleScore);
+                drawScoreVisualization(totalGradedScore, maxPossibleScore);
+
+                form.classList.add('hidden');
+                submitBtn.classList.add('hidden');
+                resultsDiv.classList.remove('hidden');
+            }
+
+            function getFeedback(score, maxScore) {
+                const percentage = (score / maxScore) * 100;
+                let feedback, strengths = [], opportunities = [];
+
+                if (percentage >= 90) {
+                    feedback = "¡Excelente! **Demostraste un desempeño ético sobresaliente.**";
+                    strengths.push("Fuiste un ejemplo de respeto, tolerancia y amabilidad con todos.");
+                    strengths.push("Tu honestidad y compromiso con la verdad fueron impecables en todo momento.");
+                    opportunities.push("Sigue cultivando estos valores, ¡son la base de una gran persona!");
+                } else if (percentage >= 70) {
+                    feedback = "¡Muy bien! **Tu desempeño ético fue muy bueno.**";
+                    strengths.push("Fuiste respetuoso(a) y tolerante con las opiniones de los demás.");
+                    opportunities.push("Busca ser aún más constante en la aplicación de la honestidad y la justicia.");
+                } else if (percentage >= 50) {
+                    feedback = "Estás en el camino. **Puedes mejorar tu desempeño ético.**";
+                    opportunities.push("Necesitas ser más constante en el respeto y la tolerancia hacia los demás.");
+                    opportunities.push("Trabaja en tu honestidad, asegurándote de ser siempre transparente en tus acciones.");
+                } else {
+                    feedback = "Es un buen momento para **reflexionar sobre tu desempeño ético.**";
+                    opportunities.push("Es fundamental que te comprometas más con el respeto, la tolerancia y la amabilidad.");
+                    opportunities.push("Necesitas ser más honesto(a) en todas tus acciones y trabajos.");
+                }
+
+                return `
+                    <h3>${feedback}</h3>
+                    <h4>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12c0 1.1.9 2 2 2h3V10H7z"/><path d="M10 10V2.1L14 10h7l-3 7 3 7H10z"/></svg>
+                        Fortalezas:
+                    </h4>
+                    <ul>${strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                    <h4>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 3c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M11 17h2"/><path d="M12 18v4"/></svg>
+                        Oportunidades de mejora:
+                    </h4>
+                    <ul>${opportunities.map(o => `<li>${o}</li>`).join('')}</ul>
+                    <p>¡Gracias por tu honestidad en esta autoevaluación!</p>
+                `;
+            }
+
+            function drawScoreVisualization(score, maxScore) {
+                const centerX = scoreCanvas.width / 2;
+                const centerY = scoreCanvas.height / 2;
+                const radius = Math.min(centerX, centerY) - 10;
+                ctx.clearRect(0, 0, scoreCanvas.width, scoreCanvas.height);
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = '#e0e0e0';
+                ctx.lineWidth = 15;
+                ctx.stroke();
+                const endAngle = (score / maxScore) * 2 * Math.PI;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle - Math.PI / 2);
+                ctx.strokeStyle = '#0056b3';
+                ctx.lineWidth = 15;
+                ctx.stroke();
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 24px Inter, Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(`${Math.round((score / maxScore) * 100)}%`, centerX, centerY);
+            }
+
+            function goToMainMenu() {
+                window.location.href = '/';
+            }
+
+            // --- MODALES ---
+            function createModal(content) {
+                const existingModal = document.querySelector('.modal-overlay');
+                if (existingModal) existingModal.remove();
+
+                const modalOverlay = document.createElement('div');
+                modalOverlay.className = 'modal-overlay';
+                modalOverlay.innerHTML = content;
+                document.body.appendChild(modalOverlay);
+                
+                void modalOverlay.offsetWidth;
+                modalOverlay.classList.add('visible');
+                return modalOverlay;
+            }
+
+            function closeModal() {
+                 const modalOverlay = document.querySelector('.modal-overlay');
+                 if (modalOverlay) {
+                    modalOverlay.classList.remove('visible');
+                    modalOverlay.addEventListener('transitionend', () => modalOverlay.remove(), { once: true });
+                 }
+            }
+            
+            function showInfoModal(message, showButton = true) {
+                const buttonHtml = showButton ? `<div class="modal-buttons"><button id="modalCloseBtn">Entendido</button></div>` : '';
+                const modal = createModal(`
+                    <div class="modal-content">
+                        <p style="font-size: 1.1em; margin-bottom: 20px; color: #333;">${message}</p>
+                        ${buttonHtml}
+                    </div>
+                `);
+                if (showButton) {
+                    modal.querySelector('#modalCloseBtn').addEventListener('click', closeModal);
+                }
+            }
+
+            function showConfirmationModal(title, message, onConfirm) {
+                const modal = createModal(`
+                    <div class="modal-content">
+                        <h3 style="margin-top:0;">${title}</h3>
+                        <p>${message}</p>
+                        <div class="modal-buttons">
+                            <button id="modalCancelBtn" class="secondary">Cancelar</button>
+                            <button id="modalConfirmBtn">Confirmar y Enviar</button>
+                        </div>
+                    </div>
+                `);
+                modal.querySelector('#modalConfirmBtn').addEventListener('click', () => {
+                    closeModal();
+                    onConfirm();
+                });
+                modal.querySelector('#modalCancelBtn').addEventListener('click', closeModal);
+            }
+
+            // --- EVENT LISTENERS ---
+            form.addEventListener('input', updateProgressBar);
+            submitBtn.addEventListener('click', handleFormSubmission);
+            resetBtn.addEventListener('click', goToMainMenu);
+
+            // --- INICIALIZACIÓN ---
+            loadQuestions();
+        });
+    </script>
+
+<!-- Firebase (Éthykos - ethicos-a9a66) -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
+        authDomain: "ethicos-a9a66.firebaseapp.com",
+        projectId: "ethicos-a9a66",
+        storageBucket: "ethicos-a9a66.firebasestorage.app",
+        messagingSenderId: "1038796710548",
+        appId: "1:1038796710548:web:bf8b72d7244edd3c92ca81"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Guarda un resultado de cuestionario en la colección "quizResults".
+    // Cualquiera puede crear (estudiantes sin login); solo un profesor
+    // autenticado puede leer (ver reglas de Firestore).
+    window.submitQuizResult = async function (data) {
+        await addDoc(collection(db, "quizResults"), {
+            ...data,
+            createdAt: serverTimestamp()
+        });
+    };
+</script>
+
+</body>
+</html>

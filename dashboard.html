@@ -461,6 +461,14 @@
         </div>
         <div class="ranking-section-arrow"><i class="fas fa-chevron-right"></i></div>
     </div>
+    <div class="ranking-section" id="quizSectionBtn">
+        <div class="ranking-section-icon" style="background:linear-gradient(135deg, #7C3AED, #A78BFA);">📋</div>
+        <div class="ranking-section-text">
+            <div class="ranking-section-title">Resultados de Cuestionarios</div>
+            <div class="ranking-section-sub">Ética · Excelencia · Generosidad · Talentos</div>
+        </div>
+        <div class="ranking-section-arrow"><i class="fas fa-chevron-right"></i></div>
+    </div>
     <div id="tribesContainer" class="tribes-grid"></div>
 </div>
 
@@ -694,6 +702,53 @@
         </div>
         <div class="modal-buttons" style="margin-top:16px;">
             <button class="modal-cancel" id="closeRankingBtn">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Resultados de Cuestionarios -->
+<div id="quizResultsModal" class="modal">
+    <div class="modal-content ranking-modal">
+        <h2>📋 Resultados de Cuestionarios</h2>
+        <div class="ranking-filter-bar" id="quizTypeFilterBar">
+            <button class="ranking-course-btn active" data-qtype="all">Todos</button>
+            <button class="ranking-course-btn" data-qtype="Autoevaluación de Ética">Autoevaluación Ética</button>
+            <button class="ranking-course-btn" data-qtype="Excelencia">Excelencia</button>
+            <button class="ranking-course-btn" data-qtype="Generosidad">Generosidad</button>
+            <button class="ranking-course-btn" data-qtype="Cuestionario Talentos">Talentos</button>
+        </div>
+        <div class="ranking-filter-bar" id="quizCourseFilterBar" style="margin-top:8px;">
+            <button class="ranking-course-btn active" data-qcourse="all">Todos los cursos</button>
+            <button class="ranking-course-btn" data-qcourse="6">6°</button>
+            <button class="ranking-course-btn" data-qcourse="7">7°</button>
+            <button class="ranking-course-btn" data-qcourse="8">8°</button>
+            <button class="ranking-course-btn" data-qcourse="9">9°</button>
+            <button class="ranking-course-btn" data-qcourse="10">10°</button>
+            <button class="ranking-course-btn" data-qcourse="11">11°</button>
+        </div>
+        <div style="font-size:12px;color:#64748B;margin:10px 2px;" id="quizResultsCount"></div>
+        <div class="ranking-table-wrap">
+            <table class="ranking-table">
+                <thead><tr>
+                    <th>Estudiante</th><th>Curso</th><th>Cuestionario</th>
+                    <th>Puntaje</th><th>Fecha</th><th>Detalle</th>
+                </tr></thead>
+                <tbody id="quizResultsTableBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-buttons" style="margin-top:16px;">
+            <button class="modal-cancel" id="closeQuizResultsBtn">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal detalle de un resultado de cuestionario -->
+<div id="quizDetailModal" class="modal">
+    <div class="modal-content" style="max-width:520px;max-height:80vh;overflow-y:auto;">
+        <h2 id="quizDetailTitle">Detalle de respuestas</h2>
+        <div id="quizDetailBody" style="font-size:14px;line-height:1.5;color:#334155;"></div>
+        <div class="modal-buttons" style="margin-top:16px;">
+            <button class="modal-cancel" id="closeQuizDetailBtn">Cerrar</button>
         </div>
     </div>
 </div>
@@ -2259,6 +2314,124 @@
         await loadRanking();
     };
     document.getElementById('closeRankingBtn').onclick = () => closeModal('rankingModal');
+
+    // ── Resultados de Cuestionarios ──────────────────────────
+    let quizAllResults = [];
+    let quizCurrentType = 'all';
+    let quizCurrentCourse = 'all';
+
+    document.getElementById('quizSectionBtn').onclick = async () => {
+        openModal('quizResultsModal');
+        await loadQuizResults();
+    };
+    document.getElementById('closeQuizResultsBtn').onclick = () => closeModal('quizResultsModal');
+    document.getElementById('closeQuizDetailBtn').onclick = () => closeModal('quizDetailModal');
+
+    document.querySelectorAll('#quizTypeFilterBar .ranking-course-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#quizTypeFilterBar .ranking-course-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            quizCurrentType = btn.dataset.qtype;
+            renderQuizResults();
+        });
+    });
+    document.querySelectorAll('#quizCourseFilterBar .ranking-course-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#quizCourseFilterBar .ranking-course-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            quizCurrentCourse = btn.dataset.qcourse;
+            renderQuizResults();
+        });
+    });
+
+    async function loadQuizResults() {
+        document.getElementById('quizResultsTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center;">Cargando...</td></tr>';
+        try {
+            const q = query(collection(db, "quizResults"), orderBy("createdAt", "desc"));
+            const snap = await getDocs(q);
+            quizAllResults = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        } catch (e) {
+            console.error('Error cargando resultados de cuestionarios:', e);
+            quizAllResults = [];
+        }
+        renderQuizResults();
+    }
+
+    function quizTypeShortLabel(type) {
+        const map = {
+            'Autoevaluación de Ética': 'Autoevaluación Ética',
+            'Excelencia': 'Excelencia',
+            'Generosidad': 'Generosidad',
+            'Cuestionario Talentos': 'Talentos'
+        };
+        return map[type] || type || 'N/A';
+    }
+
+    function renderQuizResults() {
+        let filtered = quizAllResults;
+        if (quizCurrentType !== 'all') {
+            filtered = filtered.filter(r => r.quizType === quizCurrentType);
+        }
+        if (quizCurrentCourse !== 'all') {
+            filtered = filtered.filter(r => String(r.course) === quizCurrentCourse);
+        }
+
+        document.getElementById('quizResultsCount').textContent =
+            `${filtered.length} resultado${filtered.length === 1 ? '' : 's'}`;
+
+        const tbody = document.getElementById('quizResultsTableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#94A3B8;">Sin resultados para este filtro</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(r => {
+            const name = `${r.studentLastName || ''}, ${r.studentFirstName || ''}`.trim();
+            const isTalentos = r.quizType === 'Cuestionario Talentos';
+            const scoreCell = isTalentos
+                ? '<span style="color:#64748B;">Ver detalle</span>'
+                : `${r.score ?? 0} / ${r.maxScore ?? 0}`;
+            let dateStr = 'N/A';
+            try {
+                dateStr = new Date(r.timestamp).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+            } catch (e) {}
+            return `
+                <tr>
+                    <td>${name || 'N/A'}</td>
+                    <td>${r.course || 'N/A'}</td>
+                    <td>${quizTypeShortLabel(r.quizType)}</td>
+                    <td>${scoreCell}</td>
+                    <td>${dateStr}</td>
+                    <td><button class="ranking-course-btn" onclick="window.__showQuizDetail('${r.id}')">Ver</button></td>
+                </tr>`;
+        }).join('');
+    }
+
+    window.__showQuizDetail = function (id) {
+        const r = quizAllResults.find(x => x.id === id);
+        if (!r) return;
+        const name = `${r.studentLastName || ''}, ${r.studentFirstName || ''}`.trim();
+        document.getElementById('quizDetailTitle').textContent = `${quizTypeShortLabel(r.quizType)} — ${name}`;
+
+        let html = '';
+        const answers = r.detailedAnswers || {};
+        Object.keys(answers).forEach(key => {
+            const val = answers[key];
+            if (val && typeof val === 'object') {
+                const question = val.question || val.pregunta || key;
+                const answer = val.answer ?? val.respuesta ?? val.score ?? 'N/A';
+                html += `<p><strong>${question}:</strong> ${answer}</p>`;
+            } else {
+                html += `<p><strong>${key}:</strong> ${val}</p>`;
+            }
+        });
+        if (r.feedback) {
+            html += `<hr style="margin:12px 0;"><h4>Feedback</h4><div>${r.feedback}</div>`;
+        }
+        if (!html) html = '<p style="color:#94A3B8;">No hay detalle disponible para este resultado.</p>';
+        document.getElementById('quizDetailBody').innerHTML = html;
+        openModal('quizDetailModal');
+    };
 
     document.querySelectorAll('.ranking-course-btn').forEach(btn => {
         btn.addEventListener('click', () => {

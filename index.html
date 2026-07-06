@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🏹 Éthykos - Etica en Acción</title>
+    <title>Éthykos - Etica en Acción</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="shortcut icon" href="./img/logo.png" type="png">
@@ -295,6 +295,54 @@
         .battle-vs { font-size: 18px; font-weight: 900; color: #FCD34D; text-shadow: 0 0 10px rgba(252,211,77,0.6); z-index: 1; }
         .battle-title { color: #FDA4AF; font-size: 11px; font-weight: 800; letter-spacing: 1px; }
         .battle-sub   { color: #94A3B8; font-size: 9px; }
+
+        /* ==================== SECCIÓN CUESTIONARIOS (separada de juegos) ==================== */
+        .quizzes-section-wrapper {
+            background: #F1F5F9;
+            padding: 60px 40px 80px;
+        }
+        .quizzes-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
+        .quizzes-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(79,70,229,0.1); color: #4F46E5;
+            padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 700;
+            margin-bottom: 14px;
+        }
+        .quizzes-title { font-size: 32px; font-weight: 800; color: #1E293B; margin-bottom: 10px; }
+        .quizzes-title span { color: #4F46E5; }
+        .quizzes-subtitle { color: #64748B; font-size: 16px; margin-bottom: 36px; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+        .quizzes-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .quiz-card-simple {
+            background: white; border-radius: 18px; padding: 28px 20px;
+            display: flex; flex-direction: column; align-items: center; gap: 14px;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.25s ease;
+        }
+        .quiz-card-simple:hover { transform: translateY(-6px); box-shadow: 0 14px 30px rgba(0,0,0,0.1); }
+        .quiz-card-simple-icon {
+            width: 64px; height: 64px; border-radius: 18px;
+            display: flex; align-items: center; justify-content: center; font-size: 30px;
+        }
+        .quiz-card-simple-title { font-size: 16px; font-weight: 700; color: #1E293B; }
+        .quiz-card-simple-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 18px; border-radius: 30px; font-weight: 700;
+            font-size: 13px; color: white; margin-top: auto;
+        }
+        .icon-etica { background: linear-gradient(135deg, #4F46E5, #6366F1); }
+        .icon-excelencia { background: linear-gradient(135deg, #B45309, #EAB308); }
+        .icon-generosidad { background: linear-gradient(135deg, #BE185D, #EC4899); }
+        .icon-talentos { background: linear-gradient(135deg, #0E7490, #06B6D4); }
+        .btn-etica  { background: #4F46E5; }
+        .btn-excelencia  { background: #CA8A04; }
+        .btn-generosidad  { background: #DB2777; }
+        .btn-talentos  { background: #0891B2; }
 
         /* Portal banner */
         .student-portal-banner {
@@ -747,6 +795,42 @@
     </div>
 </section>
 
+<!-- ==================== SECCIÓN CUESTIONARIOS ==================== -->
+<section class="quizzes-section-wrapper">
+    <div class="quizzes-inner">
+        <div class="quizzes-badge"><i class="fas fa-clipboard-check"></i> Cuestionarios</div>
+        <h2 class="quizzes-title">Cuestionarios de <span>Ética</span></h2>
+
+        <div class="quizzes-grid">
+
+            <a href="./cuestionario_autoevaluacion_etica.html" class="quiz-card-simple">
+                <div class="quiz-card-simple-icon icon-etica">📝</div>
+                <div class="quiz-card-simple-title">Autoevaluación Ética</div>
+                <span class="quiz-card-simple-btn btn-etica"><i class="fas fa-pen"></i> Responder</span>
+            </a>
+
+            <a href="./cuestionario_excelencia.html" class="quiz-card-simple">
+                <div class="quiz-card-simple-icon icon-excelencia">🌟</div>
+                <div class="quiz-card-simple-title">Excelencia</div>
+                <span class="quiz-card-simple-btn btn-excelencia"><i class="fas fa-pen"></i> Responder</span>
+            </a>
+
+            <a href="./cuestionario_generosidad.html" class="quiz-card-simple">
+                <div class="quiz-card-simple-icon icon-generosidad">🎁</div>
+                <div class="quiz-card-simple-title">Generosidad</div>
+                <span class="quiz-card-simple-btn btn-generosidad"><i class="fas fa-pen"></i> Responder</span>
+            </a>
+
+            <a href="./cuestionario_talentos.html" class="quiz-card-simple">
+                <div class="quiz-card-simple-icon icon-talentos">🧭</div>
+                <div class="quiz-card-simple-title">Descubre tus Talentos</div>
+                <span class="quiz-card-simple-btn btn-talentos"><i class="fas fa-pen"></i> Responder</span>
+            </a>
+
+        </div>
+    </div>
+</section>
+
 <!-- ==================== FOOTER ==================== -->
 <footer class="footer">
     <div class="footer-content">
@@ -757,7 +841,7 @@
             <span class="footer-credits-title">Idea y desarrollo por:</span>
             <p class="footer-credits-line">
                 <span class="footer-copy">©</span> Ronald Rojas Newball (Chrisayuron) &nbsp;2026<br>
-                <b>versión 1.7.0</b>
+                <b>versión 1.8.0</b>
             </p>
             <a href="https://mr-ronald.vercel.app/" target="_blank" rel="noopener noreferrer" class="footer-url">
                 <i class="fas fa-envelope"></i> CONTÁCTAME

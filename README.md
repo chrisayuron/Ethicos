@@ -211,8 +211,9 @@ Los estudiantes pueden acumular monedas y canjearlas por beneficios definidos pa
 | `v1.5.0` | Puntos individuales, niveles, monedas y recompensas.            |
 | `v1.6.0` | Ranking de estudiantes y portal individual.                     |
 | `v1.7.0` | Modo proyector, ranking en tiempo real, temporizador y reloj.   |
+| `v1.8.0` | Cuestionarios de autoevaluación (Ética, Excelencia, Generosidad, Talentos) integrados al portal público, con resultados almacenados en Firestore y panel de revisión para el docente. |
 
-**Versión actual: `v1.7.0`**
+**Versión actual: `v1.8.0`**
 
 ---
 
