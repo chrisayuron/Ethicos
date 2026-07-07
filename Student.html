@@ -416,9 +416,18 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
 const app = initializeApp(window.firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Autenticación anónima e invisible para el estudiante: no pide nada,
+// solo permite que las reglas de Firestore exijan "request.auth != null"
+// y así bloqueen lecturas que no pasen por esta aplicación.
+let authReady = signInAnonymously(auth).catch(err => {
+    console.error('No se pudo iniciar sesión anónima:', err);
+});
 
 // ── CONSTANTS ───────────────────────────────────────────────
 const ETHICS_LEVELS = [
@@ -446,34 +455,30 @@ const REWARDS = [
 const COURSE_NAMES = { 6:'6°', 7:'7°', 8:'8°', 9:'9°', 10:'10°', 11:'11°' };
 
 // ── SESSION ──────────────────────────────────────────────────
-const SESSION_KEY = 'ethykos_student_session';
+// NOTA DE SEGURIDAD: esta app se usa en equipos compartidos (sala de
+// cómputo). Por eso NO se guarda ni se restaura sesión entre cargas de
+// página: cada vez que se abre/recarga Student.html, el estudiante debe
+// ingresar su documento de nuevo. No usar localStorage aquí.
 let currentStudent = null;
 
-function saveSession(student) {
-    try { localStorage.setItem(SESSION_KEY, JSON.stringify({ id: student.id, document: student.document })); } catch(e) {}
-}
-function loadSession() {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch(e) { return null; }
-}
-function clearSession() {
-    try { localStorage.removeItem(SESSION_KEY); } catch(e) {}
-}
-
 // ── NOTIFICATIONS ────────────────────────────────────────────
+// sessionStorage: se borra automáticamente al cerrar la pestaña/navegador,
+// para no dejar datos de un estudiante disponibles al siguiente en un
+// equipo compartido de sala de cómputo.
 const NOTIF_KEY = 'ethykos_notifs_';
 const SNAPSHOT_KEY = 'ethykos_snapshot_';
 
 function getStoredSnapshot(studentId) {
-    try { return JSON.parse(localStorage.getItem(SNAPSHOT_KEY + studentId) || 'null'); } catch(e) { return null; }
+    try { return JSON.parse(sessionStorage.getItem(SNAPSHOT_KEY + studentId) || 'null'); } catch(e) { return null; }
 }
 function saveSnapshot(studentId, data) {
-    try { localStorage.setItem(SNAPSHOT_KEY + studentId, JSON.stringify(data)); } catch(e) {}
+    try { sessionStorage.setItem(SNAPSHOT_KEY + studentId, JSON.stringify(data)); } catch(e) {}
 }
 function getStoredNotifs(studentId) {
-    try { return JSON.parse(localStorage.getItem(NOTIF_KEY + studentId) || '[]'); } catch(e) { return []; }
+    try { return JSON.parse(sessionStorage.getItem(NOTIF_KEY + studentId) || '[]'); } catch(e) { return []; }
 }
 function saveNotifs(studentId, notifs) {
-    try { localStorage.setItem(NOTIF_KEY + studentId, JSON.stringify(notifs.slice(0, 30))); } catch(e) {}
+    try { sessionStorage.setItem(NOTIF_KEY + studentId, JSON.stringify(notifs.slice(0, 30))); } catch(e) {}
 }
 
 function generateNotifs(studentId, prev, current, prevTribePts, currentTribePts) {
@@ -592,13 +597,10 @@ function hide(id) { document.getElementById(id).style.display='none'; }
 
 // ── BOOT ─────────────────────────────────────────────────────
 async function boot() {
-    const sess = loadSession();
-    if (sess?.document) {
-        try {
-            const student = await findStudent(sess.document);
-            if (student) { currentStudent = student; await renderPortal(); return; }
-        } catch(e) {}
-    }
+    // Espera la autenticación anónima antes de cualquier lectura a Firestore.
+    await authReady;
+    // Siempre se pide el documento: no se restaura ninguna sesión anterior
+    // (equipos compartidos en sala de cómputo).
     hide('loadingScreen'); show('loginScreen');
     document.getElementById('docInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 }
@@ -625,7 +627,6 @@ window.doLogin = async function() {
             errEl.style.display = 'block';
         } else {
             currentStudent = student;
-            saveSession(student);
             await renderPortal();
         }
     } catch(e) {
@@ -637,7 +638,15 @@ window.doLogin = async function() {
 };
 
 window.doLogout = function() {
-    clearSession(); currentStudent = null;
+    // Limpia también snapshot/notificaciones en sessionStorage del estudiante actual,
+    // para no dejar rastro en el equipo compartido.
+    try {
+        if (currentStudent?.id) {
+            sessionStorage.removeItem(SNAPSHOT_KEY + currentStudent.id);
+            sessionStorage.removeItem(NOTIF_KEY + currentStudent.id);
+        }
+    } catch(e) {}
+    currentStudent = null;
     hide('portalScreen'); show('loginScreen');
     document.getElementById('docInput').value = '';
 };

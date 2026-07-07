@@ -20,6 +20,7 @@ La plataforma permite al docente organizar actividades, reconocer avances indivi
 * Portal individual para estudiantes.
 * Modo proyector para actividades presenciales.
 * Acceso a juegos educativos relacionados con valores y ética.
+* Cuestionarios de autoevaluación (Ética, Excelencia, Generosidad, Talentos) con resultados guardados para revisión docente.
 
 ---
 
