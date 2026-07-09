@@ -850,8 +850,14 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // ===== AUTH =====
+    const TEACHER_EMAIL = "rrnewball@gmail.com";
     onAuthStateChanged(auth, (user) => {
         if (!user) { window.location.href = "index.html"; return; }
+        if (user.email !== TEACHER_EMAIL) {
+            // Sesión colada (anónima u otra cuenta): cerrarla y mandar al login
+            signOut(auth).finally(() => { window.location.href = "index.html"; });
+            return;
+        }
         initDashboard();
     });
 
@@ -1542,7 +1548,14 @@
         const list = document.getElementById("studentList");
         list.innerHTML='<div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>';
         allStudents = await getStudents(null);
-        renderStudentList(allStudents);
+        applyStudentFilter();
+    }
+    function applyStudentFilter() {
+        const q = document.getElementById('studentSearch').value.toLowerCase();
+        const filtered = q
+            ? allStudents.filter(s => s.name.toLowerCase().includes(q) || (s.document||'').includes(q) || String(s.course).includes(q))
+            : allStudents;
+        renderStudentList(filtered);
     }
     function renderStudentList(students) {
         const list = document.getElementById("studentList");
@@ -1599,16 +1612,10 @@
                 const snap = await getDoc(doc(db,"students",studentId));
                 if (snap.exists()) allStudents[idx] = {id:studentId,...snap.data()};
             }
-            const q = document.getElementById('studentSearch').value.toLowerCase();
-            const filtered = q ? allStudents.filter(s=>s.name.toLowerCase().includes(q)||(s.document||'').includes(q)||String(s.course).includes(q)) : allStudents;
-            renderStudentList(filtered);
+            applyStudentFilter();
         } catch(e) { showToast('Error al actualizar puntos','error'); }
     };
-    document.getElementById("studentSearch").addEventListener("input", function() {
-        const q = this.value.toLowerCase();
-        const filtered = allStudents.filter(s => s.name.toLowerCase().includes(q) || (s.document||'').includes(q) || String(s.course).includes(q));
-        renderStudentList(filtered);
-    });
+    document.getElementById("studentSearch").addEventListener("input", applyStudentFilter);
 
     // Agregar uno
     document.getElementById("saveOneStudentBtn").onclick = async () => {
