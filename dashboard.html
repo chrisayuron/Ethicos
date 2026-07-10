@@ -2471,20 +2471,28 @@
             ? rankingAllStudents
             : rankingAllStudents.filter(s => String(s.course) === rankingCurrentCourse);
 
-        const sorted = [...filtered].sort((a, b) => (b.individualPoints||0) - (a.individualPoints||0));
+        // Orden: puntos desc, y como desempate secundario (solo visual, no de mérito) el nombre
+        const sorted = [...filtered].sort((a, b) => (b.individualPoints||0) - (a.individualPoints||0) || a.name.localeCompare(b.name));
 
-        // ── Podium (top 3) ────────────────────────────────────
+        // Posición "1224": empatados comparten posición; sin puntos (0) no hay posición de mérito
+        let currentRank = 0, prevPoints = null;
+        const ranked = sorted.map((s, i) => {
+            const pts = s.individualPoints || 0;
+            if (pts !== prevPoints) { currentRank = i + 1; prevPoints = pts; }
+            return { ...s, _rank: pts > 0 ? currentRank : null };
+        });
+
+        // ── Podium (top 3 CON puntos reales) ───────────────────
         const podium = document.getElementById('rankingPodium');
-        if (sorted.length < 1) { podium.innerHTML = ''; }
+        const withPoints = ranked.filter(s => s._rank !== null);
+        const podiumTop = withPoints.slice(0, 3);
+        if (podiumTop.length < 1) {
+            podium.innerHTML = `<div class="ranking-empty" style="padding:16px;">🏁 Aún nadie tiene puntos — ¡el podio se llenará pronto!</div>`;
+        }
         else {
-            const podiumOrder = [sorted[1], sorted[0], sorted[2]].filter(Boolean); // 2nd, 1st, 3rd
-            const classes = sorted[1] ? ['p2','p1','p3'] : ['p1'];
-            const blocks = [55, 80, 40];
-            const medals = ['🥈','🏆','🥉'];
-
-            podium.innerHTML = podiumOrder.map((s, vi) => {
-                const isCenter = s === sorted[0];
-                const cls = isCenter ? 'p1' : (s === sorted[1] ? 'p2' : 'p3');
+            const podiumOrder = [podiumTop[1], podiumTop[0], podiumTop[2]].filter(Boolean); // 2do, 1ro, 3ro
+            podium.innerHTML = podiumOrder.map((s) => {
+                const cls = s === podiumTop[0] ? 'p1' : (s === podiumTop[1] ? 'p2' : 'p3');
                 const blockH = cls === 'p1' ? 80 : cls === 'p2' ? 55 : 40;
                 const medal = cls === 'p1' ? '🏆' : cls === 'p2' ? '🥈' : '🥉';
                 const lvl = getLevelInfo(s.individualPoints);
@@ -2500,14 +2508,14 @@
 
         // ── Full table ────────────────────────────────────────
         const tbody = document.getElementById('rankingTableBody');
-        if (!sorted.length) {
+        if (!ranked.length) {
             tbody.innerHTML = `<tr><td colspan="7"><div class="ranking-empty"><i class="fas fa-users" style="font-size:24px;display:block;margin-bottom:8px;"></i>No hay estudiantes${rankingCurrentCourse !== 'all' ? ' en este curso' : ''}</div></td></tr>`;
             return;
         }
-        tbody.innerHTML = sorted.map((s, i) => {
-            const pos = i + 1;
+        tbody.innerHTML = ranked.map((s) => {
+            const pos = s._rank;
             const posClass = pos === 1 ? 'gold' : pos === 2 ? 'silver' : pos === 3 ? 'bronze' : 'normal';
-            const posLabel = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+            const posLabel = pos === null ? '—' : (pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos);
             const lvl = getLevelInfo(s.individualPoints);
             const tribe = rankingTribesMap[s.id] || '—';
             return `<tr>
