@@ -214,6 +214,15 @@
         .shop-tabs { display: flex; gap: 0; margin-bottom: 20px; border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0; }
         .shop-tab-btn { flex: 1; padding: 10px; border: none; background: #F1F5F9; color: #475569; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; }
         .shop-tab-btn.active { background: #D97706; color: white; }
+        .reward-manage-row { display:flex; align-items:center; gap:12px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:10px 14px; }
+        .reward-manage-row .rm-icon { font-size:22px; }
+        .reward-manage-row .rm-info { flex:1; min-width:0; }
+        .reward-manage-row .rm-name { font-weight:700; font-size:13px; color:#1E293B; }
+        .reward-manage-row .rm-desc { font-size:11px; color:#94A3B8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .reward-manage-row .rm-cost { font-size:12px; font-weight:700; color:#F59E0B; white-space:nowrap; }
+        .reward-manage-row .rm-actions { display:flex; gap:6px; }
+        .reward-manage-row .rm-actions button { border:none; background:#EEF2FF; color:#4338CA; padding:6px 10px; border-radius:8px; cursor:pointer; font-size:12px; }
+        .reward-manage-row .rm-actions button.rm-delete { background:#FEE2E2; color:#DC2626; }
         .shop-panel { display: none; } .shop-panel.active { display: block; }
         .shop-student-select { width: 100%; padding: 10px 14px; border: 1px solid #E2E8F0; border-radius: 12px; font-size: 14px; margin-bottom: 16px; background: #F8FAFC; color: #1E293B; }
         .shop-student-info { background: #F8FAFC; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: none; border: 1px solid #E2E8F0; }
@@ -374,6 +383,7 @@
         .qr-gen-item .qr-doc { font-size: 10px; color: #94A3B8; }
         .qr-print-btn { margin-top: 10px; width: 100%; padding: 10px; background: #7C3AED; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .qr-print-btn:hover { background: #6D28D9; }
+        #downloadQrsPdfBtn:hover { background: #047857 !important; }
 
         /* ===== ASSIGN TRIBE MODAL ===== */
         .tribe-option { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #F8FAFC; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
@@ -404,7 +414,7 @@
         @media print {
             body * { visibility: hidden; }
             #printArea, #printArea * { visibility: visible; }
-            #printArea { position: fixed; top: 0; left: 0; width: 100%; }
+            #printArea { position: static; width: 100%; }
         }
     </style>
 </head>
@@ -592,8 +602,19 @@
                     Carga estudiantes para generar sus QR
                 </div>
             </div>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+                <select id="printCourseFilter" style="flex:1;padding:8px 10px;border:1px solid #E2E8F0;border-radius:10px;font-size:13px;">
+                    <option value="">📚 Todos los cursos (agrupados)</option>
+                    <option value="6">6°</option><option value="7">7°</option>
+                    <option value="8">8°</option><option value="9">9°</option>
+                    <option value="10">10°</option><option value="11">11°</option>
+                </select>
+            </div>
             <button class="qr-print-btn" id="printQrsBtn">
                 <i class="fas fa-print"></i> Imprimir carnés QR
+            </button>
+            <button class="qr-print-btn" id="downloadQrsPdfBtn" style="background:#059669;margin-top:8px;">
+                <i class="fas fa-file-pdf"></i> Descargar PDF (sin cortes)
             </button>
         </div>
 
@@ -760,6 +781,7 @@
         <div class="shop-tabs">
             <button class="shop-tab-btn active" data-stab="shopCatalogPanel">🛒 Canjear</button>
             <button class="shop-tab-btn" data-stab="shopHistoryPanel">📜 Historial</button>
+            <button class="shop-tab-btn" data-stab="shopManagePanel">⚙️ Gestionar</button>
         </div>
 
         <!-- Canjear -->
@@ -780,6 +802,32 @@
         <!-- Historial -->
         <div id="shopHistoryPanel" class="shop-panel">
             <div id="redemptionList" style="max-height:420px;overflow-y:auto;">
+                <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>
+            </div>
+        </div>
+
+        <div id="shopManagePanel" class="shop-panel">
+            <button class="modal-save" id="newRewardBtn" style="width:100%;margin-bottom:12px;">
+                <i class="fas fa-plus"></i> Nueva recompensa
+            </button>
+
+            <div id="rewardFormWrap" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;padding:14px;margin-bottom:14px;">
+                <input type="hidden" id="rewardFormId" value="">
+                <label>🙂 Icono (emoji)</label>
+                <input type="text" id="rewardFormIcon" placeholder="Ej: 🎁" maxlength="4" style="width:80px;text-align:center;font-size:20px;">
+                <label>📝 Nombre</label>
+                <input type="text" id="rewardFormName" placeholder="Ej: Cambiar de computador">
+                <label>💬 Descripción</label>
+                <textarea id="rewardFormDesc" rows="2" placeholder="Describe brevemente en qué consiste..."></textarea>
+                <label>🪙 Costo (monedas)</label>
+                <input type="number" id="rewardFormCost" min="1" step="1" placeholder="Ej: 20">
+                <div style="display:flex;gap:10px;margin-top:10px;">
+                    <button class="modal-save" id="saveRewardBtn" style="flex:1;">Guardar</button>
+                    <button class="modal-cancel" id="cancelRewardBtn" style="flex:1;">Cancelar</button>
+                </div>
+            </div>
+
+            <div id="rewardsManageList" style="display:flex;flex-direction:column;gap:8px;">
                 <div class="loading"><i class="fas fa-spinner fa-pulse"></i> Cargando...</div>
             </div>
         </div>
@@ -810,6 +858,7 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <!-- QRCode generator -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -851,6 +900,24 @@
 
     // ===== AUTH =====
     const TEACHER_EMAIL = "rrnewball@gmail.com";
+
+    // --- Cierre de sesión por inactividad (30 min) ---
+    const IDLE_LIMIT_MS = 30 * 60 * 1000;
+    const LAST_ACTIVE_KEY = "ethykos_lastActive";
+    function markActivity() { localStorage.setItem(LAST_ACTIVE_KEY, Date.now().toString()); }
+    function isSessionExpired() {
+        const last = parseInt(localStorage.getItem(LAST_ACTIVE_KEY) || "0", 10);
+        return (Date.now() - last) > IDLE_LIMIT_MS;
+    }
+    function forceLogoutExpired() {
+        signOut(auth).finally(() => { window.location.href = "index.html?expired=1"; });
+    }
+    ["click","keydown","mousemove","scroll","touchstart"].forEach(evt =>
+        document.addEventListener(evt, markActivity, { passive: true })
+    );
+    // Revisa cada minuto si la sesión sigue vigente (cubre el caso de dejar la pestaña abierta)
+    setInterval(() => { if (isSessionExpired()) forceLogoutExpired(); }, 60 * 1000);
+
     onAuthStateChanged(auth, (user) => {
         if (!user) { window.location.href = "index.html"; return; }
         if (user.email !== TEACHER_EMAIL) {
@@ -858,6 +925,8 @@
             signOut(auth).finally(() => { window.location.href = "index.html"; });
             return;
         }
+        if (isSessionExpired()) { forceLogoutExpired(); return; }
+        markActivity();
         initDashboard();
     });
 
@@ -1978,57 +2047,194 @@
 
     // Imprimir QR
     document.getElementById("printQrsBtn").onclick = async () => {
-        const students = await getStudents(null);
-        if (!students.length) { showToast("No hay estudiantes para imprimir","error"); return; }
+        const courseFilter = document.getElementById('printCourseFilter').value; // '' = todos agrupados
+        let students = await getStudents(null);
+        if (courseFilter) students = students.filter(s => String(s.course) === courseFilter);
+        if (!students.length) { showToast(courseFilter ? "No hay estudiantes en ese curso" : "No hay estudiantes para imprimir","error"); return; }
+
+        // Agrupar por curso y ordenar alfabéticamente dentro de cada curso
+        const courseOrder = ['6','7','8','9','10','11'];
+        const grouped = {};
+        students.forEach(s => {
+            const c = String(s.course);
+            (grouped[c] = grouped[c] || []).push(s);
+        });
+        Object.keys(grouped).forEach(c => grouped[c].sort((a,b) => a.name.localeCompare(b.name)));
+        const coursesToRender = courseOrder.filter(c => grouped[c] && grouped[c].length);
+
         const printArea = document.getElementById('printArea');
         printArea.style.display = 'block';
         printArea.innerHTML = `
         <style>
-            @media print { body * { visibility:hidden; } #printArea, #printArea * { visibility:visible; } #printArea { position:fixed;top:0;left:0;width:100%; } }
-            .print-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 20px; }
-            .print-card { border: 2px solid #E2E8F0; border-radius: 12px; padding: 12px; text-align: center; page-break-inside: avoid; }
+            @media print {
+                body * { visibility:hidden; }
+                #printArea, #printArea * { visibility:visible; }
+                #printArea { position:static !important; width:100%; }
+                .print-course-section { page-break-after: always; }
+                .print-course-section:last-child { page-break-after: auto; }
+            }
+            .print-course-title { font-family:sans-serif; font-weight:800; font-size:16px; color:#1E293B; padding:14px 4px 6px; border-bottom:2px solid #7C3AED; margin:0 20px 10px; }
+            .print-grid { display: flex; flex-wrap: wrap; gap: 10px; padding: 0 20px 20px; }
+            .print-card { flex: 0 0 calc(25% - 8px); max-width: calc(25% - 8px); box-sizing: border-box; border: 2px solid #E2E8F0; border-radius: 12px; padding: 12px; text-align: center; page-break-inside: avoid; break-inside: avoid; }
             .print-name { font-weight: 700; font-size: 12px; margin-top: 6px; font-family: sans-serif; }
             .print-doc { color: #94A3B8; font-size: 10px; font-family: sans-serif; }
             .print-course { background: #DBEAFE; color: #2563EB; border-radius: 10px; padding: 2px 8px; font-size: 10px; display: inline-block; margin-top: 4px; font-family: sans-serif; font-weight: bold; }
-        </style>
-        <div class="print-grid" id="printGrid"></div>`;
-        const grid = document.getElementById('printGrid');
-        for (const s of students) {
-            const card = document.createElement('div');
-            card.className = 'print-card';
+        </style>`;
 
-            const qrDiv = document.createElement('div');
-            qrDiv.style.margin = '0 auto';
-            qrDiv.style.width = '90px'; qrDiv.style.height = '90px';
-            card.appendChild(qrDiv);
+        for (const c of coursesToRender) {
+            const list = grouped[c];
+            const section = document.createElement('div');
+            section.className = 'print-course-section';
 
-            const nameEl = document.createElement('div');
-            nameEl.className = 'print-name';
-            nameEl.textContent = s.name.split(' ').slice(0,3).join(' ');
-            card.appendChild(nameEl);
+            const title = document.createElement('div');
+            title.className = 'print-course-title';
+            title.textContent = `Curso ${courseNames[c] || c}° — ${list.length} estudiante${list.length===1?'':'s'}`;
+            section.appendChild(title);
 
-            const docEl = document.createElement('div');
-            docEl.className = 'print-doc';
-            docEl.textContent = s.document || '';
-            card.appendChild(docEl);
+            const grid = document.createElement('div');
+            grid.className = 'print-grid';
+            section.appendChild(grid);
+            printArea.appendChild(section);
 
-            const courseEl = document.createElement('div');
-            courseEl.className = 'print-course';
-            courseEl.textContent = courseNames[s.course] || s.course;
-            card.appendChild(courseEl);
+            for (const s of list) {
+                const card = document.createElement('div');
+                card.className = 'print-card';
 
-            grid.appendChild(card);
+                const qrDiv = document.createElement('div');
+                qrDiv.style.margin = '0 auto';
+                qrDiv.style.width = '90px'; qrDiv.style.height = '90px';
+                card.appendChild(qrDiv);
 
-            // Generar el QR DESPUÉS de insertar qrDiv en el DOM real
-            try {
-                new window.QRCode(qrDiv, { text: String(s.document || s.id), width:90, height:90, colorDark:"#1E293B", colorLight:"#ffffff", correctLevel:window.QRCode.CorrectLevel.H });
-            } catch(e) { console.error('Error generando QR para', s.name, e); }
+                const nameEl = document.createElement('div');
+                nameEl.className = 'print-name';
+                nameEl.textContent = s.name.split(' ').slice(0,3).join(' ');
+                card.appendChild(nameEl);
+
+                const docEl = document.createElement('div');
+                docEl.className = 'print-doc';
+                docEl.textContent = s.document || '';
+                card.appendChild(docEl);
+
+                const courseEl = document.createElement('div');
+                courseEl.className = 'print-course';
+                courseEl.textContent = courseNames[s.course] || s.course;
+                card.appendChild(courseEl);
+
+                grid.appendChild(card);
+
+                // Generar el QR DESPUÉS de insertar qrDiv en el DOM real
+                try {
+                    new window.QRCode(qrDiv, { text: String(s.document || s.id), width:90, height:90, colorDark:"#1E293B", colorLight:"#ffffff", correctLevel:window.QRCode.CorrectLevel.H });
+                } catch(e) { console.error('Error generando QR para', s.name, e); }
+            }
         }
         // Esperar a que todos los canvas/imgs terminen de pintarse antes de imprimir
         setTimeout(() => {
             window.print();
             setTimeout(() => { printArea.style.display='none'; printArea.innerHTML=''; }, 300);
         }, 600);
+    };
+
+    // ===== DESCARGAR CARNÉS COMO PDF (posiciones calculadas, sin depender de paginación del navegador) =====
+    document.getElementById("downloadQrsPdfBtn").onclick = async () => {
+        const courseFilter = document.getElementById('printCourseFilter').value;
+        let students = await getStudents(null);
+        if (courseFilter) students = students.filter(s => String(s.course) === courseFilter);
+        if (!students.length) { showToast(courseFilter ? "No hay estudiantes en ese curso" : "No hay estudiantes para exportar","error"); return; }
+
+        const courseOrder = ['6','7','8','9','10','11'];
+        const grouped = {};
+        students.forEach(s => { const c = String(s.course); (grouped[c] = grouped[c] || []).push(s); });
+        Object.keys(grouped).forEach(c => grouped[c].sort((a,b) => a.name.localeCompare(b.name)));
+        const coursesToRender = courseOrder.filter(c => grouped[c] && grouped[c].length);
+
+        const btn = document.getElementById('downloadQrsPdfBtn');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Generando PDF...';
+
+        // Contenedor invisible donde renderizamos temporalmente cada QR para poder leerlo como imagen
+        const hidden = document.createElement('div');
+        hidden.style.position = 'fixed'; hidden.style.left = '-9999px'; hidden.style.top = '0';
+        document.body.appendChild(hidden);
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+            const pageH = 297, marginX = 10, marginY = 12;
+            const cols = 4, cardW = 44.5, cardH = 50, gap = 4;
+            const qrSize = 30;
+
+            let firstPage = true;
+            for (const c of coursesToRender) {
+                const list = grouped[c];
+                if (!firstPage) pdf.addPage();
+                firstPage = false;
+
+                let col = 0, y = marginY;
+                pdf.setFontSize(13); pdf.setFont(undefined, 'bold'); pdf.setTextColor(30,41,59);
+                pdf.text(`Curso ${courseNames[c] || c}° — ${list.length} estudiante${list.length===1?'':'s'}`, marginX, y);
+                y += 8;
+
+                for (let i = 0; i < list.length; i++) {
+                    const s = list[i];
+
+                    // Generar el QR en el contenedor oculto y leerlo como imagen
+                    const qrDiv = document.createElement('div');
+                    hidden.appendChild(qrDiv);
+                    try {
+                        new window.QRCode(qrDiv, { text: String(s.document || s.id), width:200, height:200, colorDark:"#1E293B", colorLight:"#ffffff", correctLevel:window.QRCode.CorrectLevel.H });
+                    } catch(e) { console.error('Error generando QR para', s.name, e); }
+                    await new Promise(r => setTimeout(r, 15));
+                    const canvasEl = qrDiv.querySelector('canvas');
+                    const imgData = canvasEl ? canvasEl.toDataURL('image/png') : (qrDiv.querySelector('img')?.src || null);
+                    hidden.removeChild(qrDiv);
+
+                    const x = marginX + col * (cardW + gap);
+
+                    pdf.setDrawColor(226,232,240);
+                    pdf.roundedRect(x, y, cardW, cardH, 2, 2);
+
+                    if (imgData) {
+                        const qrX = x + (cardW - qrSize) / 2;
+                        pdf.addImage(imgData, 'PNG', qrX, y + 3, qrSize, qrSize);
+                    }
+
+                    const nameShort = s.name.split(' ').slice(0, 3).join(' ');
+                    pdf.setFontSize(8); pdf.setFont(undefined, 'bold'); pdf.setTextColor(30,41,59);
+                    const nameLines = pdf.splitTextToSize(nameShort, cardW - 4);
+                    pdf.text(nameLines, x + cardW / 2, y + qrSize + 8, { align: 'center' });
+
+                    pdf.setFontSize(7); pdf.setFont(undefined, 'normal'); pdf.setTextColor(148,163,184);
+                    pdf.text(String(s.document || ''), x + cardW / 2, y + qrSize + 8 + (nameLines.length * 3.2) + 3, { align: 'center' });
+
+                    col++;
+                    if (col >= cols) {
+                        col = 0;
+                        y += cardH + gap;
+                        // Si la siguiente fila ya no cabe en la página, saltar de página
+                        if (y + cardH > pageH - marginY && i < list.length - 1) {
+                            pdf.addPage();
+                            y = marginY;
+                            pdf.setFontSize(11); pdf.setFont(undefined, 'italic'); pdf.setTextColor(100,116,139);
+                            pdf.text(`Curso ${courseNames[c] || c}° (continuación)`, marginX, y);
+                            y += 8;
+                        }
+                    }
+                }
+            }
+
+            document.body.removeChild(hidden);
+            pdf.save('carnes_qr_ethykos.pdf');
+            showToast('✅ PDF generado','success');
+        } catch(e) {
+            console.error(e);
+            document.body.contains(hidden) && document.body.removeChild(hidden);
+            showToast('Error al generar el PDF','error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
     };
 
     // ===== HISTORIAL DE ASISTENCIA =====
@@ -2171,7 +2377,9 @@
     document.getElementById('closeHistoryResultsBtn').onclick = () => closeModal('historyResultsModal');
 
     // ===== REWARDS CATALOG =====
-    const REWARDS = [
+    // ===== REWARDS CATALOG (editable, guardado en Firestore) =====
+    // Catálogo original, usado solo una vez como semilla si la colección "rewards" está vacía.
+    const REWARDS_SEED = [
         { id:'pc',       icon:'💻', name:'Cambiar de computador',              desc:'Cambia al PC disponible que prefieras en la próxima clase.',          cost:15 },
         { id:'turn',     icon:'🔄', name:'Cambiar turno de actividad',         desc:'Modifica tu turno de participación en la siguiente actividad.',       cost:20 },
         { id:'order',    icon:'📋', name:'Elegir orden de participación',      desc:'Decides el orden en que participan las tribus en la próxima misión.', cost:25 },
@@ -2185,6 +2393,34 @@
         { id:'time',     icon:'⏰', name:'Tiempo extra para entregar',         desc:'5 minutos adicionales para entregar una actividad o tarea.',          cost:35 },
         { id:'early',    icon:'🚪', name:'Salir más temprano de clase',        desc:'Con permiso del profe, puedes salir unos minutos antes al final.',    cost:50 },
     ];
+    let REWARDS = []; // catálogo vigente, cargado desde Firestore
+    let rewardsCatalogLoaded = false;
+
+    async function loadRewardsCatalog(force) {
+        if (rewardsCatalogLoaded && !force) return REWARDS;
+        const snap = await getDocs(collection(db, "rewards"));
+        if (snap.empty) {
+            // Primera vez: sembrar con el catálogo original, conservando los mismos IDs
+            for (const r of REWARDS_SEED) {
+                await setDoc(doc(db, "rewards", r.id), { icon:r.icon, name:r.name, desc:r.desc, cost:r.cost, createdAt: serverTimestamp() });
+            }
+            REWARDS = REWARDS_SEED.map(r => ({ ...r }));
+        } else {
+            REWARDS = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (a.cost||0)-(b.cost||0));
+        }
+        rewardsCatalogLoaded = true;
+        return REWARDS;
+    }
+    async function addRewardDoc(data) {
+        const ref = await addDoc(collection(db, "rewards"), { ...data, createdAt: serverTimestamp() });
+        return ref.id;
+    }
+    async function updateRewardDoc(id, data) {
+        await updateDoc(doc(db, "rewards", id), data);
+    }
+    async function deleteRewardDoc(id) {
+        await deleteDoc(doc(db, "rewards", id));
+    }
 
     async function updateStudentRewardPoints(studentId, delta) {
         const ref = doc(db, "students", studentId);
@@ -2215,6 +2451,7 @@
     let shopStudentCache = null;
     document.getElementById('shopBtn').onclick = async () => {
         openModal('shopModal');
+        await loadRewardsCatalog();
         await loadShopStudents();
         renderRewardsGrid(null);
     };
@@ -2227,6 +2464,7 @@
             btn.classList.add('active');
             document.getElementById(btn.dataset.stab).classList.add('active');
             if (btn.dataset.stab === 'shopHistoryPanel') await loadRedemptionHistory();
+            if (btn.dataset.stab === 'shopManagePanel') renderRewardsManageList();
         });
     });
 
@@ -2288,6 +2526,85 @@
             }
             showToast(`✅ Canjeado: ${reward.icon} ${reward.name}`, 'success');
         } catch(e) { showToast('Error al canjear','error'); }
+    };
+
+    // ===== GESTIÓN DEL CATÁLOGO DE RECOMPENSAS =====
+    function renderRewardsManageList() {
+        const list = document.getElementById('rewardsManageList');
+        if (!REWARDS.length) {
+            list.innerHTML = '<div style="text-align:center;color:#94A3B8;padding:20px;">No hay recompensas creadas todavía</div>';
+            return;
+        }
+        const sorted = [...REWARDS].sort((a,b) => (a.cost||0)-(b.cost||0));
+        list.innerHTML = sorted.map(r => `
+            <div class="reward-manage-row">
+                <div class="rm-icon">${escapeHtml(r.icon||'🎁')}</div>
+                <div class="rm-info">
+                    <div class="rm-name">${escapeHtml(r.name||'')}</div>
+                    <div class="rm-desc">${escapeHtml(r.desc||'')}</div>
+                </div>
+                <div class="rm-cost">🪙 ${r.cost||0}</div>
+                <div class="rm-actions">
+                    <button onclick="window.editRewardStart('${r.id}')"><i class="fas fa-pen"></i></button>
+                    <button class="rm-delete" onclick="window.deleteRewardConfirm('${r.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`).join('');
+    }
+
+    function showRewardForm(reward) {
+        document.getElementById('rewardFormId').value = reward?.id || '';
+        document.getElementById('rewardFormIcon').value = reward?.icon || '';
+        document.getElementById('rewardFormName').value = reward?.name || '';
+        document.getElementById('rewardFormDesc').value = reward?.desc || '';
+        document.getElementById('rewardFormCost').value = reward?.cost || '';
+        document.getElementById('rewardFormWrap').style.display = 'block';
+        document.getElementById('saveRewardBtn').textContent = reward ? 'Guardar cambios' : 'Crear recompensa';
+    }
+    function hideRewardForm() {
+        document.getElementById('rewardFormWrap').style.display = 'none';
+    }
+
+    document.getElementById('newRewardBtn').onclick = () => showRewardForm(null);
+    document.getElementById('cancelRewardBtn').onclick = () => hideRewardForm();
+
+    document.getElementById('saveRewardBtn').onclick = async () => {
+        const id = document.getElementById('rewardFormId').value;
+        const icon = document.getElementById('rewardFormIcon').value.trim() || '🎁';
+        const name = document.getElementById('rewardFormName').value.trim();
+        const desc = document.getElementById('rewardFormDesc').value.trim();
+        const cost = parseInt(document.getElementById('rewardFormCost').value, 10);
+
+        if (!name) { showToast('Ponle un nombre a la recompensa','error'); return; }
+        if (!cost || cost <= 0) { showToast('El costo debe ser un número mayor a 0','error'); return; }
+
+        try {
+            if (id) {
+                await updateRewardDoc(id, { icon, name, desc, cost });
+                showToast('✅ Recompensa actualizada','success');
+            } else {
+                await addRewardDoc({ icon, name, desc, cost });
+                showToast('✅ Recompensa creada','success');
+            }
+            hideRewardForm();
+            await loadRewardsCatalog(true);
+            renderRewardsManageList();
+        } catch(e) { showToast('Error al guardar la recompensa','error'); }
+    };
+
+    window.editRewardStart = (id) => {
+        const reward = REWARDS.find(r => r.id === id);
+        if (reward) showRewardForm(reward);
+    };
+    window.deleteRewardConfirm = async (id) => {
+        const reward = REWARDS.find(r => r.id === id);
+        if (!reward) return;
+        if (!confirm(`¿Eliminar la recompensa "${reward.name}"? Los canjes ya realizados de esta recompensa se mantienen en el historial.`)) return;
+        try {
+            await deleteRewardDoc(id);
+            await loadRewardsCatalog(true);
+            renderRewardsManageList();
+            showToast('Recompensa eliminada','');
+        } catch(e) { showToast('Error al eliminar','error'); }
     };
 
     async function loadRedemptionHistory() {

@@ -1004,7 +1004,16 @@
     const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
 
-    onAuthStateChanged(auth, (user) => { if (user) window.location.href = "dashboard.html"; });
+    onAuthStateChanged(auth, (user) => { if (user) { localStorage.setItem("ethykos_lastActive", Date.now().toString()); window.location.href = "dashboard.html"; } });
+
+    // Aviso si venimos de un cierre de sesión automático por inactividad
+    if (new URLSearchParams(window.location.search).get("expired") === "1") {
+        const loginError = document.getElementById("loginError");
+        if (loginError) {
+            loginError.textContent = "Tu sesión se cerró por inactividad (30 min). Vuelve a iniciar sesión.";
+            loginError.style.color = "#D97706";
+        }
+    }
 
     window.doLogin = async function() {
         const email = document.getElementById("loginEmail").value.trim();
@@ -1015,6 +1024,7 @@
         loginError.style.color = "#2563EB";
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            localStorage.setItem("ethykos_lastActive", Date.now().toString());
             window.location.href = "dashboard.html";
         } catch (error) {
             const msgs = { 'auth/user-not-found': 'Usuario no encontrado.', 'auth/wrong-password': 'Contraseña incorrecta.', 'auth/invalid-email': 'Correo inválido.', 'auth/api-key-not-valid': 'Error de API key.' };
