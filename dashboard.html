@@ -207,6 +207,10 @@
         .pts-badge-btn { border: none; background: none; cursor: pointer; font-size: 11px; padding: 2px 6px; border-radius: 6px; transition: all 0.15s; font-weight: 700; }
         .pts-badge-btn.plus { color: #059669; } .pts-badge-btn.plus:hover { background: #D1FAE5; }
         .pts-badge-btn.minus { color: #EF4444; } .pts-badge-btn.minus:hover { background: #FEE2E2; }
+        .syllabus-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: none; }
+        .syllabus-badge.pending { background: #DBEAFE; color: #1D4ED8; cursor: pointer; transition: all 0.15s; }
+        .syllabus-badge.pending:hover { background: #BFDBFE; }
+        .syllabus-badge.done { background: #D1FAE5; color: #047857; cursor: default; }
         /* Shop modal */
         .header-btn.amber { background: #D97706; box-shadow: 0 2px 10px rgba(217,119,6,0.3); }
         .header-btn.amber:hover { background: #B45309; }
@@ -1656,6 +1660,11 @@
                     <button class="pts-badge-btn plus" onclick="window.quickStudentPts('${s.id}','reward',5)">+5</button>
                     <button class="pts-badge-btn plus" onclick="window.quickStudentPts('${s.id}','reward',10)">+10</button>
                     <button class="pts-badge-btn minus" onclick="window.quickStudentPts('${s.id}','reward',-5)">-5</button>
+                    <span style="width:1px;height:14px;background:#E2E8F0;margin:0 2px;"></span>
+                    ${s.syllabusDelivered
+                        ? `<span class="syllabus-badge done"><i class="fas fa-check-circle"></i> Syllabus entregado</span>`
+                        : `<button class="syllabus-badge pending" onclick="window.markSyllabusDelivered('${s.id}')"><i class="fas fa-file-arrow-up"></i> Marcar entrega Syllabus (+10 pts)</button>`
+                    }
                 </div>
             </div>`;
         }).join('');
@@ -1683,6 +1692,38 @@
             }
             applyStudentFilter();
         } catch(e) { showToast('Error al actualizar puntos','error'); }
+    };
+
+    window.markSyllabusDelivered = async (studentId) => {
+        try {
+            const ref = doc(db, "students", studentId);
+            const snap = await getDoc(ref);
+            if (!snap.exists()) return;
+            const data = snap.data();
+            if (data.syllabusDelivered) {
+                showToast('Ya se había registrado la entrega de este estudiante', '');
+                return;
+            }
+            const prevPoints = data.individualPoints || 0;
+            const updatedPoints = prevPoints + 10;
+            await updateDoc(ref, { syllabusDelivered: true, individualPoints: updatedPoints });
+
+            const prevLvl = getLevelInfo(prevPoints).levelNumber;
+            const newLvl = getLevelInfo(updatedPoints).levelNumber;
+            if (newLvl > prevLvl) {
+                await updateStudentRewardPoints(studentId, 10);
+                showToast(`📄 Syllabus registrado (+10 pts) · ⬆️ ¡Subió a ${getLevelInfo(updatedPoints).name}!`, 'success');
+            } else {
+                showToast('📄 Entrega de Syllabus registrada (+10 pts)', 'success');
+            }
+
+            const idx = allStudents.findIndex(s => s.id === studentId);
+            if (idx >= 0) {
+                const fresh = await getDoc(ref);
+                if (fresh.exists()) allStudents[idx] = { id: studentId, ...fresh.data() };
+            }
+            applyStudentFilter();
+        } catch(e) { showToast('Error al registrar la entrega','error'); }
     };
     document.getElementById("studentSearch").addEventListener("input", applyStudentFilter);
 
