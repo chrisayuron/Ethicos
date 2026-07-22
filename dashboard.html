@@ -583,6 +583,10 @@
 <div id="attendanceModal" class="modal">
     <div class="modal-content qr-modal">
         <h2>📷 Registro de Asistencia QR</h2>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <label style="font-size:12px;color:#64748B;font-weight:600;white-space:nowrap;"><i class="fas fa-video"></i> Cámara:</label>
+            <select id="qr-camera-select" style="flex:1;padding:6px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;"></select>
+        </div>
         <div id="qr-video-container">
             <video id="qr-video" autoplay playsinline muted></video>
             <div id="qr-overlay"><div class="qr-frame"></div></div>
@@ -592,6 +596,21 @@
                 <i class="fas fa-camera"></i> Esperando código QR...
             </div>
         </div>
+
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:12px;margin-top:12px;">
+            <div style="font-weight:700;font-size:13px;color:#1E293B;margin-bottom:8px;">
+                <i class="fas fa-pen"></i> Registro manual (código dañado o extraviado)
+            </div>
+            <div class="searchable-select" style="position:relative;">
+                <input type="text" id="manualAttInput" placeholder="Buscar estudiante por nombre..." autocomplete="off" style="width:100%;padding:9px 12px;border:1px solid #E2E8F0;border-radius:10px;font-size:13px;box-sizing:border-box;">
+                <input type="hidden" id="manualAttStudentDoc" value="">
+                <div class="searchable-select-list" id="manualAttList"></div>
+            </div>
+            <button class="modal-save" id="manualAttBtn" style="width:100%;margin-top:8px;padding:9px;">
+                <i class="fas fa-check"></i> Registrar asistencia
+            </button>
+        </div>
+
         <div style="display:flex;align-items:center;gap:10px;margin-top:12px;">
             <strong style="font-size:14px;">Asistencias hoy:</strong>
             <span id="attCount" class="att-count">0</span>
@@ -1834,9 +1853,34 @@
     // ===== ATTENDANCE QR =====
     document.getElementById("attendanceBtn").onclick = () => {
         try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch(e) {}
-        openModal("attendanceModal"); startQRScanner(); loadAttendanceLog(); loadQRGeneratorGrid();
+        const savedCameraId = localStorage.getItem('ethykos_preferredCameraId') || undefined;
+        openModal("attendanceModal"); startQRScanner(savedCameraId); loadAttendanceLog(); loadQRGeneratorGrid(); initManualAttendance();
     };
     document.getElementById("closeAttendanceBtn").onclick = () => { stopQRScanner(); closeModal("attendanceModal"); };
+
+    // ===== REGISTRO MANUAL (código dañado o extraviado) =====
+    let manualAttSearchable = null;
+    async function initManualAttendance() {
+        const students = await getStudents(null);
+        if (!manualAttSearchable) {
+            manualAttSearchable = createSearchableSelect({
+                inputId: 'manualAttInput', hiddenId: 'manualAttStudentDoc', listId: 'manualAttList',
+                items: students,
+                getLabel: s => `${s.name} (${courseNames[s.course]||s.course})`,
+                getValue: s => s.document || '',
+                onSelect: () => {}
+            });
+        } else {
+            manualAttSearchable.setItems(students);
+        }
+    }
+    document.getElementById('manualAttBtn').onclick = async () => {
+        const docNum = document.getElementById('manualAttStudentDoc').value;
+        if (!docNum) { showToast('Busca y selecciona un estudiante de la lista primero', 'error'); return; }
+        await registerAttendanceByDocument(docNum);
+        document.getElementById('manualAttInput').value = '';
+        document.getElementById('manualAttStudentDoc').value = '';
+    };
 
     async function loadAttendanceLog() {
         const records = await getTodayAttendance();
@@ -1857,17 +1901,22 @@
     // QR Scanner
     let qrCanvas = document.createElement('canvas');
     let qrCtx = qrCanvas.getContext('2d');
-    async function startQRScanner() {
+    async function startQRScanner(preferredDeviceId) {
         const statusEl = document.getElementById('qr-status-msg');
         const video = document.getElementById('qr-video');
         statusEl.textContent = '📷 Activando cámara...';
         statusEl.className = 'status-msg status-waiting';
         try {
-            // Intentar cámara trasera primero, con fallback a cualquier cámara disponible
-            try {
-                qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
-            } catch (e1) {
-                qrStream = await navigator.mediaDevices.getUserMedia({ video: true });
+            if (preferredDeviceId) {
+                // El profe eligió una cámara específica (ej. webcam USB apuntando a los estudiantes)
+                qrStream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: preferredDeviceId } } });
+            } else {
+                // Intentar cámara trasera primero, con fallback a cualquier cámara disponible
+                try {
+                    qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+                } catch (e1) {
+                    qrStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                }
             }
             video.srcObject = qrStream;
             await video.play();
@@ -1892,12 +1941,37 @@
 
             if (qrScanInterval) clearInterval(qrScanInterval);
             qrScanInterval = setInterval(() => scanFrame(video), 250);
+
+            // Con la cámara ya autorizada, los nombres de los dispositivos quedan visibles
+            await populateCameraList();
         } catch(e) {
             console.error('Error de cámara:', e);
             statusEl.textContent = '⚠️ No se pudo acceder a la cámara: ' + (e.message||e.name||'desconocido');
             statusEl.className = 'status-msg status-error';
         }
     }
+    async function populateCameraList() {
+        const sel = document.getElementById('qr-camera-select');
+        if (!sel) return;
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const cams = devices.filter(d => d.kind === 'videoinput');
+            if (!cams.length) return;
+            const activeTrack = qrStream?.getVideoTracks?.()[0];
+            const activeId = activeTrack?.getSettings?.().deviceId || '';
+            sel.innerHTML = cams.map((c,i) =>
+                `<option value="${c.deviceId}">${escapeHtml(c.label || ('Cámara ' + (i+1)))}</option>`
+            ).join('');
+            if (activeId) sel.value = activeId;
+        } catch(e) { console.error('No se pudo listar las cámaras disponibles', e); }
+    }
+    document.getElementById('qr-camera-select').addEventListener('change', async function() {
+        const deviceId = this.value;
+        if (!deviceId) return;
+        localStorage.setItem('ethykos_preferredCameraId', deviceId);
+        stopQRScanner();
+        await startQRScanner(deviceId);
+    });
     function stopQRScanner() {
         if (qrScanInterval) { clearInterval(qrScanInterval); qrScanInterval=null; }
         if (qrStream) { qrStream.getTracks().forEach(t=>t.stop()); qrStream=null; }
@@ -2000,9 +2074,7 @@
         else vibrateDevice([150, 80, 150]);
     }
 
-    async function processQRCode(data) {
-        // El QR contiene únicamente el número de documento
-        const studentDoc = data.trim();
+    async function registerAttendanceByDocument(studentDoc) {
         const statusEl = document.getElementById('qr-status-msg');
         try {
             const q = query(collection(db, "students"), where("document","==", studentDoc));
@@ -2050,6 +2122,10 @@
             statusEl.className = 'status-msg status-error';
             notifyResult('error');
         }
+    }
+    async function processQRCode(data) {
+        // El QR contiene únicamente el número de documento
+        await registerAttendanceByDocument(data.trim());
     }
 
     // QR Generator Grid
