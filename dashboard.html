@@ -705,7 +705,10 @@
             </div>
             <button class="history-clear-btn" id="hf-clearBtn"><i class="fas fa-rotate-left"></i> Limpiar filtros</button>
             <button class="history-clear-btn" id="hf-repairBtn" style="color:#7C3AED;"><i class="fas fa-wrench"></i> Reparar registros antiguos</button>
+            <button class="history-clear-btn" id="hf-auditBtn" style="color:#0891B2;"><i class="fas fa-magnifying-glass-chart"></i> Auditar puntos de tribu</button>
+            <button class="history-clear-btn" id="hf-resetTestBtn" style="color:#DC2626;"><i class="fas fa-triangle-exclamation"></i> 🧪 Reiniciar datos de prueba</button>
         </div>
+        <div id="auditResultBox" style="display:none;margin:10px 0;padding:12px;border-radius:12px;border:1px solid #E2E8F0;background:#F8FAFC;font-size:12px;line-height:1.6;"></div>
 
         <div class="history-results-count" id="historyResultsCount"></div>
         <div class="history-table-wrap">
@@ -2481,6 +2484,105 @@
             await runHistoryQuery();
         } catch(e) {
             showToast('Error al reparar registros', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    };
+
+    document.getElementById('hf-auditBtn').onclick = async () => {
+        const btn = document.getElementById('hf-auditBtn');
+        const box = document.getElementById('auditResultBox');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Auditando...';
+        box.style.display = 'none';
+        try {
+            // Traer TODAS las tribus (todos los cursos) y TODA la asistencia histórica
+            const tribesSnap = await getDocs(collection(db, "tribes"));
+            const allTribesRaw = tribesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            const attSnap = await getDocs(collection(db, "attendance"));
+            const allAttendance = attSnap.docs.map(d => d.data());
+
+            // 1) Detectar tribus con nombre duplicado (posible causa de confusión de puntos)
+            const nameCounts = {};
+            allTribesRaw.forEach(t => { const key = `${t.name}__${t.course}`; nameCounts[key] = (nameCounts[key]||0) + 1; });
+            const duplicateNames = Object.entries(nameCounts).filter(([,c]) => c > 1).map(([k]) => k.split('__')[0]);
+
+            // 2) Contar asistencias por tribeId y comparar contra el campo "points" actual
+            const attCountByTribe = {};
+            allAttendance.forEach(r => { if (r.tribeId) attCountByTribe[r.tribeId] = (attCountByTribe[r.tribeId]||0) + 1; });
+
+            const mismatches = allTribesRaw
+                .map(t => ({ ...t, attCount: attCountByTribe[t.id] || 0 }))
+                .filter(t => (t.points||0) !== t.attCount);
+
+            let html = `<div style="font-weight:700;color:#0E7490;margin-bottom:6px;"><i class="fas fa-magnifying-glass-chart"></i> Resultado de la auditoría</div>`;
+            html += `<div>Tribus revisadas: <strong>${allTribesRaw.length}</strong> · Registros de asistencia totales: <strong>${allAttendance.length}</strong></div>`;
+
+            if (duplicateNames.length) {
+                html += `<div style="margin-top:8px;color:#DC2626;"><strong>⚠️ Nombres de tribu duplicados</strong> (mismo nombre y curso en más de un documento): ${duplicateNames.map(n=>escapeHtml(n)).join(', ')}. Esto puede hacer parecer que una tribu tiene más/menos puntos de los que realmente le corresponden si se confunden entre sí.</div>`;
+            } else {
+                html += `<div style="margin-top:8px;color:#059669;">✅ No se encontraron tribus con nombres duplicados.</div>`;
+            }
+
+            if (mismatches.length) {
+                html += `<div style="margin-top:8px;color:#DC2626;"><strong>⚠️ Puntos que no cuadran con la asistencia registrada:</strong></div>`;
+                html += mismatches.map(t => `<div style="margin-left:10px;">• <strong>${escapeHtml(t.name)}</strong> (${courseNames[t.course]||t.course}°): puntos actuales = ${t.points||0}, asistencias registradas = ${t.attCount} <span style="color:#94A3B8;">(diferencia: ${(t.points||0) - t.attCount > 0 ? '+' : ''}${(t.points||0) - t.attCount})</span></div>`).join('');
+                html += `<div style="margin-top:8px;color:#64748B;">Nota: esta comparación asume que la asistencia es la única fuente de puntos. Si has usado los botones manuales +1/+3/+5 en las tarjetas de tribu, esos también generan diferencia aquí (no es necesariamente un error).</div>`;
+            } else {
+                html += `<div style="margin-top:8px;color:#059669;">✅ Los puntos de todas las tribus cuadran exactamente con su número de asistencias registradas.</div>`;
+            }
+
+            box.innerHTML = html;
+            box.style.display = 'block';
+        } catch(e) {
+            console.error(e);
+            showToast('Error al ejecutar la auditoría', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    };
+
+    document.getElementById('hf-resetTestBtn').onclick = async () => {
+        const step1 = confirm(
+            '🧪 REINICIAR DATOS DE PRUEBA\n\n' +
+            'Esto va a:\n' +
+            '• Borrar TODOS los registros de asistencia (de todos los días, todos los cursos)\n' +
+            '• Reiniciar a 0 los puntos de TODAS las tribus\n\n' +
+            'Esta acción NO se puede deshacer. Úsala solo mientras estés probando el sistema, ' +
+            'antes de empezar a registrar asistencia real.\n\n¿Continuar?'
+        );
+        if (!step1) return;
+        const step2 = confirm('Confirma una vez más: se borrará TODA la asistencia y se pondrán en 0 TODOS los puntos de tribu. ¿Estás seguro?');
+        if (!step2) return;
+
+        const btn = document.getElementById('hf-resetTestBtn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Reiniciando...';
+        try {
+            // Borrar toda la asistencia
+            const attSnap = await getDocs(collection(db, "attendance"));
+            for (const d of attSnap.docs) {
+                await deleteDoc(doc(db, "attendance", d.id));
+            }
+            // Reiniciar puntos de todas las tribus a 0
+            const tribesSnap = await getDocs(collection(db, "tribes"));
+            for (const t of tribesSnap.docs) {
+                await updateDoc(doc(db, "tribes", t.id), { points: 0 });
+            }
+            scannedToday = new Set();
+            showToast(`✅ Reiniciado: ${attSnap.docs.length} registros de asistencia borrados, ${tribesSnap.docs.length} tribus en 0 puntos`, 'success');
+            document.getElementById('auditResultBox').style.display = 'none';
+            await runHistoryQuery();
+            await renderTribes();
+            await renderChart();
+        } catch(e) {
+            console.error(e);
+            showToast('Error al reiniciar los datos de prueba', 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = original;
