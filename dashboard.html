@@ -380,8 +380,10 @@
         .qr-generator-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid #E2E8F0; }
         .qr-gen-title { font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
         .qr-gen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto; }
-        .qr-gen-item { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .qr-gen-item { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
         .qr-gen-item:hover { border-color: #3B82F6; background: #EFF6FF; }
+        .qr-gen-item.selected { border-color: #7C3AED; background: #F5F3FF; box-shadow: 0 0 0 2px #DDD6FE; }
+        .qr-gen-item .qr-check { position: absolute; top: 6px; left: 6px; width: 16px; height: 16px; cursor: pointer; }
         .qr-gen-item .qr-mini { margin: 0 auto 6px; }
         .qr-gen-item .qr-label { font-size: 11px; font-weight: 500; color: #1E293B; }
         .qr-gen-item .qr-doc { font-size: 10px; color: #94A3B8; }
@@ -620,6 +622,13 @@
         <!-- Generador de QR de estudiantes -->
         <div class="qr-generator-section">
             <div class="qr-gen-title"><i class="fas fa-id-card"></i> Carnés QR de estudiantes</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:12px;">
+                <span id="qrSelectCount" style="color:#64748B;">0 seleccionados</span>
+                <div style="display:flex;gap:10px;">
+                    <a href="#" id="qrSelectAllBtn" style="color:#7C3AED;font-weight:600;text-decoration:none;">Seleccionar todos</a>
+                    <a href="#" id="qrSelectNoneBtn" style="color:#94A3B8;font-weight:600;text-decoration:none;">Ninguno</a>
+                </div>
+            </div>
             <div id="qrGenGrid" class="qr-gen-grid">
                 <div style="text-align:center;color:#94A3B8;font-size:13px;padding:20px;">
                     Carga estudiantes para generar sus QR
@@ -2134,15 +2143,34 @@
     }
 
     // QR Generator Grid
+    let selectedQrDocs = new Set(); // documentos de estudiantes seleccionados para imprimir/exportar
+    function updateQrSelectCount() {
+        document.getElementById('qrSelectCount').textContent = `${selectedQrDocs.size} seleccionado${selectedQrDocs.size===1?'':'s'}`;
+    }
     async function loadQRGeneratorGrid() {
         const grid = document.getElementById('qrGenGrid');
         const students = await getStudents(null);
         if (!students.length) { grid.innerHTML='<div style="text-align:center;color:#94A3B8;font-size:13px;padding:20px;">Sin estudiantes registrados</div>'; return; }
         grid.innerHTML = '';
         for (const s of students) {
+            const docKey = s.document || s.id;
             const item = document.createElement('div');
-            item.className = 'qr-gen-item';
+            item.className = 'qr-gen-item' + (selectedQrDocs.has(docKey) ? ' selected' : '');
             item.title = `Ver QR de ${s.name}`;
+            item.dataset.docKey = docKey;
+
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.className = 'qr-check';
+            check.checked = selectedQrDocs.has(docKey);
+            check.addEventListener('click', (e) => e.stopPropagation()); // evita doble toggle con el click del item
+            check.addEventListener('change', () => {
+                if (check.checked) selectedQrDocs.add(docKey); else selectedQrDocs.delete(docKey);
+                item.classList.toggle('selected', check.checked);
+                updateQrSelectCount();
+            });
+            item.appendChild(check);
+
             const qrDiv = document.createElement('div');
             qrDiv.className = 'qr-mini';
             qrDiv.style.width = '80px'; qrDiv.style.height = '80px';
@@ -2154,6 +2182,10 @@
             doc_.className = 'qr-doc';
             doc_.textContent = s.document||courseNames[s.course]||s.course;
             item.appendChild(label); item.appendChild(doc_);
+
+            // Clic en cualquier parte de la tarjeta también alterna la selección
+            item.addEventListener('click', () => { check.checked = !check.checked; check.dispatchEvent(new Event('change')); });
+
             grid.appendChild(item);
             // Generar QR
             try {
@@ -2166,13 +2198,35 @@
             } catch(e) {}
         }
     }
+    document.getElementById('qrSelectAllBtn').onclick = (e) => {
+        e.preventDefault();
+        document.querySelectorAll('#qrGenGrid .qr-gen-item').forEach(item => {
+            selectedQrDocs.add(item.dataset.docKey);
+            item.classList.add('selected');
+            const cb = item.querySelector('.qr-check'); if (cb) cb.checked = true;
+        });
+        updateQrSelectCount();
+    };
+    document.getElementById('qrSelectNoneBtn').onclick = (e) => {
+        e.preventDefault();
+        selectedQrDocs.clear();
+        document.querySelectorAll('#qrGenGrid .qr-gen-item').forEach(item => {
+            item.classList.remove('selected');
+            const cb = item.querySelector('.qr-check'); if (cb) cb.checked = false;
+        });
+        updateQrSelectCount();
+    };
 
     // Imprimir QR
     document.getElementById("printQrsBtn").onclick = async () => {
         const courseFilter = document.getElementById('printCourseFilter').value; // '' = todos agrupados
         let students = await getStudents(null);
-        if (courseFilter) students = students.filter(s => String(s.course) === courseFilter);
-        if (!students.length) { showToast(courseFilter ? "No hay estudiantes en ese curso" : "No hay estudiantes para imprimir","error"); return; }
+        if (selectedQrDocs.size > 0) {
+            students = students.filter(s => selectedQrDocs.has(s.document || s.id));
+        } else if (courseFilter) {
+            students = students.filter(s => String(s.course) === courseFilter);
+        }
+        if (!students.length) { showToast(selectedQrDocs.size > 0 ? "Los estudiantes seleccionados no se encontraron" : (courseFilter ? "No hay estudiantes en ese curso" : "No hay estudiantes para imprimir"),"error"); return; }
 
         // Agrupar por curso y ordenar alfabéticamente dentro de cada curso
         const courseOrder = ['6','7','8','9','10','11'];
@@ -2261,8 +2315,12 @@
     document.getElementById("downloadQrsPdfBtn").onclick = async () => {
         const courseFilter = document.getElementById('printCourseFilter').value;
         let students = await getStudents(null);
-        if (courseFilter) students = students.filter(s => String(s.course) === courseFilter);
-        if (!students.length) { showToast(courseFilter ? "No hay estudiantes en ese curso" : "No hay estudiantes para exportar","error"); return; }
+        if (selectedQrDocs.size > 0) {
+            students = students.filter(s => selectedQrDocs.has(s.document || s.id));
+        } else if (courseFilter) {
+            students = students.filter(s => String(s.course) === courseFilter);
+        }
+        if (!students.length) { showToast(selectedQrDocs.size > 0 ? "Los estudiantes seleccionados no se encontraron" : (courseFilter ? "No hay estudiantes en ese curso" : "No hay estudiantes para exportar"),"error"); return; }
 
         const courseOrder = ['6','7','8','9','10','11'];
         const grouped = {};
