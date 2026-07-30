@@ -444,6 +444,9 @@
         <a href="./projector.html" class="header-btn" style="text-decoration:none;background:#0F172A;box-shadow:0 2px 10px rgba(15,23,42,0.4);">
             <i class="fas fa-tv"></i> <span>Proyector</span>
         </a>
+        <button class="header-btn" id="backupBtn" style="background:#0891B2;box-shadow:0 2px 10px rgba(8,145,178,0.3);">
+            <i class="fas fa-cloud-arrow-down"></i> <span>Respaldo</span>
+        </button>
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
     </div>
 </div>
@@ -713,10 +716,10 @@
                 <input type="date" id="hf-dateTo">
             </div>
             <button class="history-clear-btn" id="hf-clearBtn"><i class="fas fa-rotate-left"></i> Limpiar filtros</button>
-            <button class="history-clear-btn" id="hf-repairBtn" style="color:#7C3AED;"><i class="fas fa-wrench"></i> Reparar registros antiguos</button>
             <button class="history-clear-btn" id="hf-auditBtn" style="color:#0891B2;"><i class="fas fa-magnifying-glass-chart"></i> Auditar puntos de tribu</button>
             <button class="history-clear-btn" id="hf-resetTestBtn" style="color:#DC2626;"><i class="fas fa-triangle-exclamation"></i> 🧪 Reiniciar datos de prueba</button>
             <button class="history-clear-btn" id="hf-backfillPtsBtn" style="color:#059669;"><i class="fas fa-user-check"></i> Aplicar puntos individuales pendientes</button>
+            <button class="history-clear-btn" id="hf-forceRepairBtn" style="color:#7C3AED;"><i class="fas fa-wrench"></i> Reparar asistencia/puntos de tribu ahora</button>
         </div>
         <div id="auditResultBox" style="display:none;margin:10px 0;padding:12px;border-radius:12px;border:1px solid #E2E8F0;background:#F8FAFC;font-size:12px;line-height:1.6;"></div>
 
@@ -916,6 +919,136 @@
     let scannedToday = new Set();
     let assigningStudent = null;
 
+    // ===== CACHE DE DATOS (evita lecturas excesivas a Firestore) =====
+    // Todas las lecturas pasan por la caché. Solo se lee Firestore al iniciar o al sincronizar.
+    const CACHE_KEY = 'ethykos_dataCache';
+    const CACHE_TTL = 10 * 60 * 1000; // 10 minutos: después de esto se considera obsoleta
+    let dataCache = {
+        tribes: [],
+        students: [],
+        attendance: [],
+        lastSync: 0
+    };
+
+    function saveCacheToLocal() {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(dataCache));
+        } catch(e) {}
+    }
+    function loadCacheFromLocal() {
+        try {
+            const raw = localStorage.getItem(CACHE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed.tribes && parsed.students) {
+                    dataCache = parsed;
+                    return true;
+                }
+            }
+        } catch(e) {}
+        return false;
+    }
+    function isCacheStale() {
+        return (Date.now() - (dataCache.lastSync || 0)) > CACHE_TTL;
+    }
+
+    // Carga TODO desde Firestore una sola vez (al inicio o al sincronizar)
+    async function loadAllData(forceFresh) {
+        if (!forceFresh && loadCacheFromLocal() && !isCacheStale()) {
+            return; // Caché local todavía es válida
+        }
+        const [tribesSnap, studentsSnap, attSnap] = await Promise.all([
+            getDocs(collection(db, "tribes")),
+            getDocs(collection(db, "students")),
+            getDocs(collection(db, "attendance"))
+        ]);
+        dataCache.tribes = [];
+        tribesSnap.forEach(d => dataCache.tribes.push({ id: d.id, ...d.data() }));
+        dataCache.students = [];
+        studentsSnap.forEach(d => dataCache.students.push({ id: d.id, ...d.data() }));
+        dataCache.attendance = [];
+        attSnap.forEach(d => dataCache.attendance.push({ id: d.id, ...d.data() }));
+        dataCache.lastSync = Date.now();
+        saveCacheToLocal();
+    }
+
+    // Nota: cada función cacheAdd*/cacheUpdate*/cacheDelete* de más abajo ya actualiza
+    // localStorage Y Firestore directamente (escritura real vía updateDoc/addDoc/deleteDoc
+    // en el punto donde se usa). No existe una cola de sincronización diferida: todo cambio
+    // se escribe de inmediato a Firestore, el caché local solo evita tener que releerlo.
+
+    // Lecturas desde caché (reemplazan getTribes y getStudents)
+    function getCachedTribes(grade) {
+        if (grade !== undefined && grade !== null) {
+            return dataCache.tribes.filter(t => {
+                const tGrade = t.grade !== undefined ? String(t.grade).trim() : null;
+                const tCourse = t.course !== undefined ? String(t.course).trim() : null;
+                const g = String(grade).trim();
+                return tGrade === g || tCourse === g;
+            }).sort((a, b) => a.name.localeCompare(b.name));
+        }
+        return [...dataCache.tribes].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    function getCachedStudents(course) {
+        if (course !== undefined && course !== null) {
+            return dataCache.students.filter(s => String(s.course) === String(course))
+                .sort((a, b) => a.name.localeCompare(b.name));
+        }
+        return [...dataCache.students].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    function getCachedAttendance() {
+        return dataCache.attendance;
+    }
+
+    // Helpers para modificar la caché local (la escritura real a Firestore ya sucede
+    // en el punto donde se llama a cada uno de estos, antes o después según el caso)
+    function cacheAddTribe(tribe) {
+        dataCache.tribes.push(tribe);
+        saveCacheToLocal();
+    }
+    function cacheUpdateTribe(id, data) {
+        const idx = dataCache.tribes.findIndex(t => t.id === id);
+        if (idx >= 0) Object.assign(dataCache.tribes[idx], data);
+        saveCacheToLocal();
+    }
+    function cacheDeleteTribe(id) {
+        dataCache.tribes = dataCache.tribes.filter(t => t.id !== id);
+        saveCacheToLocal();
+    }
+    function cacheAddStudent(student) {
+        dataCache.students.push(student);
+        saveCacheToLocal();
+    }
+    function cacheDeleteStudent(id) {
+        dataCache.students = dataCache.students.filter(s => s.id !== id);
+        saveCacheToLocal();
+    }
+    function cacheUpdateStudent(id, data) {
+        const idx = dataCache.students.findIndex(s => s.id === id);
+        if (idx >= 0) Object.assign(dataCache.students[idx], data);
+        saveCacheToLocal();
+    }
+    function cacheAddAttendance(record) {
+        dataCache.attendance.push(record);
+        saveCacheToLocal();
+    }
+    function cacheUpdateAttendance(id, data) {
+        const idx = dataCache.attendance.findIndex(r => r.id === id);
+        if (idx >= 0) Object.assign(dataCache.attendance[idx], data);
+        saveCacheToLocal();
+    }
+
+    // Auto-reparación con debounce: se ejecuta después de cambios en tribus
+    // para reparar asistencia huérfana sin intervención del usuario
+    let repairTimeout = null;
+    let repairRunning = false; // Lock: evita ejecuciones concurrentes
+    let repairPending = false; // Cola: indica si hay una reparación pendiente
+    function scheduleRepair() {
+        if (repairRunning) { repairPending = true; return; } // Si ya está reparando, marcar como pendiente
+        if (repairTimeout) clearTimeout(repairTimeout);
+        repairTimeout = setTimeout(() => autoRepairAttendance(), 5000); // 5s debounce
+    }
+
     // ===== UTILS =====
     function escapeHtml(t) {
         if (!t) return '';
@@ -935,7 +1068,7 @@
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // ===== AUTH =====
-    const TEACHER_EMAIL = "rrnewball@gmail.com";
+    const AUTHORIZED_EMAILS = ["rrnewball@gmail.com", "ronald.rojas@bethshalom.edu.co"];
 
     // --- Cierre de sesión por inactividad (30 min) ---
     const IDLE_LIMIT_MS = 30 * 60 * 1000;
@@ -956,7 +1089,7 @@
 
     onAuthStateChanged(auth, (user) => {
         if (!user) { window.location.href = "index.html"; return; }
-        if (user.email !== TEACHER_EMAIL) {
+        if (!AUTHORIZED_EMAILS.includes(user.email)) {
             // Sesión colada (anónima u otra cuenta): cerrarla y mandar al login
             signOut(auth).finally(() => { window.location.href = "index.html"; });
             return;
@@ -968,46 +1101,64 @@
 
     // ===== TRIBES CRUD =====
     async function getTribes(grade) {
-        try {
-            const q = query(collection(db, "tribes"), where("grade", "==", grade));
-            const snap = await getDocs(q);
-            const tribes = [];
-            snap.forEach(d => tribes.push({ id: d.id, ...d.data() }));
-            return tribes.sort((a, b) => a.name.localeCompare(b.name));
-        } catch (e) { console.error(e); return []; }
+        // Legacy: ahora usa caché. Solo Firestore si se fuerza.
+        return getCachedTribes(grade);
     }
+
+    // Busca la tribu de un estudiante en caché (robusto: prueba grade y course, number y string)
+    function findStudentTribe(studentId, studentName, studentCourse) {
+        const course = String(studentCourse).trim();
+        for (const t of dataCache.tribes) {
+            // Verificar que la tribu pertenece al curso del estudiante
+            const tGrade = t.grade !== undefined ? String(t.grade).trim() : null;
+            const tCourse = t.course !== undefined ? String(t.course).trim() : null;
+            if (tGrade !== course && tCourse !== course) continue;
+            // Buscar al estudiante en los miembros
+            const match = (t.members || []).find(m =>
+                (m.studentId && studentId && m.studentId === studentId) ||
+                (m.name && m.name === studentName)
+            );
+            if (match) return { id: t.id, name: t.name };
+        }
+        return null;
+    }
+
     async function saveTribe(data, editId) {
-        if (editId) { await updateDoc(doc(db, "tribes", editId), data); }
-        else { await addDoc(collection(db, "tribes"), data); }
+        if (editId) { await updateDoc(doc(db, "tribes", editId), data); return editId; }
+        else { const ref = await addDoc(collection(db, "tribes"), data); return ref.id; }
     }
     async function deleteTribe(id) { await deleteDoc(doc(db, "tribes", id)); }
     async function updatePoints(id, delta) {
-        const ref = doc(db, "tribes", id);
-        const d = await getDoc(ref);
-        if (d.exists()) await updateDoc(ref, { points: Math.max(0, (d.data().points||0) + delta) });
+        // Usar caché para evitar lectura a Firestore cada vez
+        const tribe = dataCache.tribes.find(t => t.id === id);
+        if (!tribe) return;
+        const newPoints = Math.max(0, (tribe.points || 0) + delta);
+        tribe.points = newPoints;
+        saveCacheToLocal();
+        await updateDoc(doc(db, "tribes", id), { points: newPoints });
     }
     async function updateMember(id, members) { await updateDoc(doc(db, "tribes", id), { members }); }
 
     // ===== STUDENTS CRUD =====
     async function getStudents(filterCourse) {
-        try {
-            let q;
-            if (filterCourse) q = query(collection(db, "students"), where("course", "==", String(filterCourse)));
-            else q = collection(db, "students");
-            const snap = await getDocs(q);
-            const list = [];
-            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-            return list.sort((a, b) => a.name.localeCompare(b.name));
-        } catch(e) { console.error(e); return []; }
+        // Legacy: ahora usa caché. Solo Firestore si se fuerza.
+        return getCachedStudents(filterCourse);
     }
     async function saveStudent(data) {
         if (data.id) {
             await setDoc(doc(db, "students", data.id), data, { merge: true });
+            cacheUpdateStudent(data.id, data);
+            return data.id;
         } else {
-            await addDoc(collection(db, "students"), data);
+            const ref = await addDoc(collection(db, "students"), data);
+            cacheAddStudent({ id: ref.id, ...data });
+            return ref.id;
         }
     }
-    async function deleteStudent(id) { await deleteDoc(doc(db, "students", id)); }
+    async function deleteStudent(id) {
+        await deleteDoc(doc(db, "students", id));
+        cacheDeleteStudent(id);
+    }
 
     // ===== NIVELES TEMÁTICOS INDIVIDUALES =====
     const ethicsLevels = [
@@ -1038,13 +1189,55 @@
         };
     }
     async function updateStudentPoints(studentId, delta) {
-        const ref = doc(db, "students", studentId);
-        const snap = await getDoc(ref);
-        if (!snap.exists()) return null;
-        const current = snap.data().individualPoints || 0;
+        // Usar caché para evitar lectura a Firestore cada vez
+        const student = dataCache.students.find(s => s.id === studentId);
+        if (!student) return null;
+        const current = student.individualPoints || 0;
         const updated = Math.max(0, current + delta);
-        await updateDoc(ref, { individualPoints: updated });
+        student.individualPoints = updated;
+        saveCacheToLocal();
+        await updateDoc(doc(db, "students", studentId), { individualPoints: updated });
         return updated;
+    }
+
+    /**
+     * Otorga puntos de NIVEL a un estudiante, y en el mismo movimiento otorga
+     * monedas 🪙 equivalentes (espejo del mismo delta). Si el estudiante sube
+     * de nivel como resultado, se agrega además un bono de monedas = nivel × 10
+     * por cada nivel alcanzado (ej. llegar a nivel 3 = +30 monedas de bono).
+     * No existe ningún mecanismo para gastar monedas y acelerar el nivel.
+     */
+    async function awardLevelPoints(studentId, delta) {
+        const student = dataCache.students.find(s => s.id === studentId);
+        if (!student) return null;
+
+        const beforePoints = student.individualPoints || 0;
+        const beforeLevel = getLevelInfo(beforePoints).levelNumber;
+
+        const afterPoints = Math.max(0, beforePoints + delta);
+        const afterLevel = getLevelInfo(afterPoints).levelNumber;
+
+        const beforeCoins = student.rewardPoints || 0;
+        let afterCoins = Math.max(0, beforeCoins + delta); // espejo: mismas monedas que puntos otorgados/restados
+
+        let bonusCoins = 0;
+        if (afterLevel > beforeLevel) {
+            for (let lvl = beforeLevel + 1; lvl <= afterLevel; lvl++) bonusCoins += lvl * 10;
+            afterCoins += bonusCoins;
+        }
+
+        student.individualPoints = afterPoints;
+        student.rewardPoints = afterCoins;
+        saveCacheToLocal();
+        await updateDoc(doc(db, "students", studentId), { individualPoints: afterPoints, rewardPoints: afterCoins });
+
+        return {
+            points: afterPoints,
+            coins: afterCoins,
+            leveledUp: afterLevel > beforeLevel,
+            levelInfo: getLevelInfo(afterPoints),
+            bonusCoins
+        };
     }
 
     // ===== ATTENDANCE =====
@@ -1053,30 +1246,26 @@
         const key = `${studentDoc}_${today}`;
         if (scannedToday.has(key)) return { duplicate: true };
         scannedToday.add(key);
-        await addDoc(collection(db, "attendance"), {
+        const newRecord = {
             studentDoc, studentName, tribeId: tribeId||null, tribeName: tribeName||null,
-            course: course||null, date: today, timestamp: serverTimestamp(), pointsAwarded: true
-        });
+            course: course||null, date: today, timestamp: serverTimestamp(),
+            pointsAwarded: true, tribePointsAwarded: !!tribeId
+        };
+        const ref = await addDoc(collection(db, "attendance"), newRecord);
+        cacheAddAttendance({ id: ref.id, ...newRecord });
         if (tribeId) await updatePoints(tribeId, 1);
-        if (studentId) await updateStudentPoints(studentId, 1);
-        return { ok: true, tribeName };
+        let awardResult = null;
+        if (studentId) awardResult = await awardLevelPoints(studentId, 1);
+        return { ok: true, tribeName, awardResult };
     }
     async function getTodayAttendance() {
         const today = new Date().toISOString().slice(0, 10);
-        try {
-            const q = query(collection(db, "attendance"), where("date","==",today));
-            const snap = await getDocs(q);
-            const list = [];
-            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-            return list;
-        } catch(e) { return []; }
+        return dataCache.attendance.filter(r => r.date === today);
     }
     async function getAttendanceHistory(filters) {
         // filters: { studentDoc, dateFrom, dateTo, course }
         try {
-            const snap = await getDocs(collection(db, "attendance"));
-            let list = [];
-            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            let list = getCachedAttendance();
             if (filters.studentDoc) {
                 list = list.filter(r => r.studentDoc === filters.studentDoc);
             }
@@ -1092,31 +1281,6 @@
             return list.sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
         } catch(e) { console.error('Error cargando historial:', e); return []; }
     }
-    async function repairAttendanceCourses() {
-        // Completa el campo 'course' en registros antiguos de asistencia, cruzando por studentDoc
-        const snap = await getDocs(collection(db, "attendance"));
-        const records = [];
-        snap.forEach(d => records.push({ id: d.id, ...d.data() }));
-        const missing = records.filter(r => !r.course);
-        if (!missing.length) return { repaired: 0, notFound: 0 };
-
-        const allStudents = await getStudents(null);
-        const byDoc = {};
-        allStudents.forEach(s => { if (s.document) byDoc[s.document] = s; });
-
-        let repaired = 0, notFound = 0;
-        for (const r of missing) {
-            const student = byDoc[r.studentDoc];
-            if (student && student.course) {
-                await updateDoc(doc(db, "attendance", r.id), { course: student.course });
-                repaired++;
-            } else {
-                notFound++;
-            }
-        }
-        return { repaired, notFound };
-    }
-
     // ===== RENDER CHART =====
     async function renderChart() {
         const container = document.getElementById("chartContainer");
@@ -1330,10 +1494,10 @@
             const tribes = await getTribes(currentGrade);
             if (!tribes.length) { container.innerHTML = `<div class="empty-message"><i class="fas fa-users"></i><h3>Todavía no hay tribus</h3><p>Haz clic en "Crear Nueva Tribu"</p></div>`; return; }
 
-            // Precargar estudiantes del curso actual para mostrar nivel/puntos individuales sin N consultas
-            const courseStudents = await getStudents(currentGrade);
+            // Precargar TODOS los estudiantes (no solo del curso actual) para vincular miembros de tribu
+            const allForLink = getCachedStudents();
             const studentsById = {};
-            courseStudents.forEach(s => { studentsById[s.id] = s; });
+            allForLink.forEach(s => { studentsById[s.id] = s; });
             window.__studentsByIdCache = studentsById; // usado por las acciones de puntos individuales
 
             container.innerHTML = tribes.map(tribe => {
@@ -1426,7 +1590,10 @@
                 if (!sel) return;
 
                 // Build options: disable if assigned to any tribe (including this one)
-                const opts = courseStudents.map(s => {
+                const opts = allForLink.filter(s => {
+                    // Solo mostrar estudiantes del curso actual en el dropdown de agregar miembro
+                    return String(s.course) === String(currentGrade);
+                }).map(s => {
                     const inThisTribe = (tribe.members || []).some(m => m.studentId === s.id);
                     const inOtherTribe = !inThisTribe && assignedAnywhere.has(s.id);
                     const otherTribeName = inOtherTribe
@@ -1483,9 +1650,10 @@
         const btn = document.querySelector(`#pointsForm_${memberUid} .points-inline-apply`);
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'; }
         try {
-            const updated = await updateStudentPoints(studentId, delta);
-            const levelInfo = getLevelInfo(updated);
-            showToast(`${delta > 0 ? '+' : ''}${delta} pts · ${levelInfo.icon} ${levelInfo.name}`, 'success');
+            const ar = await awardLevelPoints(studentId, delta);
+            let msg = `${delta > 0 ? '+' : ''}${delta} pts · ${delta>0?'+':''}${delta}🪙 · ${ar.levelInfo.icon} ${ar.levelInfo.name}`;
+            if (ar.leveledUp) msg += ` · ⬆️ +${ar.bonusCoins}🪙 bono`;
+            showToast(msg, 'success');
             input.value = 5;
             await renderTribes(); // re-render actualiza el nivel visible
         } catch(e) {
@@ -1498,9 +1666,14 @@
         const input = document.getElementById(`customPoints_${uid}`);
         const v = parseInt(input.value);
         if (isNaN(v)||v===0) { showToast("Ingresa un número válido", "error"); return; }
-        const ref = doc(db,"tribes",id);
-        const d = await getDoc(ref);
-        if (d.exists()) await updateDoc(ref, { points: Math.max(0,(d.data().points||0)+v) });
+        // Usar caché en vez de getDoc
+        const tribe = dataCache.tribes.find(t => t.id === id);
+        if (tribe) {
+            const newPts = Math.max(0, (tribe.points||0) + v);
+            tribe.points = newPts;
+            saveCacheToLocal();
+            await updateDoc(doc(db,"tribes",id), { points: newPts });
+        }
         input.value = 0;
         await renderTribes(); await renderChart();
     };
@@ -1517,7 +1690,10 @@
             showToast("Este estudiante ya está en la tribu","error"); return;
         }
         if (tribe) {
-            await updateMember(tribeId, [...(tribe.members||[]), {name, role, studentId}]);
+            const newMembers = [...(tribe.members||[]), {name, role, studentId}];
+            await updateMember(tribeId, newMembers);
+            cacheUpdateTribe(tribeId, { members: newMembers });
+            scheduleRepair(); // Reparar asistencia huérfana en segundo plano
             await renderTribes(); await renderChart();
         }
         sel.value = '';
@@ -1528,7 +1704,10 @@
         const tribes = await getTribes(currentGrade);
         const tribe = tribes.find(t=>t.id===tribeId);
         if (tribe) {
-            await updateMember(tribeId, (tribe.members||[]).filter((_,i)=>i!==idx));
+            const newMembers = (tribe.members||[]).filter((_,i)=>i!==idx);
+            await updateMember(tribeId, newMembers);
+            cacheUpdateTribe(tribeId, { members: newMembers });
+            scheduleRepair();
             await renderTribes(); await renderChart();
         }
     };
@@ -1559,8 +1738,9 @@
             const newRole = document.getElementById('editMemberRole').value;
             if (!newName) { showToast("El nombre no puede estar vacío","error"); return; }
             const newMembers = [...tribe.members];
-            newMembers[idx] = {name:newName, role:newRole};
+            newMembers[idx] = {...member, name:newName, role:newRole};
             await updateMember(tribeId, newMembers);
+            cacheUpdateTribe(tribeId, { members: newMembers });
             await renderTribes(); await renderChart();
             overlay.remove(); showToast("Integrante actualizado ✅","success");
         });
@@ -1578,11 +1758,15 @@
         openModal("tribeModal");
     };
     window.confirmDeleteTribe = async (tribeId) => {
-        const tribes = await getTribes(currentGrade);
-        const tribe = tribes.find(t=>t.id===tribeId);
-        if (tribe && confirm(`¿Eliminar "${tribe.name}"?`)) {
-            await deleteTribe(tribeId); await renderTribes(); await renderChart();
-        }
+        const tribe = getCachedTribes(currentGrade).find(t=>t.id===tribeId);
+        if (!tribe) return;
+        const memberCount = (tribe.members||[]).length;
+        if (!confirm(`¿Eliminar la tribu "${tribe.name}"?${memberCount ? ` Tiene ${memberCount} integrante(s) asignado(s).` : ''}`)) return;
+        if (!confirm(`Confirma una vez más: se eliminará "${tribe.name}" de forma permanente, junto con sus puntos e integrantes asignados. Esta acción no se puede deshacer. ¿Continuar?`)) return;
+        await deleteTribe(tribeId);
+        cacheDeleteTribe(tribeId);
+        await renderTribes(); await renderChart();
+        showToast(`Tribu "${tribe.name}" eliminada`, '');
     };
 
     // ===== COURSES NAV =====
@@ -1613,13 +1797,17 @@
         const name = document.getElementById("tribeName").value.trim();
         if (!name) { showToast("Ingresa el nombre de la tribu","error"); return; }
         const tribeData = { grade:currentGrade, name, imageData:tempImageData, warCry:document.getElementById("tribeWarCry").value.trim(), members:[], points:0, createdAt:new Date().toISOString() };
+        let savedId;
         if (editingTribeId) {
-            const tribes = await getTribes(currentGrade);
-            const existing = tribes.find(t=>t.id===editingTribeId);
+            const existing = getCachedTribes(currentGrade).find(t=>t.id===editingTribeId);
             if (existing) { tribeData.members=existing.members||[]; tribeData.points=existing.points||0; }
             delete tribeData.createdAt;
-            await saveTribe(tribeData, editingTribeId);
-        } else { await saveTribe(tribeData, null); }
+            savedId = await saveTribe(tribeData, editingTribeId);
+            cacheUpdateTribe(editingTribeId, tribeData);
+        } else {
+            savedId = await saveTribe(tribeData, null);
+            cacheAddTribe({ id: savedId, ...tribeData });
+        }
         closeModal("tribeModal"); editingTribeId=null;
         await renderTribes(); await renderChart();
         showToast("Tribu guardada ✅","success");
@@ -1628,7 +1816,57 @@
         const file = e.target.files[0];
         if (file) { const r=new FileReader(); r.onload=ev=>{tempImageData=ev.target.result;document.getElementById("imagePreview").innerHTML=`<img src="${tempImageData}">`;}; r.readAsDataURL(file); }
     });
-    document.getElementById("logoutBtn").onclick = async () => { await signOut(auth); window.location.href="index.html"; };
+    document.getElementById("logoutBtn").onclick = async () => {
+        await signOut(auth);
+        window.location.href="index.html";
+    };
+
+    // ===== RESPALDO COMPLETO (JSON) =====
+    document.getElementById("backupBtn").onclick = async () => {
+        const btn = document.getElementById('backupBtn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> <span>Generando...</span>';
+        try {
+            const collectionsToBackup = ['tribes', 'students', 'attendance', 'redemptions', 'rewards', 'quizResults'];
+            const backup = { generatedAt: new Date().toISOString(), project: 'ethicos-a9a66', data: {} };
+
+            for (const colName of collectionsToBackup) {
+                const snap = await getDocs(collection(db, colName));
+                backup.data[colName] = snap.docs.map(d => {
+                    const raw = d.data();
+                    // Convertir Timestamps de Firestore a texto legible para que el JSON sea portable
+                    const clean = {};
+                    Object.keys(raw).forEach(k => {
+                        const v = raw[k];
+                        clean[k] = (v && typeof v === 'object' && typeof v.toDate === 'function') ? v.toDate().toISOString() : v;
+                    });
+                    return { id: d.id, ...clean };
+                });
+            }
+
+            const json = JSON.stringify(backup, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+            a.href = url;
+            a.download = `ethykos_respaldo_${stamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            const totalDocs = Object.values(backup.data).reduce((sum, arr) => sum + arr.length, 0);
+            showToast(`✅ Respaldo descargado (${totalDocs} registros en total)`, 'success');
+        } catch(e) {
+            console.error(e);
+            showToast('Error al generar el respaldo', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    };
     document.getElementById("addTribeBtn").onclick = openAddTribeModal;
     document.getElementById("saveTribeBtn").onclick = saveTribeFromModal;
     document.getElementById("cancelModalBtn").onclick = () => closeModal("tribeModal");
@@ -1705,23 +1943,17 @@
     window.quickStudentPts = async (studentId, type, delta) => {
         try {
             if (type === 'level') {
-                const prev = allStudents.find(s=>s.id===studentId)?.individualPoints||0;
-                const updated = await updateStudentPoints(studentId, delta);
-                // Check level up bonus
-                const prevLvl = getLevelInfo(prev).levelNumber;
-                const newLvl = getLevelInfo(updated).levelNumber;
-                if (newLvl > prevLvl) {
-                    await updateStudentRewardPoints(studentId, 10);
-                    showToast(`⬆️ ¡Subió a ${getLevelInfo(updated).name}! +10 🪙 bonus`, 'success');
+                const ar = await awardLevelPoints(studentId, delta);
+                if (ar?.leveledUp) {
+                    showToast(`⬆️ ¡Subió a ${ar.levelInfo.icon} ${ar.levelInfo.name}! +${delta}🪙 · +${ar.bonusCoins}🪙 bono`, 'success');
                 }
             } else {
                 await updateStudentRewardPoints(studentId, delta);
             }
-            // Refresh list
+            // Refresh list from cache
             const idx = allStudents.findIndex(s=>s.id===studentId);
             if (idx>=0) {
-                const snap = await getDoc(doc(db,"students",studentId));
-                if (snap.exists()) allStudents[idx] = {id:studentId,...snap.data()};
+                allStudents[idx] = dataCache.students.find(s => s.id === studentId) || allStudents[idx];
             }
             applyStudentFilter();
         } catch(e) { showToast('Error al actualizar puntos','error'); }
@@ -1729,32 +1961,23 @@
 
     window.markSyllabusDelivered = async (studentId) => {
         try {
-            const ref = doc(db, "students", studentId);
-            const snap = await getDoc(ref);
-            if (!snap.exists()) return;
-            const data = snap.data();
-            if (data.syllabusDelivered) {
+            const student = dataCache.students.find(s => s.id === studentId);
+            if (!student) return;
+            if (student.syllabusDelivered) {
                 showToast('Ya se había registrado la entrega de este estudiante', '');
                 return;
             }
-            const prevPoints = data.individualPoints || 0;
-            const updatedPoints = prevPoints + 10;
-            await updateDoc(ref, { syllabusDelivered: true, individualPoints: updatedPoints });
+            await updateDoc(doc(db, "students", studentId), { syllabusDelivered: true });
+            student.syllabusDelivered = true;
+            saveCacheToLocal();
 
-            const prevLvl = getLevelInfo(prevPoints).levelNumber;
-            const newLvl = getLevelInfo(updatedPoints).levelNumber;
-            if (newLvl > prevLvl) {
-                await updateStudentRewardPoints(studentId, 10);
-                showToast(`📄 Syllabus registrado (+10 pts) · ⬆️ ¡Subió a ${getLevelInfo(updatedPoints).name}!`, 'success');
-            } else {
-                showToast('📄 Entrega de Syllabus registrada (+10 pts)', 'success');
-            }
+            const ar = await awardLevelPoints(studentId, 10);
+            let msg = `📄 Entrega de Syllabus registrada (+10pts · +10🪙)`;
+            if (ar?.leveledUp) msg += ` · ⬆️ ¡Subió a ${ar.levelInfo.icon} ${ar.levelInfo.name}! (+${ar.bonusCoins}🪙 bono)`;
+            showToast(msg, 'success');
 
             const idx = allStudents.findIndex(s => s.id === studentId);
-            if (idx >= 0) {
-                const fresh = await getDoc(ref);
-                if (fresh.exists()) allStudents[idx] = { id: studentId, ...fresh.data() };
-            }
+            if (idx >= 0) allStudents[idx] = student;
             applyStudentFilter();
         } catch(e) { showToast('Error al registrar la entrega','error'); }
     };
@@ -1844,23 +2067,30 @@
     };
     window.assignToTribe = async (tribeId, tribeName) => {
         if (!assigningStudent) return;
-        const tribes = await getTribes(parseInt(assigningStudent.course));
-        const tribe = tribes.find(t=>t.id===tribeId);
+        const tribe = getCachedTribes(parseInt(assigningStudent.course)).find(t=>t.id===tribeId);
         if (!tribe) return;
         const existingMembers = tribe.members||[];
         if (!existingMembers.find(m=>m.name===assigningStudent.name)) {
-            await updateMember(tribeId, [...existingMembers, { name: assigningStudent.name, role: "Explorador", studentId: assigningStudent.id }]);
+            const newMembers = [...existingMembers, { name: assigningStudent.name, role: "Explorador", studentId: assigningStudent.id }];
+            await updateMember(tribeId, newMembers);
+            cacheUpdateTribe(tribeId, { members: newMembers });
+            scheduleRepair(); // Reparar asistencia huérfana en segundo plano
         }
         closeModal("assignTribeModal");
         showToast(`${assigningStudent.name} asignado/a a ${tribeName} ✅`,"success");
-        if (parseInt(assigningStudent.course)===currentGrade) { await renderTribes(); await renderChart(); }
+        if (parseInt(assigningStudent.course)===currentGrade) {
+            await renderTribes(); await renderChart();
+        }
         assigningStudent = null;
     };
     document.getElementById("closeAssignBtn").onclick = () => closeModal("assignTribeModal");
     window.removeStudent = async (id) => {
-        if (!confirm("¿Eliminar este estudiante?")) return;
+        const student = dataCache.students.find(s => s.id === id) || allStudents.find(s => s.id === id);
+        const name = student?.name || 'este estudiante';
+        if (!confirm(`¿Eliminar a "${name}"?`)) return;
+        if (!confirm(`Confirma una vez más: se eliminará a "${name}" de forma permanente (perfil, puntos, historial no se ven afectados, pero ya no podrá registrar asistencia ni aparecer en listados). Esta acción no se puede deshacer. ¿Continuar?`)) return;
         await deleteStudent(id);
-        showToast("Estudiante eliminado","");
+        showToast(`"${name}" eliminado`,"");
         loadStudentList();
     };
 
@@ -2091,15 +2321,14 @@
     async function registerAttendanceByDocument(studentDoc) {
         const statusEl = document.getElementById('qr-status-msg');
         try {
-            const q = query(collection(db, "students"), where("document","==", studentDoc));
-            const snap = await getDocs(q);
-            if (snap.empty) {
+            // Buscar estudiante en caché por número de documento (evita query a Firestore)
+            let sData = dataCache.students.find(s => s.document === studentDoc);
+            if (!sData) {
                 statusEl.textContent = `❌ Documento no encontrado: ${studentDoc}`;
                 statusEl.className = 'status-msg status-error';
                 notifyResult('error');
                 return;
             }
-            let sData = { id: snap.docs[0].id, ...snap.docs[0].data() };
             const name = sData.name;
             const today = new Date().toISOString().slice(0,10);
             const key = `${studentDoc}_${today}`;
@@ -2109,23 +2338,21 @@
                 notifyResult('duplicate');
                 return;
             }
-            // Buscar tribu del estudiante
+            // Buscar tribu del estudiante usando caché
             let tribeId = null, tribeName = null;
-            if (sData) {
-                const allTribes = await getTribes(parseInt(sData.course));
-                for (const t of allTribes) {
-                    if ((t.members||[]).find(m=>m.studentId===sData.id||m.name===name)) {
-                        tribeId = t.id; tribeName = t.name; break;
-                    }
-                }
-            }
+            const tribe = findStudentTribe(sData.id, name, sData.course);
+            if (tribe) { tribeId = tribe.id; tribeName = tribe.name; }
             const result = await recordAttendance(studentDoc, name, tribeId, tribeName, sData.course, sData.id);
             if (result.duplicate) {
                 statusEl.textContent = `⚠️ ${name} ya registró asistencia hoy`;
                 statusEl.className = 'status-msg status-error';
                 notifyResult('duplicate');
             } else {
-                statusEl.textContent = `✅ ¡${name} registrado! +1pt individual${tribeName?' · +1pt a '+tribeName:''}`;
+                const ar = result.awardResult;
+                let msg = `✅ ¡${name} registrado! +1pt individual · +1🪙`;
+                if (tribeName) msg += ` · +1pt a ${tribeName}`;
+                if (ar?.leveledUp) msg += ` · ⬆️ ¡Subió a ${ar.levelInfo.icon} ${ar.levelInfo.name}! (+${ar.bonusCoins}🪙 bono)`;
+                statusEl.textContent = msg;
                 statusEl.className = 'status-msg status-success';
                 notifyResult('success');
                 await loadAttendanceLog();
@@ -2421,11 +2648,88 @@
     let activeHistoryFilters = []; // ej: ['student'], ['date'], ['student','course'], etc.
     let historyStudentsCache = null;
 
-    document.getElementById("historySectionBtn").onclick = () => {
+    document.getElementById("historySectionBtn").onclick = async () => {
         activeHistoryFilters = [];
         document.querySelectorAll('.filter-type-card').forEach(c => c.classList.remove('active'));
         openModal("historyFilterTypeModal");
+        // NO llamar autoRepairAttendance() directamente aquí:
+        // scheduleRepair() ya se ejecuta después de cambios en tribus,
+        // y el lock previene ejecuciones concurrentes.
     };
+
+    // Auto-reparación silenciosa: repara tribeId faltante y puntos de tribu pendientes
+    // Usa lock para evitar ejecuciones concurrentes que dupliquen puntos
+    async function autoRepairAttendance(forceNotify) {
+        if (repairRunning) { if (forceNotify) showToast('Ya hay una reparación en curso, espera un momento...', ''); return; }
+        repairRunning = true;
+        if (repairTimeout) { clearTimeout(repairTimeout); repairTimeout = null; }
+        try {
+            // Usar caché en lugar de leer de Firestore
+            const records = getCachedAttendance();
+
+            // 1) Reparar registros sin tribeId que sí tienen estudiante en una tribu
+            const missingTribe = records.filter(r => !r.tribeId && r.studentDoc);
+            let tribeFixed = 0;
+            if (missingTribe.length > 0) {
+                const allStudents = getCachedStudents();
+                const byDoc = {};
+                allStudents.forEach(s => { if (s.document) byDoc[s.document] = s; });
+
+                for (const r of missingTribe) {
+                    const student = byDoc[r.studentDoc];
+                    if (!student) continue;
+                    const tribe = findStudentTribe(student.id, r.studentName, student.course);
+                    if (tribe) {
+                        await updateDoc(doc(db, "attendance", r.id), {
+                            tribeId: tribe.id,
+                            tribeName: tribe.name
+                        });
+                        cacheUpdateAttendance(r.id, { tribeId: tribe.id, tribeName: tribe.name });
+                        tribeFixed++;
+                    }
+                }
+            }
+
+            // 2) Aplicar puntos de tribu pendientes
+            // NOTA: solo procesa registros donde tribePointsAwarded sea falsy/undefined
+            // (nunca true), para evitar doble asignación
+            const pendingPts = records.filter(r => r.tribeId && r.tribePointsAwarded !== true);
+            let ptsFixed = 0;
+            for (const r of pendingPts) {
+                try {
+                    await updatePoints(r.tribeId, 1);
+                    await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true });
+                    cacheUpdateAttendance(r.id, { tribePointsAwarded: true });
+                    ptsFixed++;
+                } catch(e) {}
+            }
+
+            // Notificar solo si hubo cambios (o siempre, si se pidió explícitamente)
+            if (tribeFixed > 0 || ptsFixed > 0) {
+                let msg = 'Auto-reparación: ';
+                const parts = [];
+                if (tribeFixed > 0) parts.push(`${tribeFixed} registro(s) con tribu asignada`);
+                if (ptsFixed > 0) parts.push(`${ptsFixed} punto(s) de tribu aplicado(s)`);
+                msg += parts.join(', ');
+                showToast('🔧 ' + msg, 'success');
+                await renderTribes();
+                await renderChart();
+            } else if (forceNotify) {
+                showToast('✅ Todo en orden, no había nada pendiente por reparar', 'success');
+            }
+        } catch(e) {
+            console.error('Error en autoRepairAttendance:', e);
+            if (forceNotify) showToast('Error al reparar. Revisa la consola para más detalle.', 'error');
+        } finally {
+            repairRunning = false;
+            // Si hubo una petición de reparación mientras esta estaba corriendo, ejecutarla ahora
+            if (repairPending) {
+                repairPending = false;
+                scheduleRepair();
+            }
+        }
+    }
+
     document.getElementById("closeHistoryFilterTypeBtn").onclick = () => closeModal("historyFilterTypeModal");
 
     document.querySelectorAll('.filter-type-card').forEach(card => {
@@ -2528,28 +2832,6 @@
         runHistoryQuery();
     };
 
-    document.getElementById('hf-repairBtn').onclick = async () => {
-        if (!confirm('Esto completará el curso de registros antiguos de asistencia que no lo tengan, buscando cada estudiante por su número de documento. ¿Continuar?')) return;
-        const btn = document.getElementById('hf-repairBtn');
-        const original = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Reparando...';
-        try {
-            const { repaired, notFound } = await repairAttendanceCourses();
-            if (repaired === 0 && notFound === 0) {
-                showToast('No había registros pendientes de reparar ✅', 'success');
-            } else {
-                showToast(`Reparados: ${repaired}${notFound ? ` · Sin coincidencia: ${notFound}` : ''}`, 'success');
-            }
-            await runHistoryQuery();
-        } catch(e) {
-            showToast('Error al reparar registros', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = original;
-        }
-    };
-
     document.getElementById('hf-auditBtn').onclick = async () => {
         const btn = document.getElementById('hf-auditBtn');
         const box = document.getElementById('auditResultBox');
@@ -2558,16 +2840,17 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Auditando...';
         box.style.display = 'none';
         try {
-            // Traer TODAS las tribus (todos los cursos) y TODA la asistencia histórica
+            // Se lee directo de Firestore (no del caché local) a propósito: la auditoría
+            // debe ser una verificación independiente. Si comparara el caché contra sí
+            // mismo, nunca detectaría una desincronización entre el caché y la base real.
             const tribesSnap = await getDocs(collection(db, "tribes"));
             const allTribesRaw = tribesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
             const attSnap = await getDocs(collection(db, "attendance"));
             const allAttendance = attSnap.docs.map(d => d.data());
 
             // 1) Detectar tribus con nombre duplicado (posible causa de confusión de puntos)
             const nameCounts = {};
-            allTribesRaw.forEach(t => { const key = `${t.name}__${t.course}`; nameCounts[key] = (nameCounts[key]||0) + 1; });
+            allTribesRaw.forEach(t => { const key = `${t.name}__${t.course || t.grade}`; nameCounts[key] = (nameCounts[key]||0) + 1; });
             const duplicateNames = Object.entries(nameCounts).filter(([,c]) => c > 1).map(([k]) => k.split('__')[0]);
 
             // 2) Contar asistencias por tribeId y comparar contra el campo "points" actual
@@ -2634,6 +2917,10 @@
             for (const t of tribesSnap.docs) {
                 await updateDoc(doc(db, "tribes", t.id), { points: 0 });
             }
+            // Actualizar caché local
+            dataCache.attendance = [];
+            dataCache.tribes.forEach(t => t.points = 0);
+            saveCacheToLocal();
             scannedToday = new Set();
             showToast(`✅ Reiniciado: ${attSnap.docs.length} registros de asistencia borrados, ${tribesSnap.docs.length} tribus en 0 puntos`, 'success');
             document.getElementById('auditResultBox').style.display = 'none';
@@ -2648,6 +2935,12 @@
             btn.innerHTML = original;
         }
     };
+
+    document.getElementById('historyBackBtn').onclick = () => {
+        closeModal('historyResultsModal');
+        openModal('historyFilterTypeModal');
+    };
+    document.getElementById('closeHistoryResultsBtn').onclick = () => closeModal('historyResultsModal');
 
     document.getElementById('hf-backfillPtsBtn').onclick = async () => {
         const btn = document.getElementById('hf-backfillPtsBtn');
@@ -2695,11 +2988,18 @@
         }
     };
 
-    document.getElementById('historyBackBtn').onclick = () => {
-        closeModal('historyResultsModal');
-        openModal('historyFilterTypeModal');
+    document.getElementById('hf-forceRepairBtn').onclick = async () => {
+        const btn = document.getElementById('hf-forceRepairBtn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Reparando...';
+        try {
+            await autoRepairAttendance(true); // true = mostrar siempre un resultado, incluso "nada que reparar"
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
     };
-    document.getElementById('closeHistoryResultsBtn').onclick = () => closeModal('historyResultsModal');
 
     // ===== REWARDS CATALOG =====
     // ===== REWARDS CATALOG (editable, guardado en Firestore) =====
@@ -2748,12 +3048,14 @@
     }
 
     async function updateStudentRewardPoints(studentId, delta) {
-        const ref = doc(db, "students", studentId);
-        const snap = await getDoc(ref);
-        if (!snap.exists()) return null;
-        const current = snap.data().rewardPoints || 0;
+        // Usar caché para evitar lectura a Firestore cada vez
+        const student = dataCache.students.find(s => s.id === studentId);
+        if (!student) return null;
+        const current = student.rewardPoints || 0;
         const updated = Math.max(0, current + delta);
-        await updateDoc(ref, { rewardPoints: updated });
+        student.rewardPoints = updated;
+        saveCacheToLocal();
+        await updateDoc(doc(db, "students", studentId), { rewardPoints: updated });
         return updated;
     }
     async function recordRedemption(studentId, studentName, rewardId, rewardName, cost) {
@@ -3039,18 +3341,18 @@
             const isTalentos = r.quizType === 'Cuestionario Talentos';
             const scoreCell = isTalentos
                 ? '<span style="color:#64748B;">Ver detalle</span>'
-                : `${r.score ?? 0} / ${r.maxScore ?? 0}`;
+                : `${escapeHtml(String(r.score ?? 0))} / ${escapeHtml(String(r.maxScore ?? 0))}`;
             let dateStr = 'N/A';
             try {
                 dateStr = new Date(r.timestamp).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
             } catch (e) {}
             return `
                 <tr>
-                    <td>${name || 'N/A'}</td>
-                    <td>${r.course || 'N/A'}</td>
-                    <td>${quizTypeShortLabel(r.quizType)}</td>
+                    <td>${escapeHtml(name) || 'N/A'}</td>
+                    <td>${escapeHtml(String(r.course || 'N/A'))}</td>
+                    <td>${escapeHtml(quizTypeShortLabel(r.quizType))}</td>
                     <td>${scoreCell}</td>
-                    <td>${dateStr}</td>
+                    <td>${escapeHtml(dateStr)}</td>
                     <td><button class="ranking-course-btn" onclick="window.__showQuizDetail('${r.id}')">Ver</button></td>
                 </tr>`;
         }).join('');
@@ -3069,13 +3371,13 @@
             if (val && typeof val === 'object') {
                 const question = val.question || val.pregunta || key;
                 const answer = val.answer ?? val.respuesta ?? val.score ?? 'N/A';
-                html += `<p><strong>${question}:</strong> ${answer}</p>`;
+                html += `<p><strong>${escapeHtml(String(question))}:</strong> ${escapeHtml(String(answer))}</p>`;
             } else {
-                html += `<p><strong>${key}:</strong> ${val}</p>`;
+                html += `<p><strong>${escapeHtml(String(key))}:</strong> ${escapeHtml(String(val))}</p>`;
             }
         });
         if (r.feedback) {
-            html += `<hr style="margin:12px 0;"><h4>Feedback</h4><div>${r.feedback}</div>`;
+            html += `<hr style="margin:12px 0;"><h4>Feedback</h4><div>${escapeHtml(String(r.feedback))}</div>`;
         }
         if (!html) html = '<p style="color:#94A3B8;">No hay detalle disponible para este resultado.</p>';
         document.getElementById('quizDetailBody').innerHTML = html;
@@ -3092,19 +3394,15 @@
     });
 
     async function loadRanking() {
-        // Load all students
-        rankingAllStudents = await getStudents(null);
-        // Build studentId → tribeName map by scanning all tribes of all courses
+        // Load from cache
+        rankingAllStudents = getCachedStudents();
+        // Build studentId → tribeName map from cached tribes
         rankingTribesMap = {};
-        try {
-            const snap = await getDocs(collection(db, "tribes"));
-            snap.forEach(d => {
-                const t = d.data();
-                (t.members || []).forEach(m => {
-                    if (m.studentId) rankingTribesMap[m.studentId] = t.name;
-                });
+        dataCache.tribes.forEach(t => {
+            (t.members || []).forEach(m => {
+                if (m.studentId) rankingTribesMap[m.studentId] = t.name;
             });
-        } catch(e) {}
+        });
         renderRanking();
     }
 
@@ -3174,10 +3472,13 @@
 
     // ===== INIT =====
     async function initDashboard() {
+        await loadAllData();
         renderCoursesNav();
         document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
         await renderTribes();
         await renderChart();
+        // Auto-reparar asistencia en segundo plano (silencioso, sin intervención del usuario)
+        autoRepairAttendance();
     }
 </script>
 </body>
