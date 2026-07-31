@@ -447,6 +447,9 @@
         <button class="header-btn" id="backupBtn" style="background:#0891B2;box-shadow:0 2px 10px rgba(8,145,178,0.3);">
             <i class="fas fa-cloud-arrow-down"></i> <span>Respaldo</span>
         </button>
+        <button class="header-btn" id="pointsLogBtn" style="background:#4338CA;box-shadow:0 2px 10px rgba(67,56,202,0.3);">
+            <i class="fas fa-clock-rotate-left"></i> <span>Log de puntos</span>
+        </button>
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
     </div>
 </div>
@@ -733,6 +736,39 @@
 
         <div class="modal-buttons" style="margin-top:16px;">
             <button class="modal-cancel" id="closeHistoryResultsBtn">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Log de Puntos -->
+<div id="pointsLogModal" class="modal">
+    <div class="modal-content history-modal">
+        <h2>📜 Log de cambios de puntos</h2>
+        <div class="history-filters-bar">
+            <div class="history-filter-field">
+                <label>🔎 Buscar</label>
+                <input type="text" id="plog-search" placeholder="Nombre de estudiante o tribu...">
+            </div>
+            <div class="history-filter-field">
+                <label>📂 Tipo</label>
+                <select id="plog-type">
+                    <option value="">Todos</option>
+                    <option value="tribe">Puntos de tribu</option>
+                    <option value="individual">Puntos de nivel (individual)</option>
+                    <option value="coins">Monedas 🪙</option>
+                </select>
+            </div>
+            <button class="history-clear-btn" id="plog-refreshBtn"><i class="fas fa-rotate"></i> Actualizar</button>
+        </div>
+        <div class="history-results-count" id="plogResultsCount"></div>
+        <div class="history-table-wrap">
+            <table class="history-table" id="plogTable">
+                <thead><tr><th>Fecha/Hora</th><th>Tipo</th><th>Objetivo</th><th>Cambio</th><th>Resultado</th><th>Origen</th><th>Quién</th></tr></thead>
+                <tbody id="plogTableBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-buttons" style="margin-top:16px;">
+            <button class="modal-cancel" id="closePointsLogBtn">Cerrar</button>
         </div>
     </div>
 </div>
@@ -1050,6 +1086,50 @@
     }
 
     // ===== UTILS =====
+    /**
+     * Buscador desplegable reutilizable.
+     * Al hacer foco en el input muestra TODOS los ítems; al escribir, filtra.
+     */
+    function createSearchableSelect({ inputId, hiddenId, listId, items, getLabel, getValue, onSelect, emptyLabel }) {
+        const input = document.getElementById(inputId);
+        const hidden = document.getElementById(hiddenId);
+        const list = document.getElementById(listId);
+        let currentItems = items || [];
+
+        function renderList(filterText) {
+            const f = (filterText || '').toLowerCase().trim();
+            const filtered = f ? currentItems.filter(it => getLabel(it).toLowerCase().includes(f)) : currentItems;
+            if (!filtered.length) {
+                list.innerHTML = `<div class="searchable-select-empty">Sin resultados</div>`;
+            } else {
+                list.innerHTML = filtered.slice(0, 200).map(it =>
+                    `<div class="searchable-select-item" data-value="${escapeHtml(String(getValue(it)))}">${escapeHtml(getLabel(it))}</div>`
+                ).join('');
+            }
+            list.style.display = 'block';
+        }
+
+        input.addEventListener('focus', () => renderList(input.value));
+        input.addEventListener('input', () => { hidden.value = ''; renderList(input.value); });
+        list.addEventListener('mousedown', (e) => {
+            const item = e.target.closest('.searchable-select-item');
+            if (!item) return;
+            const val = item.dataset.value;
+            const obj = currentItems.find(it => String(getValue(it)) === val);
+            input.value = obj ? getLabel(obj) : '';
+            hidden.value = val;
+            list.style.display = 'none';
+            onSelect(val, obj);
+        });
+        document.addEventListener('click', (e) => {
+            if (e.target !== input && !list.contains(e.target)) list.style.display = 'none';
+        });
+        return {
+            clear() { input.value = ''; hidden.value = ''; list.style.display = 'none'; onSelect('', null); },
+            setItems(newItems) { currentItems = newItems || []; }
+        };
+    }
+
     function escapeHtml(t) {
         if (!t) return '';
         const d = document.createElement('div');
@@ -1128,7 +1208,24 @@
         else { const ref = await addDoc(collection(db, "tribes"), data); return ref.id; }
     }
     async function deleteTribe(id) { await deleteDoc(doc(db, "tribes", id)); }
-    async function updatePoints(id, delta) {
+
+    /**
+     * Registra un cambio de puntos en el log de auditoría. No bloquea la UI
+     * (no se espera el resultado en los puntos de llamada); si falla, solo
+     * se registra en consola, nunca interrumpe la acción principal.
+     */
+    async function logPointsChange(type, targetId, targetName, delta, resultingValue, source) {
+        try {
+            await addDoc(collection(db, "pointsLog"), {
+                type, targetId, targetName: targetName || '', delta, resultingValue,
+                source: source || 'manual',
+                actorEmail: auth.currentUser?.email || 'desconocido',
+                timestamp: serverTimestamp()
+            });
+        } catch(e) { console.error('Error al registrar en pointsLog:', e); }
+    }
+
+    async function updatePoints(id, delta, source) {
         // Usar caché para evitar lectura a Firestore cada vez
         const tribe = dataCache.tribes.find(t => t.id === id);
         if (!tribe) return;
@@ -1136,6 +1233,7 @@
         tribe.points = newPoints;
         saveCacheToLocal();
         await updateDoc(doc(db, "tribes", id), { points: newPoints });
+        logPointsChange('tribe', id, tribe.name, delta, newPoints, source || 'manual');
     }
     async function updateMember(id, members) { await updateDoc(doc(db, "tribes", id), { members }); }
 
@@ -1197,6 +1295,7 @@
         student.individualPoints = updated;
         saveCacheToLocal();
         await updateDoc(doc(db, "students", studentId), { individualPoints: updated });
+        logPointsChange('individual', studentId, student.name, delta, updated, 'backfill');
         return updated;
     }
 
@@ -1207,7 +1306,7 @@
      * por cada nivel alcanzado (ej. llegar a nivel 3 = +30 monedas de bono).
      * No existe ningún mecanismo para gastar monedas y acelerar el nivel.
      */
-    async function awardLevelPoints(studentId, delta) {
+    async function awardLevelPoints(studentId, delta, source) {
         const student = dataCache.students.find(s => s.id === studentId);
         if (!student) return null;
 
@@ -1230,6 +1329,10 @@
         student.rewardPoints = afterCoins;
         saveCacheToLocal();
         await updateDoc(doc(db, "students", studentId), { individualPoints: afterPoints, rewardPoints: afterCoins });
+        logPointsChange('individual', studentId, student.name, delta, afterPoints, source || 'manual');
+        if (afterCoins !== beforeCoins) {
+            logPointsChange('coins', studentId, student.name, afterCoins - beforeCoins, afterCoins, (source || 'manual') + (bonusCoins ? '+level_bonus' : ''));
+        }
 
         return {
             points: afterPoints,
@@ -1253,9 +1356,9 @@
         };
         const ref = await addDoc(collection(db, "attendance"), newRecord);
         cacheAddAttendance({ id: ref.id, ...newRecord });
-        if (tribeId) await updatePoints(tribeId, 1);
+        if (tribeId) await updatePoints(tribeId, 1, 'attendance');
         let awardResult = null;
-        if (studentId) awardResult = await awardLevelPoints(studentId, 1);
+        if (studentId) awardResult = await awardLevelPoints(studentId, 1, 'attendance');
         return { ok: true, tribeName, awardResult };
     }
     async function getTodayAttendance() {
@@ -1615,7 +1718,17 @@
     }
 
     // ===== WINDOW TRIBE ACTIONS =====
-    window.addPoints = async (id, delta) => { await updatePoints(id, delta); await renderTribes(); await renderChart(); };
+    let addPointsBusy = new Set(); // evita doble clic mientras se procesa el mismo tribeId
+    window.addPoints = async (id, delta) => {
+        if (addPointsBusy.has(id)) return; // ya hay una operación en curso para esta tribu
+        addPointsBusy.add(id);
+        try {
+            await updatePoints(id, delta, 'manual');
+            await renderTribes(); await renderChart();
+        } finally {
+            addPointsBusy.delete(id);
+        }
+    };
     window.togglePointsForm = (memberUid) => {
         const form = document.getElementById(`pointsForm_${memberUid}`);
         if (!form) return;
@@ -1650,7 +1763,7 @@
         const btn = document.querySelector(`#pointsForm_${memberUid} .points-inline-apply`);
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'; }
         try {
-            const ar = await awardLevelPoints(studentId, delta);
+            const ar = await awardLevelPoints(studentId, delta, 'manual');
             let msg = `${delta > 0 ? '+' : ''}${delta} pts · ${delta>0?'+':''}${delta}🪙 · ${ar.levelInfo.icon} ${ar.levelInfo.name}`;
             if (ar.leveledUp) msg += ` · ⬆️ +${ar.bonusCoins}🪙 bono`;
             showToast(msg, 'success');
@@ -1663,19 +1776,26 @@
     };
 
     window.applyCustomPoints = async (id, uid) => {
+        if (addPointsBusy.has(id)) return;
         const input = document.getElementById(`customPoints_${uid}`);
         const v = parseInt(input.value);
         if (isNaN(v)||v===0) { showToast("Ingresa un número válido", "error"); return; }
-        // Usar caché en vez de getDoc
-        const tribe = dataCache.tribes.find(t => t.id === id);
-        if (tribe) {
-            const newPts = Math.max(0, (tribe.points||0) + v);
-            tribe.points = newPts;
-            saveCacheToLocal();
-            await updateDoc(doc(db,"tribes",id), { points: newPts });
+        addPointsBusy.add(id);
+        try {
+            // Usar caché en vez de getDoc
+            const tribe = dataCache.tribes.find(t => t.id === id);
+            if (tribe) {
+                const newPts = Math.max(0, (tribe.points||0) + v);
+                tribe.points = newPts;
+                saveCacheToLocal();
+                await updateDoc(doc(db,"tribes",id), { points: newPts });
+                logPointsChange('tribe', id, tribe.name, v, newPts, 'manual');
+            }
+            input.value = 0;
+            await renderTribes(); await renderChart();
+        } finally {
+            addPointsBusy.delete(id);
         }
-        input.value = 0;
-        await renderTribes(); await renderChart();
     };
     window.addMember = async (tribeId) => {
         const sel = document.getElementById(`newMemberName_${tribeId}`);
@@ -1828,7 +1948,7 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> <span>Generando...</span>';
         try {
-            const collectionsToBackup = ['tribes', 'students', 'attendance', 'redemptions', 'rewards', 'quizResults'];
+            const collectionsToBackup = ['tribes', 'students', 'attendance', 'redemptions', 'rewards', 'quizResults', 'pointsLog'];
             const backup = { generatedAt: new Date().toISOString(), project: 'ethicos-a9a66', data: {} };
 
             for (const colName of collectionsToBackup) {
@@ -1867,6 +1987,66 @@
             btn.innerHTML = original;
         }
     };
+
+    // ===== LOG DE CAMBIOS DE PUNTOS =====
+    let plogCache = [];
+    const plogSourceLabels = {
+        attendance: '📷 Asistencia', manual: '✋ Manual', syllabus: '📄 Syllabus',
+        backfill: '🔧 Backfill', repair: '🔧 Auto-reparación', shop_redeem: '🛒 Canje tienda'
+    };
+    const plogTypeLabels = { tribe: '🛡️ Tribu', individual: '⭐ Nivel', coins: '🪙 Moneda' };
+
+    async function loadPointsLog() {
+        const tbody = document.getElementById('plogTableBody');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94A3B8;">Cargando...</td></tr>';
+        try {
+            const snap = await getDocs(collection(db, "pointsLog"));
+            plogCache = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+                .sort((a,b) => (b.timestamp?.seconds||0) - (a.timestamp?.seconds||0));
+            renderPointsLog();
+        } catch(e) {
+            console.error(e);
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#DC2626;">Error al cargar el log</td></tr>';
+        }
+    }
+
+    function renderPointsLog() {
+        const typeFilter = document.getElementById('plog-type').value;
+        const search = document.getElementById('plog-search').value.toLowerCase().trim();
+        let filtered = plogCache;
+        if (typeFilter) filtered = filtered.filter(l => l.type === typeFilter);
+        if (search) filtered = filtered.filter(l => (l.targetName||'').toLowerCase().includes(search));
+
+        document.getElementById('plogResultsCount').textContent = `${filtered.length} registro(s) encontrado(s)`;
+        const tbody = document.getElementById('plogTableBody');
+        if (!filtered.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94A3B8;">Sin registros</td></tr>';
+            return;
+        }
+        tbody.innerHTML = filtered.slice(0, 300).map(l => {
+            let dateStr = 'N/A';
+            try { dateStr = new Date(l.timestamp.seconds*1000).toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'}); } catch(e) {}
+            const deltaStr = (l.delta > 0 ? '+' : '') + l.delta;
+            const deltaColor = l.delta > 0 ? '#059669' : '#DC2626';
+            const sourceLabel = plogSourceLabels[l.source] || escapeHtml(l.source || 'manual');
+            return `<tr>
+                <td>${escapeHtml(dateStr)}</td>
+                <td>${plogTypeLabels[l.type] || escapeHtml(l.type)}</td>
+                <td>${escapeHtml(l.targetName || '—')}</td>
+                <td style="font-weight:700;color:${deltaColor};">${escapeHtml(String(deltaStr))}</td>
+                <td>${escapeHtml(String(l.resultingValue ?? '—'))}</td>
+                <td>${sourceLabel}</td>
+                <td style="font-size:11px;color:#64748B;">${escapeHtml(l.actorEmail || '—')}</td>
+            </tr>`;
+        }).join('') + (filtered.length > 300 ? `<tr><td colspan="7" style="text-align:center;color:#94A3B8;font-size:11px;">Mostrando los 300 más recientes de ${filtered.length}. Usa el buscador para acotar.</td></tr>` : '');
+    }
+
+    document.getElementById('pointsLogBtn').onclick = async () => { openModal('pointsLogModal'); await loadPointsLog(); };
+    document.getElementById('closePointsLogBtn').onclick = () => closeModal('pointsLogModal');
+    document.getElementById('plog-refreshBtn').onclick = loadPointsLog;
+    document.getElementById('plog-type').addEventListener('change', renderPointsLog);
+    document.getElementById('plog-search').addEventListener('input', renderPointsLog);
+
     document.getElementById("addTribeBtn").onclick = openAddTribeModal;
     document.getElementById("saveTribeBtn").onclick = saveTribeFromModal;
     document.getElementById("cancelModalBtn").onclick = () => closeModal("tribeModal");
@@ -1943,7 +2123,7 @@
     window.quickStudentPts = async (studentId, type, delta) => {
         try {
             if (type === 'level') {
-                const ar = await awardLevelPoints(studentId, delta);
+                const ar = await awardLevelPoints(studentId, delta, 'manual');
                 if (ar?.leveledUp) {
                     showToast(`⬆️ ¡Subió a ${ar.levelInfo.icon} ${ar.levelInfo.name}! +${delta}🪙 · +${ar.bonusCoins}🪙 bono`, 'success');
                 }
@@ -1971,7 +2151,7 @@
             student.syllabusDelivered = true;
             saveCacheToLocal();
 
-            const ar = await awardLevelPoints(studentId, 10);
+            const ar = await awardLevelPoints(studentId, 10, 'syllabus');
             let msg = `📄 Entrega de Syllabus registrada (+10pts · +10🪙)`;
             if (ar?.leveledUp) msg += ` · ⬆️ ¡Subió a ${ar.levelInfo.icon} ${ar.levelInfo.name}! (+${ar.bonusCoins}🪙 bono)`;
             showToast(msg, 'success');
@@ -2105,12 +2285,12 @@
     // ===== REGISTRO MANUAL (código dañado o extraviado) =====
     let manualAttSearchable = null;
     async function initManualAttendance() {
-        const students = await getStudents(null);
+        const students = getCachedStudents().length ? getCachedStudents() : await getStudents(null);
         if (!manualAttSearchable) {
             manualAttSearchable = createSearchableSelect({
                 inputId: 'manualAttInput', hiddenId: 'manualAttStudentDoc', listId: 'manualAttList',
                 items: students,
-                getLabel: s => `${s.name} (${courseNames[s.course]||s.course})`,
+                getLabel: s => `${s.name} (${courseNames[s.course]||s.course}°)`,
                 getValue: s => s.document || '',
                 onSelect: () => {}
             });
@@ -2690,14 +2870,26 @@
                 }
             }
 
-            // 2) Aplicar puntos de tribu pendientes
-            // NOTA: solo procesa registros donde tribePointsAwarded sea falsy/undefined
-            // (nunca true), para evitar doble asignación
-            const pendingPts = records.filter(r => r.tribeId && r.tribePointsAwarded !== true);
+            // 2) Aplicar puntos de tribu pendientes.
+            // Solo procesa registros marcados EXPLÍCITAMENTE con tribePointsAwarded === false.
+            // Los registros sin el campo (undefined) se consideran ya procesados y solo se
+            // marcan como true para evitar que la próxima ejecución los vuelva a tocar.
+            const records_with_tribe = records.filter(r => r.tribeId);
+            const pendingPts = records_with_tribe.filter(r => r.tribePointsAwarded === false);
+            const unmarked = records_with_tribe.filter(r => r.tribePointsAwarded === undefined || r.tribePointsAwarded === null);
+
+            // Marcar silenciosamente los registros sin el campo (ya tienen su punto, solo falta la marca)
+            for (const r of unmarked) {
+                try {
+                    await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true });
+                    cacheUpdateAttendance(r.id, { tribePointsAwarded: true });
+                } catch(e) {}
+            }
+
             let ptsFixed = 0;
             for (const r of pendingPts) {
                 try {
-                    await updatePoints(r.tribeId, 1);
+                    await updatePoints(r.tribeId, 1, 'repair');
                     await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true });
                     cacheUpdateAttendance(r.id, { tribePointsAwarded: true });
                     ptsFixed++;
@@ -3047,7 +3239,7 @@
         await deleteDoc(doc(db, "rewards", id));
     }
 
-    async function updateStudentRewardPoints(studentId, delta) {
+    async function updateStudentRewardPoints(studentId, delta, source) {
         // Usar caché para evitar lectura a Firestore cada vez
         const student = dataCache.students.find(s => s.id === studentId);
         if (!student) return null;
@@ -3056,6 +3248,7 @@
         student.rewardPoints = updated;
         saveCacheToLocal();
         await updateDoc(doc(db, "students", studentId), { rewardPoints: updated });
+        logPointsChange('coins', studentId, student.name, delta, updated, source || 'manual');
         return updated;
     }
     async function recordRedemption(studentId, studentName, rewardId, rewardName, cost) {
@@ -3141,7 +3334,7 @@
         if (!reward) return;
         if (!confirm(`¿Canjear "${reward.name}" por ${reward.cost} 🪙 para ${studentName}?`)) return;
         try {
-            const updated = await updateStudentRewardPoints(studentId, -reward.cost);
+            const updated = await updateStudentRewardPoints(studentId, -reward.cost, 'shop_redeem');
             if (updated === null) { showToast('Estudiante no encontrado','error'); return; }
             await recordRedemption(studentId, studentName, rewardId, reward.name, reward.cost);
             // Refresh student in cache and re-render
