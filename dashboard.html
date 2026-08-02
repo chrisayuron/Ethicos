@@ -1597,11 +1597,35 @@
             const tribes = await getTribes(currentGrade);
             if (!tribes.length) { container.innerHTML = `<div class="empty-message"><i class="fas fa-users"></i><h3>Todavía no hay tribus</h3><p>Haz clic en "Crear Nueva Tribu"</p></div>`; return; }
 
-            // Precargar TODOS los estudiantes (no solo del curso actual) para vincular miembros de tribu
-            const allForLink = getCachedStudents();
+            // Precargar TODOS los estudiantes para vincular miembros de tribu.
+            // Si el caché está vacío, forzar recarga fresca desde Firestore.
+            let allForLink = getCachedStudents();
+            if (!allForLink.length) {
+                await loadAllData(true);
+                allForLink = getCachedStudents();
+            }
             const studentsById = {};
             allForLink.forEach(s => { studentsById[s.id] = s; });
-            window.__studentsByIdCache = studentsById; // usado por las acciones de puntos individuales
+
+            // Fallback: si algún miembro tiene studentId pero no está en el caché,
+            // buscarlo directamente en Firestore para no deshabilitar sus botones
+            const missingIds = [];
+            tribes.forEach(t => (t.members||[]).forEach(m => {
+                if (m.studentId && !studentsById[m.studentId]) missingIds.push(m.studentId);
+            }));
+            if (missingIds.length) {
+                await Promise.all([...new Set(missingIds)].map(async id => {
+                    try {
+                        const snap = await getDoc(doc(db, "students", id));
+                        if (snap.exists()) {
+                            const s = { id: snap.id, ...snap.data() };
+                            studentsById[id] = s;
+                            cacheUpdateStudent(id, s);
+                        }
+                    } catch(e) {}
+                }));
+            }
+            window.__studentsByIdCache = studentsById;
 
             container.innerHTML = tribes.map(tribe => {
                 const pts = tribe.points||0;

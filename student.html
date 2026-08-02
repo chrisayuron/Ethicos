@@ -691,6 +691,11 @@ async function renderPortal() {
         loadAttendance()
     ]);
 
+    // Actualización automática de datos de tribu cada 45s
+    if (!window.__tribeRefreshInterval) {
+        window.__tribeRefreshInterval = setInterval(loadTribeData, 45000);
+    }
+
     // Generate and show notifications based on snapshot diff
     const notifs = generateNotifs(
         s.id,
