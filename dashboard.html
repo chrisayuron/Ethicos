@@ -721,6 +721,7 @@
             <button class="history-clear-btn" id="hf-clearBtn"><i class="fas fa-rotate-left"></i> Limpiar filtros</button>
             <button class="history-clear-btn" id="hf-auditBtn" style="color:#0891B2;"><i class="fas fa-magnifying-glass-chart"></i> Auditar puntos de tribu</button>
             <button class="history-clear-btn" id="hf-resetTestBtn" style="color:#DC2626;"><i class="fas fa-triangle-exclamation"></i> 🧪 Reiniciar datos de prueba</button>
+            <button class="history-clear-btn" id="hf-resetTribePtsBtn" style="color:#EA580C;"><i class="fas fa-arrow-rotate-left"></i> Resetear puntos de tribu (sin borrar asistencia)</button>
             <button class="history-clear-btn" id="hf-backfillPtsBtn" style="color:#059669;"><i class="fas fa-user-check"></i> Aplicar puntos individuales pendientes</button>
             <button class="history-clear-btn" id="hf-forceRepairBtn" style="color:#7C3AED;"><i class="fas fa-wrench"></i> Reparar asistencia/puntos de tribu ahora</button>
         </div>
@@ -1651,6 +1652,7 @@
                         </div>
                         <div class="score-custom">
                             <input type="number" id="customPoints_${uid}" placeholder="Cantidad" value="0" step="1">
+                            <input type="text" id="customReason_${uid}" placeholder="Motivo (opcional)" style="width:140px;padding:5px 8px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:20px;color:#1E293B;font-size:12px;">
                             <button onclick="window.applyCustomPoints('${tribe.id}','${uid}')"><i class="fas fa-plus"></i> Aplicar</button>
                         </div>
                     </div>
@@ -1688,6 +1690,7 @@
                                 </div>
                                 <div class="points-inline-controls">
                                     <input type="number" id="pointsInput_${memberUid}" placeholder="Cantidad" value="5" step="1">
+                                    <input type="text" id="pointsReason_${memberUid}" placeholder="Motivo (opcional)" style="flex:1;padding:6px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:12px;">
                                     <button class="points-inline-apply" onclick="window.applyIndividualPoints('${linkedStudent.id}','${memberUid}','${tribe.id}')"><i class="fas fa-check"></i> Asignar</button>
                                 </div>
                             </div>` : ''}`;
@@ -1782,17 +1785,20 @@
 
     window.applyIndividualPoints = async (studentId, memberUid, tribeId) => {
         const input = document.getElementById(`pointsInput_${memberUid}`);
+        const reasonInput = document.getElementById(`pointsReason_${memberUid}`);
         const delta = parseInt(input?.value);
+        const reason = reasonInput ? reasonInput.value.trim() : '';
         if (isNaN(delta) || delta === 0) { showToast('Ingresa una cantidad distinta de 0', 'error'); return; }
         const btn = document.querySelector(`#pointsForm_${memberUid} .points-inline-apply`);
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>'; }
         try {
-            const ar = await awardLevelPoints(studentId, delta, 'manual');
+            const ar = await awardLevelPoints(studentId, delta, reason ? `manual: ${reason}` : 'manual');
             let msg = `${delta > 0 ? '+' : ''}${delta} pts · ${delta>0?'+':''}${delta}🪙 · ${ar.levelInfo.icon} ${ar.levelInfo.name}`;
             if (ar.leveledUp) msg += ` · ⬆️ +${ar.bonusCoins}🪙 bono`;
             showToast(msg, 'success');
             input.value = 5;
-            await renderTribes(); // re-render actualiza el nivel visible
+            if (reasonInput) reasonInput.value = '';
+            await renderTribes();
         } catch(e) {
             showToast('Error al asignar puntos', 'error');
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Asignar'; }
@@ -1802,20 +1808,22 @@
     window.applyCustomPoints = async (id, uid) => {
         if (addPointsBusy.has(id)) return;
         const input = document.getElementById(`customPoints_${uid}`);
+        const reasonInput = document.getElementById(`customReason_${uid}`);
         const v = parseInt(input.value);
+        const reason = reasonInput ? reasonInput.value.trim() : '';
         if (isNaN(v)||v===0) { showToast("Ingresa un número válido", "error"); return; }
         addPointsBusy.add(id);
         try {
-            // Usar caché en vez de getDoc
             const tribe = dataCache.tribes.find(t => t.id === id);
             if (tribe) {
                 const newPts = Math.max(0, (tribe.points||0) + v);
                 tribe.points = newPts;
                 saveCacheToLocal();
                 await updateDoc(doc(db,"tribes",id), { points: newPts });
-                logPointsChange('tribe', id, tribe.name, v, newPts, 'manual');
+                logPointsChange('tribe', id, tribe.name, v, newPts, reason ? `manual: ${reason}` : 'manual');
             }
             input.value = 0;
+            if (reasonInput) reasonInput.value = '';
             await renderTribes(); await renderChart();
         } finally {
             addPointsBusy.delete(id);
@@ -3088,7 +3096,12 @@
 
             if (mismatches.length) {
                 html += `<div style="margin-top:8px;color:#DC2626;"><strong>⚠️ Puntos que no cuadran con la asistencia registrada:</strong></div>`;
-                html += mismatches.map(t => `<div style="margin-left:10px;">• <strong>${escapeHtml(t.name)}</strong> (${courseNames[t.course]||t.course}°): puntos actuales = ${t.points||0}, asistencias registradas = ${t.attCount} <span style="color:#94A3B8;">(diferencia: ${(t.points||0) - t.attCount > 0 ? '+' : ''}${(t.points||0) - t.attCount})</span></div>`).join('');
+                html += mismatches.map(t => {
+                    const courseVal = t.course || t.grade;
+                    const courseLabel = courseVal ? (courseNames[courseVal] || courseVal + '°') : 'Sin curso';
+                    const diff = (t.points||0) - t.attCount;
+                    return `<div style="margin-left:10px;">• <strong>${escapeHtml(t.name)}</strong> (${escapeHtml(String(courseLabel))}): puntos actuales = ${t.points||0}, asistencias registradas = ${t.attCount} <span style="color:#94A3B8;">(diferencia: ${diff > 0 ? '+' : ''}${diff})</span></div>`;
+                }).join('');
                 html += `<div style="margin-top:8px;color:#64748B;">Nota: esta comparación asume que la asistencia es la única fuente de puntos. Si has usado los botones manuales +1/+3/+5 en las tarjetas de tribu, esos también generan diferencia aquí (no es necesariamente un error).</div>`;
             } else {
                 html += `<div style="margin-top:8px;color:#059669;">✅ Los puntos de todas las tribus cuadran exactamente con su número de asistencias registradas.</div>`;
@@ -3210,7 +3223,40 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Reparando...';
         try {
-            await autoRepairAttendance(true); // true = mostrar siempre un resultado, incluso "nada que reparar"
+            await autoRepairAttendance(true);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    };
+
+    document.getElementById('hf-resetTribePtsBtn').onclick = async () => {
+        if (!confirm('Esto pondrá en 0 los puntos de TODAS las tribus, sin borrar ningún registro de asistencia. Luego puedes usar "Reparar asistencia/puntos de tribu ahora" para recalcularlos correctamente. ¿Continuar?')) return;
+        if (!confirm('Confirma: se resetean a 0 los puntos de todas las tribus. ¿Estás seguro?')) return;
+        const btn = document.getElementById('hf-resetTribePtsBtn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Reseteando...';
+        try {
+            const tribesSnap = await getDocs(collection(db, "tribes"));
+            for (const t of tribesSnap.docs) {
+                await updateDoc(doc(db, "tribes", t.id), { points: 0 });
+                cacheUpdateTribe(t.id, { points: 0 });
+            }
+            // Marcar todos los registros de asistencia como pendientes de reasignación de puntos
+            const attSnap = await getDocs(collection(db, "attendance"));
+            for (const d of attSnap.docs) {
+                if (d.data().tribeId) {
+                    await updateDoc(doc(db, "attendance", d.id), { tribePointsAwarded: false });
+                    cacheUpdateAttendance(d.id, { tribePointsAwarded: false });
+                }
+            }
+            showToast(`✅ Puntos de ${tribesSnap.docs.length} tribus reseteados a 0. Ahora usa "Reparar asistencia/puntos de tribu ahora".`, 'success');
+            await renderTribes();
+            await renderChart();
+        } catch(e) {
+            console.error(e);
+            showToast('Error al resetear los puntos', 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = original;
