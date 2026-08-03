@@ -722,7 +722,9 @@
             <button class="history-clear-btn" id="hf-auditBtn" style="color:#0891B2;"><i class="fas fa-magnifying-glass-chart"></i> Auditar puntos de tribu</button>
             <button class="history-clear-btn" id="hf-resetTestBtn" style="color:#DC2626;"><i class="fas fa-triangle-exclamation"></i> 🧪 Reiniciar datos de prueba</button>
             <button class="history-clear-btn" id="hf-resetTribePtsBtn" style="color:#EA580C;"><i class="fas fa-arrow-rotate-left"></i> Resetear puntos de tribu (sin borrar asistencia)</button>
+            <button class="history-clear-btn" id="hf-recalcFromAttBtn" style="color:#7C3AED;font-weight:700;"><i class="fas fa-calculator"></i> ♻️ Recalcular todo desde asistencia</button>
             <button class="history-clear-btn" id="hf-backfillPtsBtn" style="color:#059669;"><i class="fas fa-user-check"></i> Aplicar puntos individuales pendientes</button>
+            <button class="history-clear-btn" id="hf-syncCoinsBtn" style="color:#D97706;"><i class="fas fa-coins"></i> Sincronizar monedas con nivel actual</button>
             <button class="history-clear-btn" id="hf-forceRepairBtn" style="color:#7C3AED;"><i class="fas fa-wrench"></i> Reparar asistencia/puntos de tribu ahora</button>
         </div>
         <div id="auditResultBox" style="display:none;margin:10px 0;padding:12px;border-radius:12px;border:1px solid #E2E8F0;background:#F8FAFC;font-size:12px;line-height:1.6;"></div>
@@ -745,27 +747,51 @@
 <div id="pointsLogModal" class="modal">
     <div class="modal-content history-modal">
         <h2>📜 Log de cambios de puntos</h2>
-        <div class="history-filters-bar">
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:10px 14px;font-size:12px;color:#1D4ED8;margin-bottom:12px;">
+            <i class="fas fa-circle-info"></i> Solo muestra cambios realizados desde que se activó la colección <code>pointsLog</code> en Firestore. Cambios anteriores no aparecen aquí.
+        </div>
+        <div class="history-filters-bar" style="flex-wrap:wrap;gap:10px;">
             <div class="history-filter-field">
-                <label>🔎 Buscar</label>
-                <input type="text" id="plog-search" placeholder="Nombre de estudiante o tribu...">
-            </div>
-            <div class="history-filter-field">
-                <label>📂 Tipo</label>
+                <label>📂 Tipo de punto</label>
                 <select id="plog-type">
-                    <option value="">Todos</option>
-                    <option value="tribe">Puntos de tribu</option>
-                    <option value="individual">Puntos de nivel (individual)</option>
-                    <option value="coins">Monedas 🪙</option>
+                    <option value="">Todos los tipos</option>
+                    <option value="tribe">🛡️ Puntos de tribu</option>
+                    <option value="individual">⭐ Puntos de nivel (individual)</option>
+                    <option value="coins">🪙 Monedas</option>
                 </select>
             </div>
-            <button class="history-clear-btn" id="plog-refreshBtn"><i class="fas fa-rotate"></i> Actualizar</button>
+            <div class="history-filter-field">
+                <label>📋 Origen</label>
+                <select id="plog-source">
+                    <option value="">Todos los orígenes</option>
+                    <option value="attendance">📷 Asistencia</option>
+                    <option value="manual">✋ Manual</option>
+                    <option value="syllabus">📄 Syllabus</option>
+                    <option value="repair">🔧 Reparación</option>
+                    <option value="backfill">🔧 Backfill</option>
+                    <option value="shop_redeem">🛒 Canje tienda</option>
+                </select>
+            </div>
+            <div class="history-filter-field">
+                <label>📅 Desde</label>
+                <input type="date" id="plog-date-from">
+            </div>
+            <div class="history-filter-field">
+                <label>📅 Hasta</label>
+                <input type="date" id="plog-date-to">
+            </div>
+            <div class="history-filter-field" style="flex:1;min-width:180px;">
+                <label>🔎 Buscar nombre</label>
+                <input type="text" id="plog-search" placeholder="Estudiante o tribu...">
+            </div>
+            <button class="history-clear-btn" id="plog-clearBtn"><i class="fas fa-rotate-left"></i> Limpiar</button>
+            <button class="history-clear-btn" id="plog-refreshBtn" style="color:#7C3AED;"><i class="fas fa-rotate"></i> Actualizar</button>
         </div>
         <div class="history-results-count" id="plogResultsCount"></div>
         <div class="history-table-wrap">
             <table class="history-table" id="plogTable">
-                <thead><tr><th>Fecha/Hora</th><th>Tipo</th><th>Objetivo</th><th>Cambio</th><th>Resultado</th><th>Origen</th><th>Quién</th></tr></thead>
-                <tbody id="plogTableBody"></tbody>
+                <thead><tr><th>Fecha/Hora</th><th>Tipo</th><th>Estudiante/Tribu</th><th>Cambio</th><th>Total</th><th>Origen / Motivo</th><th>Quién</th></tr></thead>
+                <tbody id="plogTableBody"><tr><td colspan="7" style="text-align:center;color:#94A3B8;">Abre el log para ver los registros</td></tr></tbody>
             </table>
         </div>
         <div class="modal-buttons" style="margin-top:16px;">
@@ -2044,15 +2070,26 @@
 
     function renderPointsLog() {
         const typeFilter = document.getElementById('plog-type').value;
+        const sourceFilter = document.getElementById('plog-source').value;
         const search = document.getElementById('plog-search').value.toLowerCase().trim();
+        const dateFrom = document.getElementById('plog-date-from').value; // 'YYYY-MM-DD'
+        const dateTo = document.getElementById('plog-date-to').value;
+
         let filtered = plogCache;
         if (typeFilter) filtered = filtered.filter(l => l.type === typeFilter);
+        if (sourceFilter) filtered = filtered.filter(l => (l.source || '').startsWith(sourceFilter));
         if (search) filtered = filtered.filter(l => (l.targetName||'').toLowerCase().includes(search));
+        if (dateFrom) filtered = filtered.filter(l => {
+            try { return new Date(l.timestamp.seconds*1000) >= new Date(dateFrom); } catch(e) { return true; }
+        });
+        if (dateTo) filtered = filtered.filter(l => {
+            try { return new Date(l.timestamp.seconds*1000) <= new Date(dateTo + 'T23:59:59'); } catch(e) { return true; }
+        });
 
         document.getElementById('plogResultsCount').textContent = `${filtered.length} registro(s) encontrado(s)`;
         const tbody = document.getElementById('plogTableBody');
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94A3B8;">Sin registros</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94A3B8;">Sin registros para este filtro. Los cambios se registran desde que se activó la colección en Firestore.</td></tr>';
             return;
         }
         tbody.innerHTML = filtered.slice(0, 300).map(l => {
@@ -2060,23 +2097,37 @@
             try { dateStr = new Date(l.timestamp.seconds*1000).toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'}); } catch(e) {}
             const deltaStr = (l.delta > 0 ? '+' : '') + l.delta;
             const deltaColor = l.delta > 0 ? '#059669' : '#DC2626';
-            const sourceLabel = plogSourceLabels[l.source] || escapeHtml(l.source || 'manual');
+            const sourceRaw = l.source || 'manual';
+            const sourceKey = Object.keys(plogSourceLabels).find(k => sourceRaw.startsWith(k)) || '';
+            const sourceLabel = sourceKey ? plogSourceLabels[sourceKey] : '✋ Manual';
+            const motivo = sourceRaw.includes(':') ? sourceRaw.split(':').slice(1).join(':').trim() : '';
+            const origenCell = motivo ? `${sourceLabel}<br><span style="font-size:10px;color:#64748B;">${escapeHtml(motivo)}</span>` : sourceLabel;
             return `<tr>
-                <td>${escapeHtml(dateStr)}</td>
+                <td style="white-space:nowrap;">${escapeHtml(dateStr)}</td>
                 <td>${plogTypeLabels[l.type] || escapeHtml(l.type)}</td>
-                <td>${escapeHtml(l.targetName || '—')}</td>
+                <td style="font-weight:600;">${escapeHtml(l.targetName || '—')}</td>
                 <td style="font-weight:700;color:${deltaColor};">${escapeHtml(String(deltaStr))}</td>
                 <td>${escapeHtml(String(l.resultingValue ?? '—'))}</td>
-                <td>${sourceLabel}</td>
+                <td>${origenCell}</td>
                 <td style="font-size:11px;color:#64748B;">${escapeHtml(l.actorEmail || '—')}</td>
             </tr>`;
-        }).join('') + (filtered.length > 300 ? `<tr><td colspan="7" style="text-align:center;color:#94A3B8;font-size:11px;">Mostrando los 300 más recientes de ${filtered.length}. Usa el buscador para acotar.</td></tr>` : '');
+        }).join('') + (filtered.length > 300 ? `<tr><td colspan="7" style="text-align:center;color:#94A3B8;font-size:11px;">Mostrando los 300 más recientes. Usa los filtros para acotar.</td></tr>` : '');
     }
 
     document.getElementById('pointsLogBtn').onclick = async () => { openModal('pointsLogModal'); await loadPointsLog(); };
     document.getElementById('closePointsLogBtn').onclick = () => closeModal('pointsLogModal');
     document.getElementById('plog-refreshBtn').onclick = loadPointsLog;
-    document.getElementById('plog-type').addEventListener('change', renderPointsLog);
+    document.getElementById('plog-clearBtn').onclick = () => {
+        document.getElementById('plog-type').value = '';
+        document.getElementById('plog-source').value = '';
+        document.getElementById('plog-search').value = '';
+        document.getElementById('plog-date-from').value = '';
+        document.getElementById('plog-date-to').value = '';
+        renderPointsLog();
+    };
+    ['plog-type','plog-source','plog-date-from','plog-date-to'].forEach(id =>
+        document.getElementById(id).addEventListener('change', renderPointsLog)
+    );
     document.getElementById('plog-search').addEventListener('input', renderPointsLog);
 
     document.getElementById("addTribeBtn").onclick = openAddTribeModal;
@@ -3217,6 +3268,48 @@
         }
     };
 
+    document.getElementById('hf-syncCoinsBtn').onclick = async () => {
+        const btn = document.getElementById('hf-syncCoinsBtn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Revisando...';
+        try {
+            // Recargar estudiantes frescos desde Firestore (no del caché)
+            const snap = await getDocs(collection(db, "students"));
+            const students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            // Estudiantes donde monedas < puntos de nivel (les falta la moneda del espejo)
+            const desynced = students.filter(s => {
+                const pts = s.individualPoints || 0;
+                const coins = s.rewardPoints || 0;
+                return pts > 0 && coins < pts;
+            });
+            if (!desynced.length) {
+                showToast('✅ Todas las monedas ya están sincronizadas con el nivel', 'success');
+                return;
+            }
+            if (!confirm(`Se encontraron ${desynced.length} estudiante(s) con menos monedas que puntos de nivel. Se les sumará la diferencia para igualarlas. ¿Continuar?`)) return;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sincronizando...';
+            let fixed = 0;
+            for (const s of desynced) {
+                const diff = (s.individualPoints || 0) - (s.rewardPoints || 0);
+                if (diff <= 0) continue;
+                const newCoins = (s.rewardPoints || 0) + diff;
+                await updateDoc(doc(db, "students", s.id), { rewardPoints: newCoins });
+                cacheUpdateStudent(s.id, { rewardPoints: newCoins });
+                logPointsChange('coins', s.id, s.name, diff, newCoins, 'sync_coins');
+                fixed++;
+            }
+            showToast(`✅ Monedas sincronizadas para ${fixed} estudiante(s)`, 'success');
+        } catch(e) {
+            console.error(e);
+            showToast('Error al sincronizar monedas', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    };
+
     document.getElementById('hf-forceRepairBtn').onclick = async () => {
         const btn = document.getElementById('hf-forceRepairBtn');
         const original = btn.innerHTML;
@@ -3263,7 +3356,86 @@
         }
     };
 
-    // ===== REWARDS CATALOG =====
+    document.getElementById('hf-recalcFromAttBtn').onclick = async () => {
+        if (!confirm(
+            '♻️ RECALCULAR TODO DESDE ASISTENCIA\n\n' +
+            'Este proceso:\n' +
+            '1. Genera un respaldo completo antes de tocar nada\n' +
+            '2. Resetea a 0 los puntos de nivel, monedas y Syllabus de TODOS los estudiantes\n' +
+            '3. Resetea a 0 los puntos de TODAS las tribus\n' +
+            '4. Recalcula +1 punto de nivel, +1 moneda y +1 punto de tribu por cada asistencia registrada\n\n' +
+            'Las FECHAS de asistencia se conservan intactas.\n' +
+            'Los puntos manuales (clase, Syllabus) deberás volver a ingresarlos.\n\n' +
+            '¿Continuar?'
+        )) return;
+        if (!confirm('CONFIRMA: se borrarán TODOS los puntos actuales y se recalcularán solo desde asistencia. ¿Estás seguro?')) return;
+
+        const btn = document.getElementById('hf-recalcFromAttBtn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+
+        try {
+            // PASO 1: Respaldo automático
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 1/4 Generando respaldo...';
+            const collectionsToBackup = ['tribes','students','attendance','redemptions','rewards','quizResults','pointsLog'];
+            const backup = { generatedAt: new Date().toISOString(), project: 'ethicos-a9a66', data: {} };
+            for (const col of collectionsToBackup) {
+                const s = await getDocs(collection(db, col));
+                backup.data[col] = s.docs.map(d => {
+                    const raw = d.data(); const clean = { id: d.id };
+                    Object.keys(raw).forEach(k => { const v = raw[k]; clean[k] = (v && typeof v === 'object' && typeof v.toDate === 'function') ? v.toDate().toISOString() : v; });
+                    return clean;
+                });
+            }
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+            a.href = url; a.download = `ethykos_ANTES_RECALCULO_${stamp}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+
+            // PASO 2: Resetear puntos de todos los estudiantes
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 2/4 Reseteando estudiantes...';
+            const studentsSnap = await getDocs(collection(db, "students"));
+            for (const d of studentsSnap.docs) {
+                await updateDoc(doc(db, "students", d.id), {
+                    individualPoints: 0, rewardPoints: 0, syllabusDelivered: false
+                });
+                cacheUpdateStudent(d.id, { individualPoints: 0, rewardPoints: 0, syllabusDelivered: false });
+            }
+
+            // PASO 3: Resetear puntos de todas las tribus
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 3/4 Reseteando tribus...';
+            const tribesSnap = await getDocs(collection(db, "tribes"));
+            for (const d of tribesSnap.docs) {
+                await updateDoc(doc(db, "tribes", d.id), { points: 0 });
+                cacheUpdateTribe(d.id, { points: 0 });
+            }
+
+            // PASO 4: Marcar asistencia como pendiente y reparar
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 4/4 Recalculando desde asistencia...';
+            const attSnap = await getDocs(collection(db, "attendance"));
+            for (const d of attSnap.docs) {
+                await updateDoc(doc(db, "attendance", d.id), {
+                    tribePointsAwarded: false,
+                    pointsAwarded: false
+                });
+                cacheUpdateAttendance(d.id, { tribePointsAwarded: false, pointsAwarded: false });
+            }
+            await autoRepairAttendance(true);
+
+            showToast(`✅ Recálculo completo. ${studentsSnap.docs.length} estudiantes y ${tribesSnap.docs.length} tribus actualizados desde ${attSnap.docs.length} registros de asistencia.`, 'success');
+            await renderTribes();
+            await renderChart();
+
+        } catch(e) {
+            console.error(e);
+            showToast('Error durante el recálculo. Revisa la consola y usa el respaldo si es necesario.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    };
     // ===== REWARDS CATALOG (editable, guardado en Firestore) =====
     // Catálogo original, usado solo una vez como semilla si la colección "rewards" está vacía.
     const REWARDS_SEED = [
@@ -3657,13 +3829,19 @@
     });
 
     async function loadRanking() {
-        // Load from cache
+        // Forzar lectura fresca desde Firestore para evitar que el caché
+        // desactualizado muestre tribus vacías o estudiantes sin tribu asignada
+        await loadAllData(true);
         rankingAllStudents = getCachedStudents();
-        // Build studentId → tribeName map from cached tribes
         rankingTribesMap = {};
         dataCache.tribes.forEach(t => {
             (t.members || []).forEach(m => {
                 if (m.studentId) rankingTribesMap[m.studentId] = t.name;
+                // Fallback: si el miembro no tiene studentId, intentar vincular por nombre
+                else if (m.name) {
+                    const match = rankingAllStudents.find(s => s.name === m.name);
+                    if (match) rankingTribesMap[match.id] = t.name;
+                }
             });
         });
         renderRanking();
