@@ -720,11 +720,7 @@
             </div>
             <button class="history-clear-btn" id="hf-clearBtn"><i class="fas fa-rotate-left"></i> Limpiar filtros</button>
             <button class="history-clear-btn" id="hf-auditBtn" style="color:#0891B2;"><i class="fas fa-magnifying-glass-chart"></i> Auditar puntos de tribu</button>
-            <button class="history-clear-btn" id="hf-resetTestBtn" style="color:#DC2626;"><i class="fas fa-triangle-exclamation"></i> 🧪 Reiniciar datos de prueba</button>
             <button class="history-clear-btn" id="hf-resetTribePtsBtn" style="color:#EA580C;"><i class="fas fa-arrow-rotate-left"></i> Resetear puntos de tribu (sin borrar asistencia)</button>
-            <button class="history-clear-btn" id="hf-recalcFromAttBtn" style="color:#7C3AED;font-weight:700;"><i class="fas fa-calculator"></i> ♻️ Recalcular todo desde asistencia</button>
-            <button class="history-clear-btn" id="hf-backfillPtsBtn" style="color:#059669;"><i class="fas fa-user-check"></i> Aplicar puntos individuales pendientes</button>
-            <button class="history-clear-btn" id="hf-syncCoinsBtn" style="color:#D97706;"><i class="fas fa-coins"></i> Sincronizar monedas con nivel actual</button>
             <button class="history-clear-btn" id="hf-forceRepairBtn" style="color:#7C3AED;"><i class="fas fa-wrench"></i> Reparar asistencia/puntos de tribu ahora</button>
         </div>
         <div id="auditResultBox" style="display:none;margin:10px 0;padding:12px;border-radius:12px;border:1px solid #E2E8F0;background:#F8FAFC;font-size:12px;line-height:1.6;"></div>
@@ -3169,146 +3165,11 @@
         }
     };
 
-    document.getElementById('hf-resetTestBtn').onclick = async () => {
-        const step1 = confirm(
-            '🧪 REINICIAR DATOS DE PRUEBA\n\n' +
-            'Esto va a:\n' +
-            '• Borrar TODOS los registros de asistencia (de todos los días, todos los cursos)\n' +
-            '• Reiniciar a 0 los puntos de TODAS las tribus\n\n' +
-            'Esta acción NO se puede deshacer. Úsala solo mientras estés probando el sistema, ' +
-            'antes de empezar a registrar asistencia real.\n\n¿Continuar?'
-        );
-        if (!step1) return;
-        const step2 = confirm('Confirma una vez más: se borrará TODA la asistencia y se pondrán en 0 TODOS los puntos de tribu. ¿Estás seguro?');
-        if (!step2) return;
-
-        const btn = document.getElementById('hf-resetTestBtn');
-        const original = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Reiniciando...';
-        try {
-            // Borrar toda la asistencia
-            const attSnap = await getDocs(collection(db, "attendance"));
-            for (const d of attSnap.docs) {
-                await deleteDoc(doc(db, "attendance", d.id));
-            }
-            // Reiniciar puntos de todas las tribus a 0
-            const tribesSnap = await getDocs(collection(db, "tribes"));
-            for (const t of tribesSnap.docs) {
-                await updateDoc(doc(db, "tribes", t.id), { points: 0 });
-            }
-            // Actualizar caché local
-            dataCache.attendance = [];
-            dataCache.tribes.forEach(t => t.points = 0);
-            saveCacheToLocal();
-            scannedToday = new Set();
-            showToast(`✅ Reiniciado: ${attSnap.docs.length} registros de asistencia borrados, ${tribesSnap.docs.length} tribus en 0 puntos`, 'success');
-            document.getElementById('auditResultBox').style.display = 'none';
-            await runHistoryQuery();
-            await renderTribes();
-            await renderChart();
-        } catch(e) {
-            console.error(e);
-            showToast('Error al reiniciar los datos de prueba', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = original;
-        }
-    };
-
     document.getElementById('historyBackBtn').onclick = () => {
         closeModal('historyResultsModal');
         openModal('historyFilterTypeModal');
     };
     document.getElementById('closeHistoryResultsBtn').onclick = () => closeModal('historyResultsModal');
-
-    document.getElementById('hf-backfillPtsBtn').onclick = async () => {
-        const btn = document.getElementById('hf-backfillPtsBtn');
-        const original = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Revisando...';
-        try {
-            const attSnap = await getDocs(collection(db, "attendance"));
-            // Registros de asistencia que aún no tienen su punto individual aplicado
-            const pending = attSnap.docs.filter(d => !d.data().pointsAwarded);
-
-            if (!pending.length) {
-                showToast('No hay puntos pendientes por aplicar ✅', 'success');
-                return;
-            }
-            if (!confirm(`Se encontraron ${pending.length} registro(s) de asistencia sin su punto individual aplicado (de antes de este cambio). Se sumará +1 punto individual a cada estudiante correspondiente. ¿Continuar?`)) return;
-
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Aplicando...';
-            let updated = 0, notFound = 0;
-            const studentCache = {};
-            for (const d of pending) {
-                const data = d.data();
-                const docNum = data.studentDoc;
-                if (!(docNum in studentCache)) {
-                    const q = query(collection(db, "students"), where("document","==", docNum));
-                    const snap = await getDocs(q);
-                    studentCache[docNum] = snap.empty ? null : { id: snap.docs[0].id };
-                }
-                const student = studentCache[docNum];
-                if (!student) { notFound++; continue; }
-                await updateStudentPoints(student.id, 1);
-                await updateDoc(doc(db, "attendance", d.id), { pointsAwarded: true });
-                updated++;
-            }
-            showToast(`✅ Puntos aplicados a ${updated} estudiante(s)${notFound ? ` · ${notFound} sin coincidencia` : ''}`, 'success');
-            await runHistoryQuery();
-            await renderTribes();
-            await renderChart();
-        } catch(e) {
-            console.error(e);
-            showToast('Error al aplicar los puntos pendientes', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = original;
-        }
-    };
-
-    document.getElementById('hf-syncCoinsBtn').onclick = async () => {
-        const btn = document.getElementById('hf-syncCoinsBtn');
-        const original = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Revisando...';
-        try {
-            // Recargar estudiantes frescos desde Firestore (no del caché)
-            const snap = await getDocs(collection(db, "students"));
-            const students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            // Estudiantes donde monedas < puntos de nivel (les falta la moneda del espejo)
-            const desynced = students.filter(s => {
-                const pts = s.individualPoints || 0;
-                const coins = s.rewardPoints || 0;
-                return pts > 0 && coins < pts;
-            });
-            if (!desynced.length) {
-                showToast('✅ Todas las monedas ya están sincronizadas con el nivel', 'success');
-                return;
-            }
-            if (!confirm(`Se encontraron ${desynced.length} estudiante(s) con menos monedas que puntos de nivel. Se les sumará la diferencia para igualarlas. ¿Continuar?`)) return;
-
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sincronizando...';
-            let fixed = 0;
-            for (const s of desynced) {
-                const diff = (s.individualPoints || 0) - (s.rewardPoints || 0);
-                if (diff <= 0) continue;
-                const newCoins = (s.rewardPoints || 0) + diff;
-                await updateDoc(doc(db, "students", s.id), { rewardPoints: newCoins });
-                cacheUpdateStudent(s.id, { rewardPoints: newCoins });
-                logPointsChange('coins', s.id, s.name, diff, newCoins, 'sync_coins');
-                fixed++;
-            }
-            showToast(`✅ Monedas sincronizadas para ${fixed} estudiante(s)`, 'success');
-        } catch(e) {
-            console.error(e);
-            showToast('Error al sincronizar monedas', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = original;
-        }
-    };
 
     document.getElementById('hf-forceRepairBtn').onclick = async () => {
         const btn = document.getElementById('hf-forceRepairBtn');
@@ -3356,86 +3217,6 @@
         }
     };
 
-    document.getElementById('hf-recalcFromAttBtn').onclick = async () => {
-        if (!confirm(
-            '♻️ RECALCULAR TODO DESDE ASISTENCIA\n\n' +
-            'Este proceso:\n' +
-            '1. Genera un respaldo completo antes de tocar nada\n' +
-            '2. Resetea a 0 los puntos de nivel, monedas y Syllabus de TODOS los estudiantes\n' +
-            '3. Resetea a 0 los puntos de TODAS las tribus\n' +
-            '4. Recalcula +1 punto de nivel, +1 moneda y +1 punto de tribu por cada asistencia registrada\n\n' +
-            'Las FECHAS de asistencia se conservan intactas.\n' +
-            'Los puntos manuales (clase, Syllabus) deberás volver a ingresarlos.\n\n' +
-            '¿Continuar?'
-        )) return;
-        if (!confirm('CONFIRMA: se borrarán TODOS los puntos actuales y se recalcularán solo desde asistencia. ¿Estás seguro?')) return;
-
-        const btn = document.getElementById('hf-recalcFromAttBtn');
-        const original = btn.innerHTML;
-        btn.disabled = true;
-
-        try {
-            // PASO 1: Respaldo automático
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 1/4 Generando respaldo...';
-            const collectionsToBackup = ['tribes','students','attendance','redemptions','rewards','quizResults','pointsLog'];
-            const backup = { generatedAt: new Date().toISOString(), project: 'ethicos-a9a66', data: {} };
-            for (const col of collectionsToBackup) {
-                const s = await getDocs(collection(db, col));
-                backup.data[col] = s.docs.map(d => {
-                    const raw = d.data(); const clean = { id: d.id };
-                    Object.keys(raw).forEach(k => { const v = raw[k]; clean[k] = (v && typeof v === 'object' && typeof v.toDate === 'function') ? v.toDate().toISOString() : v; });
-                    return clean;
-                });
-            }
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
-            a.href = url; a.download = `ethykos_ANTES_RECALCULO_${stamp}.json`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-
-            // PASO 2: Resetear puntos de todos los estudiantes
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 2/4 Reseteando estudiantes...';
-            const studentsSnap = await getDocs(collection(db, "students"));
-            for (const d of studentsSnap.docs) {
-                await updateDoc(doc(db, "students", d.id), {
-                    individualPoints: 0, rewardPoints: 0, syllabusDelivered: false
-                });
-                cacheUpdateStudent(d.id, { individualPoints: 0, rewardPoints: 0, syllabusDelivered: false });
-            }
-
-            // PASO 3: Resetear puntos de todas las tribus
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 3/4 Reseteando tribus...';
-            const tribesSnap = await getDocs(collection(db, "tribes"));
-            for (const d of tribesSnap.docs) {
-                await updateDoc(doc(db, "tribes", d.id), { points: 0 });
-                cacheUpdateTribe(d.id, { points: 0 });
-            }
-
-            // PASO 4: Marcar asistencia como pendiente y reparar
-            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> 4/4 Recalculando desde asistencia...';
-            const attSnap = await getDocs(collection(db, "attendance"));
-            for (const d of attSnap.docs) {
-                await updateDoc(doc(db, "attendance", d.id), {
-                    tribePointsAwarded: false,
-                    pointsAwarded: false
-                });
-                cacheUpdateAttendance(d.id, { tribePointsAwarded: false, pointsAwarded: false });
-            }
-            await autoRepairAttendance(true);
-
-            showToast(`✅ Recálculo completo. ${studentsSnap.docs.length} estudiantes y ${tribesSnap.docs.length} tribus actualizados desde ${attSnap.docs.length} registros de asistencia.`, 'success');
-            await renderTribes();
-            await renderChart();
-
-        } catch(e) {
-            console.error(e);
-            showToast('Error durante el recálculo. Revisa la consola y usa el respaldo si es necesario.', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = original;
-        }
-    };
     // ===== REWARDS CATALOG (editable, guardado en Firestore) =====
     // Catálogo original, usado solo una vez como semilla si la colección "rewards" está vacía.
     const REWARDS_SEED = [
