@@ -338,6 +338,8 @@
                 </div>
                 <div class="hero-level-badge" id="levelBadge">🌱 Aprendiz</div>
             </div>
+            <div id="motivMsg" style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,0.15);border-radius:12px;font-size:13px;font-weight:600;text-align:center;"></div>
+            <div id="levelDesc" style="margin-top:6px;font-size:12px;text-align:center;opacity:0.85;"></div>
         </div>
 
         <!-- Stats -->
@@ -431,13 +433,33 @@ let authReady = signInAnonymously(auth).catch(err => {
 
 // ── CONSTANTS ───────────────────────────────────────────────
 const ETHICS_LEVELS = [
-    { min: 0,   name: "Aprendiz",         icon: "🌱" },
-    { min: 50,  name: "Curioso/a",        icon: "🔍" },
-    { min: 120, name: "Reflexivo/a",      icon: "💭" },
-    { min: 220, name: "Comprometido/a",   icon: "🤝" },
-    { min: 350, name: "Ético/a Activo/a", icon: "🔥" },
-    { min: 500, name: "Guía Ética",       icon: "🌟" }
+    { min: 0,   name: "Aprendiz",         icon: "🌱",
+      desc: "Estás comenzando tu camino ético. Cada acción cuenta.",
+      nextHint: "Asiste a clases y participa para avanzar." },
+    { min: 50,  name: "Curioso/a",        icon: "🔍",
+      desc: "Empiezas a hacerte preguntas importantes sobre lo que está bien.",
+      nextHint: "Sigue reflexionando y participando en las actividades." },
+    { min: 120, name: "Reflexivo/a",      icon: "💭",
+      desc: "Piensas antes de actuar. Eso marca la diferencia.",
+      nextHint: "Comparte tus ideas con el grupo y asume compromisos." },
+    { min: 220, name: "Comprometido/a",   icon: "🤝",
+      desc: "Tus acciones muestran que la ética no es solo teoría para ti.",
+      nextHint: "Lidera con el ejemplo y apoya a quienes te rodean." },
+    { min: 350, name: "Ético/a Activo/a", icon: "🔥",
+      desc: "Eres un referente. Los demás aprenden de tu forma de actuar.",
+      nextHint: "Un último esfuerzo — la Guía Ética está muy cerca." },
+    { min: 500, name: "Guía Ética",       icon: "🌟",
+      desc: "Has alcanzado el nivel más alto. Eres un ejemplo de vida ética.",
+      nextHint: null }
 ];
+
+function getMotivMessage(lvl, ptsToNext) {
+    if (!lvl.nextName) return "🏆 ¡Alcanzaste el nivel máximo! Eres un ejemplo de vida ética para tu curso.";
+    if (ptsToNext <= 5)  return `⚡ ¡Solo ${ptsToNext} punto${ptsToNext===1?'':'s'} para ser ${lvl.nextName}! ¡Casi lo tienes!`;
+    if (ptsToNext <= 15) return `🔥 ¡Muy cerca! Te faltan ${ptsToNext} puntos para llegar a ${lvl.nextName}.`;
+    if (ptsToNext <= 30) return `💪 Vas muy bien. ${ptsToNext} puntos más y serás ${lvl.nextName}.`;
+    return `🎯 Meta: ${lvl.nextName} · Te faltan ${ptsToNext} puntos.`;
+}
 const REWARDS = [
     { id:'pc',      icon:'💻', name:'Cambiar de computador',             cost:15 },
     { id:'turn',    icon:'🔄', name:'Cambiar turno de actividad',        cost:20 },
@@ -668,10 +690,21 @@ async function renderPortal() {
         `${COURSE_NAMES[s.course]||s.course} · Doc. ${s.document||''}`;
     document.getElementById('levelLabel').textContent =
         `Nivel ${lvl.levelNumber} · ${lvl.name}`;
+    const ptsToNext = lvl.nextMin ? lvl.nextMin - lvl.points : 0;
     document.getElementById('levelPcts').textContent =
-        lvl.nextName ? `${lvl.pctToNext}% hacia ${lvl.nextName}` : '¡Nivel máximo!';
+        lvl.nextName ? `${lvl.pctToNext}% · faltan ${ptsToNext} pts` : '¡Nivel máximo!';
     document.getElementById('levelBar').style.width = lvl.pctToNext + '%';
     document.getElementById('levelBadge').textContent = `${lvl.icon} ${lvl.name}`;
+
+    // Mensaje motivador y descripción del nivel actual
+    const currentLevelData = ETHICS_LEVELS.find(l => l.name === lvl.name);
+    const motivEl = document.getElementById('motivMsg');
+    const descEl = document.getElementById('levelDesc');
+    if (motivEl) motivEl.textContent = getMotivMessage(lvl, ptsToNext);
+    if (descEl && currentLevelData) {
+        descEl.textContent = currentLevelData.desc +
+            (currentLevelData.nextHint ? ' · ' + currentLevelData.nextHint : '');
+    }
 
     // Stats
     document.getElementById('statLevel').textContent = lvl.levelNumber;
@@ -722,12 +755,16 @@ function renderLevelsJourney(currentLevelNum, pts) {
         const badge = isCurrent ? '<span class="level-step-badge badge-current">← Estás aquí</span>'
             : isAchieved ? '<span class="level-step-badge badge-achieved">✓ Logrado</span>'
             : '<span class="level-step-badge badge-locked">🔒 Bloqueado</span>';
-        const ptsText = next ? `Desde ${lvl.min} pts · Siguiente: ${next.min} pts` : `Desde ${lvl.min} pts · Nivel máximo`;
+        const ptsText = next ? `${lvl.min} pts para alcanzarlo · ${next.min - lvl.min} pts de rango` : `Desde ${lvl.min} pts · Nivel máximo`;
+        const faltanText = isLocked ? `<div style="font-size:11px;color:#94A3B8;margin-top:2px;">Faltan ${lvl.min - pts} pts para desbloquearlo</div>` : '';
+        const descText = lvl.desc ? `<div style="font-size:11px;color:#64748B;margin-top:3px;font-style:italic;">${lvl.desc}</div>` : '';
         return `<div class="level-step ${cls}">
             <div class="level-step-icon">${lvl.icon}</div>
             <div class="level-step-info">
                 <div class="level-step-name">Nivel ${num} · ${lvl.name}</div>
                 <div class="level-step-pts">${ptsText}</div>
+                ${descText}
+                ${faltanText}
             </div>
             ${badge}
         </div>`;
@@ -1484,10 +1521,21 @@ async function renderPortal() {
         `${COURSE_NAMES[s.course]||s.course} · Doc. ${s.document||''}`;
     document.getElementById('levelLabel').textContent =
         `Nivel ${lvl.levelNumber} · ${lvl.name}`;
+    const ptsToNext = lvl.nextMin ? lvl.nextMin - lvl.points : 0;
     document.getElementById('levelPcts').textContent =
-        lvl.nextName ? `${lvl.pctToNext}% hacia ${lvl.nextName}` : '¡Nivel máximo!';
+        lvl.nextName ? `${lvl.pctToNext}% · faltan ${ptsToNext} pts` : '¡Nivel máximo!';
     document.getElementById('levelBar').style.width = lvl.pctToNext + '%';
     document.getElementById('levelBadge').textContent = `${lvl.icon} ${lvl.name}`;
+
+    // Mensaje motivador y descripción del nivel actual
+    const currentLevelData = ETHICS_LEVELS.find(l => l.name === lvl.name);
+    const motivEl = document.getElementById('motivMsg');
+    const descEl = document.getElementById('levelDesc');
+    if (motivEl) motivEl.textContent = getMotivMessage(lvl, ptsToNext);
+    if (descEl && currentLevelData) {
+        descEl.textContent = currentLevelData.desc +
+            (currentLevelData.nextHint ? ' · ' + currentLevelData.nextHint : '');
+    }
 
     // Stats
     document.getElementById('statLevel').textContent = lvl.levelNumber;
@@ -1534,12 +1582,16 @@ function renderLevelsJourney(currentLevelNum, pts) {
         const badge = isCurrent ? '<span class="level-step-badge badge-current">← Estás aquí</span>'
             : isAchieved ? '<span class="level-step-badge badge-achieved">✓ Logrado</span>'
             : '<span class="level-step-badge badge-locked">🔒 Bloqueado</span>';
-        const ptsText = next ? `Desde ${lvl.min} pts · Siguiente: ${next.min} pts` : `Desde ${lvl.min} pts · Nivel máximo`;
+        const ptsText = next ? `${lvl.min} pts para alcanzarlo · ${next.min - lvl.min} pts de rango` : `Desde ${lvl.min} pts · Nivel máximo`;
+        const faltanText = isLocked ? `<div style="font-size:11px;color:#94A3B8;margin-top:2px;">Faltan ${lvl.min - pts} pts para desbloquearlo</div>` : '';
+        const descText = lvl.desc ? `<div style="font-size:11px;color:#64748B;margin-top:3px;font-style:italic;">${lvl.desc}</div>` : '';
         return `<div class="level-step ${cls}">
             <div class="level-step-icon">${lvl.icon}</div>
             <div class="level-step-info">
                 <div class="level-step-name">Nivel ${num} · ${lvl.name}</div>
                 <div class="level-step-pts">${ptsText}</div>
+                ${descText}
+                ${faltanText}
             </div>
             ${badge}
         </div>`;
