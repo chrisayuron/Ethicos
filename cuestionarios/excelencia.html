@@ -889,6 +889,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
@@ -900,12 +901,19 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db  = getFirestore(app);
+    const auth = getAuth(app);
 
-    // Guarda un resultado de cuestionario en la colección "quizResults".
-    // Cualquiera puede crear (estudiantes sin login); solo un profesor
-    // autenticado puede leer (ver reglas de Firestore).
+    // Inicia sesión anónima al cargar (silencioso, el estudiante no nota nada).
+    // Esto permite que la regla de Firestore "allow create: if request.auth != null"
+    // se cumpla sin que el estudiante tenga que registrarse.
+    signInAnonymously(auth).catch(e => console.warn('Auth anónima fallida:', e));
+
     window.submitQuizResult = async function (data) {
+        // Si por algún motivo aún no hay sesión, intentar de nuevo antes de guardar
+        if (!auth.currentUser) {
+            await signInAnonymously(auth);
+        }
         await addDoc(collection(db, "quizResults"), {
             ...data,
             createdAt: serverTimestamp()

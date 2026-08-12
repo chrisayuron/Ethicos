@@ -557,6 +557,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyD6hILN3OdeiDXi8HlDU2Erz70KEC0GyFQ",
@@ -568,12 +569,15 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db  = getFirestore(app);
+    const auth = getAuth(app);
+    signInAnonymously(auth).catch(e => console.warn('Auth anónima fallida:', e));
 
     // Guarda un resultado de cuestionario en la colección "quizResults".
     // Cualquiera puede crear (estudiantes sin login); solo un profesor
     // autenticado puede leer (ver reglas de Firestore).
     window.submitQuizResult = async function (data) {
+        if (!auth.currentUser) { await signInAnonymously(auth); }
         await addDoc(collection(db, "quizResults"), {
             ...data,
             createdAt: serverTimestamp()

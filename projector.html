@@ -454,8 +454,17 @@ window.startTimer = function() {
     timerRunning = true;
     document.getElementById('timerStartBtn').style.display='none';
     document.getElementById('timerPauseBtn').style.display='';
+
+    // Guardar la hora exacta de inicio y los segundos restantes al arrancar.
+    // En cada tick se calcula cuánto tiempo REAL ha pasado desde ese momento,
+    // en vez de depender de cuántos ticks disparó el setInterval (que el
+    // navegador throttlea cuando la pestaña está inactiva).
+    const startedAt = Date.now();
+    const secondsAtStart = timerSeconds;
+
     timerInterval = setInterval(() => {
-        timerSeconds--;
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        timerSeconds = Math.max(0, secondsAtStart - elapsed);
         updateTimerDisplay();
         if (timerSeconds <= 0) {
             clearInterval(timerInterval); timerRunning = false;
@@ -465,7 +474,7 @@ window.startTimer = function() {
             document.getElementById('timerDisplay').classList.add('warning');
             toast('⏰ ¡Se acabó el tiempo!');
         }
-    }, 1000);
+    }, 500); // tick cada 500ms para mayor precisión visual
 };
 window.pauseTimer = function() {
     clearInterval(timerInterval); timerRunning = false;
