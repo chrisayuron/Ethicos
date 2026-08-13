@@ -1950,6 +1950,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         activeHistoryFilters = [];
         document.querySelectorAll('.filter-type-card').forEach(c => c.classList.remove('active'));
         openModal("historyFilterTypeModal");
+        renderLastRepairInfo();
         // NO llamar autoRepairAttendance() directamente aquí:
         // scheduleRepair() ya se ejecuta después de cambios en tribus,
         // y el lock previene ejecuciones concurrentes.
@@ -2023,6 +2024,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
             if (ptsFixed > 0) parts.push(`${ptsFixed} punto(s) de tribu aplicado(s)`);
             if (individualFixed > 0) parts.push(`${individualFixed} punto(s) individual(es) aplicado(s)`);
 
+            // Guardar registro visible de la última reparación (automática o manual),
+            // para que no dependa de ver el toast en el momento exacto en que ocurre.
+            const summaryText = parts.length > 0 ? parts.join(', ') : 'sin cambios pendientes';
+            localStorage.setItem('ethykos_lastRepair', JSON.stringify({
+                when: new Date().toISOString(),
+                summary: summaryText,
+                hadFixes: parts.length > 0
+            }));
+            renderLastRepairInfo();
+
             if (parts.length > 0) {
                 showToast('🔧 Reparación: ' + parts.join(', '), 'success');
                 await renderTribes(); await renderChart();
@@ -2040,6 +2051,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 scheduleRepair();
             }
         }
+    }
+
+    function renderLastRepairInfo() {
+        const el = document.getElementById('lastRepairInfo');
+        if (!el) return;
+        const raw = localStorage.getItem('ethykos_lastRepair');
+        if (!raw) { el.textContent = 'Aún no se ha ejecutado ninguna reparación en este navegador.'; return; }
+        try {
+            const info = JSON.parse(raw);
+            const when = new Date(info.when).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+            const icon = info.hadFixes ? '🔧' : '✅';
+            el.innerHTML = `${icon} Última reparación: <strong>${when}</strong> — ${escapeHtml(info.summary)}`;
+        } catch(e) { el.textContent = ''; }
     }
 
     document.getElementById("closeHistoryFilterTypeBtn").onclick = () => closeModal("historyFilterTypeModal");
