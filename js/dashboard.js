@@ -1962,7 +1962,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         repairRunning = true;
         if (repairTimeout) { clearTimeout(repairTimeout); repairTimeout = null; }
         try {
-            // Usar caché en lugar de leer de Firestore
             const records = getCachedAttendance();
 
             // 1) Reparar registros sin tribeId que sí tienen estudiante en una tribu
@@ -1972,40 +1971,27 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 const allStudents = getCachedStudents();
                 const byDoc = {};
                 allStudents.forEach(s => { if (s.document) byDoc[s.document] = s; });
-
                 for (const r of missingTribe) {
                     const student = byDoc[r.studentDoc];
                     if (!student) continue;
                     const tribe = findStudentTribe(student.id, r.studentName, student.course);
                     if (tribe) {
-                        await updateDoc(doc(db, "attendance", r.id), {
-                            tribeId: tribe.id,
-                            tribeName: tribe.name
-                        });
+                        await updateDoc(doc(db, "attendance", r.id), { tribeId: tribe.id, tribeName: tribe.name });
                         cacheUpdateAttendance(r.id, { tribeId: tribe.id, tribeName: tribe.name });
                         tribeFixed++;
                     }
                 }
             }
 
-            // 2) Aplicar puntos de tribu pendientes.
-            // Solo procesa registros marcados EXPLÍCITAMENTE con tribePointsAwarded === false.
-            // Los registros sin el campo (undefined) se consideran ya procesados y solo se
-            // marcan como true para evitar que la próxima ejecución los vuelva a tocar.
+            // 2) Puntos de tribu pendientes (tribePointsAwarded === false explícito)
             const records_with_tribe = records.filter(r => r.tribeId);
-            const pendingPts = records_with_tribe.filter(r => r.tribePointsAwarded === false);
-            const unmarked = records_with_tribe.filter(r => r.tribePointsAwarded === undefined || r.tribePointsAwarded === null);
-
-            // Marcar silenciosamente los registros sin el campo (ya tienen su punto, solo falta la marca)
-            for (const r of unmarked) {
-                try {
-                    await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true });
-                    cacheUpdateAttendance(r.id, { tribePointsAwarded: true });
-                } catch(e) {}
+            const pendingTribePts = records_with_tribe.filter(r => r.tribePointsAwarded === false);
+            const unmarkedTribe = records_with_tribe.filter(r => r.tribePointsAwarded === undefined || r.tribePointsAwarded === null);
+            for (const r of unmarkedTribe) {
+                try { await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true }); cacheUpdateAttendance(r.id, { tribePointsAwarded: true }); } catch(e) {}
             }
-
             let ptsFixed = 0;
-            for (const r of pendingPts) {
+            for (const r of pendingTribePts) {
                 try {
                     await updatePoints(r.tribeId, 1, 'repair');
                     await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true });
@@ -2014,16 +2000,32 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 } catch(e) {}
             }
 
-            // Notificar solo si hubo cambios (o siempre, si se pidió explícitamente)
-            if (tribeFixed > 0 || ptsFixed > 0) {
-                let msg = 'Auto-reparación: ';
-                const parts = [];
-                if (tribeFixed > 0) parts.push(`${tribeFixed} registro(s) con tribu asignada`);
-                if (ptsFixed > 0) parts.push(`${ptsFixed} punto(s) de tribu aplicado(s)`);
-                msg += parts.join(', ');
-                showToast('🔧 ' + msg, 'success');
-                await renderTribes();
-                await renderChart();
+            // 3) NUEVO: Puntos individuales pendientes (pointsAwarded !== true)
+            // Busca asistencias sin el punto individual aplicado y los suma +1
+            const allStudents = getCachedStudents();
+            const byDoc = {};
+            allStudents.forEach(s => { if (s.document) byDoc[s.document] = s; });
+            const pendingIndividual = records.filter(r => r.pointsAwarded !== true && r.studentDoc);
+            let individualFixed = 0;
+            for (const r of pendingIndividual) {
+                const student = byDoc[r.studentDoc];
+                if (!student) continue;
+                try {
+                    await awardLevelPoints(student.id, 1, 'repair');
+                    await updateDoc(doc(db, "attendance", r.id), { pointsAwarded: true });
+                    cacheUpdateAttendance(r.id, { pointsAwarded: true });
+                    individualFixed++;
+                } catch(e) {}
+            }
+
+            const parts = [];
+            if (tribeFixed > 0) parts.push(`${tribeFixed} tribu(s) asignada(s)`);
+            if (ptsFixed > 0) parts.push(`${ptsFixed} punto(s) de tribu aplicado(s)`);
+            if (individualFixed > 0) parts.push(`${individualFixed} punto(s) individual(es) aplicado(s)`);
+
+            if (parts.length > 0) {
+                showToast('🔧 Reparación: ' + parts.join(', '), 'success');
+                await renderTribes(); await renderChart();
             } else if (forceNotify) {
                 showToast('✅ Todo en orden, no había nada pendiente por reparar', 'success');
             }
@@ -2687,21 +2689,28 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     });
 
     async function loadRanking() {
-        // Forzar lectura fresca desde Firestore para evitar que el caché
-        // desactualizado muestre tribus vacías o estudiantes sin tribu asignada
         await loadAllData(true);
         rankingAllStudents = getCachedStudents();
         rankingTribesMap = {};
         dataCache.tribes.forEach(t => {
             (t.members || []).forEach(m => {
                 if (m.studentId) rankingTribesMap[m.studentId] = t.name;
-                // Fallback: si el miembro no tiene studentId, intentar vincular por nombre
                 else if (m.name) {
                     const match = rankingAllStudents.find(s => s.name === m.name);
                     if (match) rankingTribesMap[match.id] = t.name;
                 }
             });
         });
+
+        // Diagnóstico: mostrar distribución de estudiantes por curso en consola
+        const cursoCount = {};
+        rankingAllStudents.forEach(s => {
+            const c = String(s.course || 'sin_curso');
+            cursoCount[c] = (cursoCount[c] || 0) + 1;
+        });
+        console.log('[Ranking] Estudiantes por curso:', cursoCount);
+        console.log('[Ranking] Total estudiantes:', rankingAllStudents.length);
+
         renderRanking();
     }
 
