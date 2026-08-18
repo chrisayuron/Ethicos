@@ -200,7 +200,8 @@
         .syllabus-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: none; }
         .syllabus-badge.pending { background: #DBEAFE; color: #1D4ED8; cursor: pointer; transition: all 0.15s; }
         .syllabus-badge.pending:hover { background: #BFDBFE; }
-        .syllabus-badge.done { background: #D1FAE5; color: #047857; cursor: default; }
+        .syllabus-badge.done { background: #D1FAE5; color: #047857; cursor: pointer; transition: all 0.15s; }
+        .syllabus-badge.done:hover { background: #A7F3D0; }
         /* Shop modal */
         .header-btn.amber { background: #D97706; box-shadow: 0 2px 10px rgba(217,119,6,0.3); }
         .header-btn.amber:hover { background: #B45309; }

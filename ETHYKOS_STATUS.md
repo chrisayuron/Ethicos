@@ -198,15 +198,12 @@ service cloud.firestore {
 ## Pendiente (lista priorizada)
 | # | Tarea | Prioridad |
 |---|---|---|
-| 1 | Verificar ranking 7° tras registrar asistencia | Media |
+| 1 | Verificar ranking todos los cursos tras ejecutar reparación | Media |
 
 ## Última sesión — completado
-- Temporizador de projector.html corregido (usa Date.now(), no se ve afectado por throttling)
-- Auth anónima agregada a los 4 cuestionarios (fix "no se pudo guardar")
-- Reorganización del proyecto en carpetas (css/, js/, cuestionarios/, img/)
-- Modo oscuro en dashboard y student (botón manual, persiste en localStorage)
-- Recompensas especiales/sorpresa (costo diferenciado, fecha expiración, mensaje)
-- Mensajes pedagógicos de progreso en student.html
+- Deshacer entrega de Syllabus: badge "entregado" ahora es clicable (resta 10pts/10🪙 con confirmación). Confirmación agregada también antes de asignar por primera vez. Limitación conocida: bono de monedas por nivel no se revierte automáticamente en el undo.
+- Auto-refresco extendido con patrón reutilizable `createAutoRefresh()` + `refreshCoreData()` (solo students+tribes, no attendance) a: vista principal de tribus (90s, siempre activa), Gestión de estudiantes (90s), Log de puntos (120s), Ranking (90s, ya existía). Todas se pausan con Page Visibility API cuando la pestaña no está visible, y refrescan al instante al volver.
+- Sesión por pestaña (browserSessionPersistence) — cerrar sesión en una pestaña no afecta a las demás
 
 ---
 

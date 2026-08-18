@@ -1,8 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { getAuth, setPersistence, browserSessionPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
     const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
+
+    // Persistencia por pestaña: cada pestaña mantiene su propia sesión.
+    // Cerrar sesión (o que expire) en una pestaña ya NO afecta a las demás
+    // pestañas abiertas del dashboard (antes usaban un almacenamiento
+    // compartido entre todas las pestañas del navegador).
+    await setPersistence(auth, browserSessionPersistence);
 
     onAuthStateChanged(auth, (user) => { if (user) { localStorage.setItem("ethykos_lastActive", Date.now().toString()); window.location.href = "dashboard.html"; } });
 

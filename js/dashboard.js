@@ -1,10 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { getAuth, setPersistence, browserSessionPersistence, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
     import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, addDoc, setDoc, query, where, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    // Persistencia por pestaña (ver index.js para el detalle completo):
+    // permite tener varias pestañas del dashboard abiertas sin que una
+    // sesión cerrada en una afecte a las demás.
+    await setPersistence(auth, browserSessionPersistence);
 
     const courseNames = { 6:"6°", 7:"7°", 8:"8°", 9:"9°", 10:"10°", 11:"11°" };
     const rolesDisponibles = ["Líder","Comunicador","Artesano","Guardián","Explorador","Guerrero"];
@@ -1149,8 +1154,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         }).join('') + (filtered.length > 300 ? `<tr><td colspan="7" style="text-align:center;color:#94A3B8;font-size:11px;">Mostrando los 300 más recientes. Usa los filtros para acotar.</td></tr>` : '');
     }
 
-    document.getElementById('pointsLogBtn').onclick = async () => { openModal('pointsLogModal'); await loadPointsLog(); };
-    document.getElementById('closePointsLogBtn').onclick = () => closeModal('pointsLogModal');
+    document.getElementById('pointsLogBtn').onclick = async () => { openModal('pointsLogModal'); await loadPointsLog(); pointsLogAutoRefresh.start(); };
+    document.getElementById('closePointsLogBtn').onclick = () => { closeModal('pointsLogModal'); pointsLogAutoRefresh.stop(); };
+    const pointsLogAutoRefresh = createAutoRefresh('pointsLogModal', 120 * 1000, loadPointsLog); // 2 min: el log solo crece, no hace falta más seguido
     document.getElementById('plog-refreshBtn').onclick = loadPointsLog;
     document.getElementById('plog-clearBtn').onclick = () => {
         document.getElementById('plog-type').value = '';
@@ -1171,8 +1177,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     window.onclick = (e) => { if (e.target===document.getElementById("tribeModal")) closeModal("tribeModal"); };
 
     // ===== STUDENTS MODAL =====
-    document.getElementById("studentsBtn").onclick = () => { openModal("studentsModal"); loadStudentList(); };
-    document.getElementById("closeStudentsBtn").onclick = () => closeModal("studentsModal");
+    document.getElementById("studentsBtn").onclick = () => { openModal("studentsModal"); loadStudentList(); studentsAutoRefresh.start(); };
+    document.getElementById("closeStudentsBtn").onclick = () => { closeModal("studentsModal"); studentsAutoRefresh.stop(); };
+    async function refreshStudentsListLive() {
+        const ok = await refreshCoreData();
+        if (!ok) return;
+        allStudents = getCachedStudents();
+        applyStudentFilter();
+    }
+    const studentsAutoRefresh = createAutoRefresh('studentsModal', 90 * 1000, refreshStudentsListLive);
 
     // Tabs
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -1231,7 +1244,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                     <button class="pts-badge-btn minus" onclick="window.quickStudentPts('${s.id}','reward',-5)">-5</button>
                     <span style="width:1px;height:14px;background:#E2E8F0;margin:0 2px;"></span>
                     ${s.syllabusDelivered
-                        ? `<span class="syllabus-badge done"><i class="fas fa-check-circle"></i> Syllabus entregado</span>`
+                        ? `<button class="syllabus-badge done" onclick="window.undoSyllabusDelivered('${s.id}')" title="Clic para deshacer"><i class="fas fa-check-circle"></i> Syllabus entregado</button>`
                         : `<button class="syllabus-badge pending" onclick="window.markSyllabusDelivered('${s.id}')"><i class="fas fa-file-arrow-up"></i> Marcar entrega Syllabus (+10 pts)</button>`
                     }
                 </div>
@@ -1265,6 +1278,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 showToast('Ya se había registrado la entrega de este estudiante', '');
                 return;
             }
+            // Confirmación antes de asignar — para evitar clics accidentales sobre el estudiante equivocado
+            if (!confirm(`¿Registrar entrega de Syllabus para "${student.name}"?\n\nEsto suma +10 puntos de nivel y +10 monedas. Si te equivocas, puedes deshacerlo después haciendo clic en el badge "Syllabus entregado".`)) return;
+
             await updateDoc(doc(db, "students", studentId), { syllabusDelivered: true });
             student.syllabusDelivered = true;
             saveCacheToLocal();
@@ -1278,6 +1294,25 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
             if (idx >= 0) allStudents[idx] = student;
             applyStudentFilter();
         } catch(e) { showToast('Error al registrar la entrega','error'); }
+    };
+
+    window.undoSyllabusDelivered = async (studentId) => {
+        try {
+            const student = dataCache.students.find(s => s.id === studentId);
+            if (!student || !student.syllabusDelivered) return;
+            if (!confirm(`¿Deshacer la entrega de Syllabus de "${student.name}"?\n\nSe restarán 10 puntos de nivel y 10 monedas.\n\nNota: si esta entrega hizo que subiera de nivel, el bono de monedas por ese cambio de nivel NO se revierte automáticamente — revísalo en "📜 Log de puntos" si necesitas ajustarlo también.`)) return;
+
+            await updateDoc(doc(db, "students", studentId), { syllabusDelivered: false });
+            student.syllabusDelivered = false;
+            saveCacheToLocal();
+
+            await awardLevelPoints(studentId, -10, 'syllabus_undo');
+            showToast(`↩️ Entrega de Syllabus deshecha para "${student.name}" (-10pts · -10🪙)`, '');
+
+            const idx = allStudents.findIndex(s => s.id === studentId);
+            if (idx >= 0) allStudents[idx] = student;
+            applyStudentFilter();
+        } catch(e) { showToast('Error al deshacer la entrega','error'); }
     };
     document.getElementById("studentSearch").addEventListener("input", applyStudentFilter);
 
@@ -1950,7 +1985,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         activeHistoryFilters = [];
         document.querySelectorAll('.filter-type-card').forEach(c => c.classList.remove('active'));
         openModal("historyFilterTypeModal");
-        renderLastRepairInfo();
         // NO llamar autoRepairAttendance() directamente aquí:
         // scheduleRepair() ya se ejecuta después de cambios en tribus,
         // y el lock previene ejecuciones concurrentes.
@@ -1963,6 +1997,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         repairRunning = true;
         if (repairTimeout) { clearTimeout(repairTimeout); repairTimeout = null; }
         try {
+            // Usar caché en lugar de leer de Firestore
             const records = getCachedAttendance();
 
             // 1) Reparar registros sin tribeId que sí tienen estudiante en una tribu
@@ -1972,27 +2007,40 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 const allStudents = getCachedStudents();
                 const byDoc = {};
                 allStudents.forEach(s => { if (s.document) byDoc[s.document] = s; });
+
                 for (const r of missingTribe) {
                     const student = byDoc[r.studentDoc];
                     if (!student) continue;
                     const tribe = findStudentTribe(student.id, r.studentName, student.course);
                     if (tribe) {
-                        await updateDoc(doc(db, "attendance", r.id), { tribeId: tribe.id, tribeName: tribe.name });
+                        await updateDoc(doc(db, "attendance", r.id), {
+                            tribeId: tribe.id,
+                            tribeName: tribe.name
+                        });
                         cacheUpdateAttendance(r.id, { tribeId: tribe.id, tribeName: tribe.name });
                         tribeFixed++;
                     }
                 }
             }
 
-            // 2) Puntos de tribu pendientes (tribePointsAwarded === false explícito)
+            // 2) Aplicar puntos de tribu pendientes.
+            // Solo procesa registros marcados EXPLÍCITAMENTE con tribePointsAwarded === false.
+            // Los registros sin el campo (undefined) se consideran ya procesados y solo se
+            // marcan como true para evitar que la próxima ejecución los vuelva a tocar.
             const records_with_tribe = records.filter(r => r.tribeId);
-            const pendingTribePts = records_with_tribe.filter(r => r.tribePointsAwarded === false);
-            const unmarkedTribe = records_with_tribe.filter(r => r.tribePointsAwarded === undefined || r.tribePointsAwarded === null);
-            for (const r of unmarkedTribe) {
-                try { await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true }); cacheUpdateAttendance(r.id, { tribePointsAwarded: true }); } catch(e) {}
+            const pendingPts = records_with_tribe.filter(r => r.tribePointsAwarded === false);
+            const unmarked = records_with_tribe.filter(r => r.tribePointsAwarded === undefined || r.tribePointsAwarded === null);
+
+            // Marcar silenciosamente los registros sin el campo (ya tienen su punto, solo falta la marca)
+            for (const r of unmarked) {
+                try {
+                    await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true });
+                    cacheUpdateAttendance(r.id, { tribePointsAwarded: true });
+                } catch(e) {}
             }
+
             let ptsFixed = 0;
-            for (const r of pendingTribePts) {
+            for (const r of pendingPts) {
                 try {
                     await updatePoints(r.tribeId, 1, 'repair');
                     await updateDoc(doc(db, "attendance", r.id), { tribePointsAwarded: true });
@@ -2001,42 +2049,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 } catch(e) {}
             }
 
-            // 3) NUEVO: Puntos individuales pendientes (pointsAwarded !== true)
-            // Busca asistencias sin el punto individual aplicado y los suma +1
-            const allStudents = getCachedStudents();
-            const byDoc = {};
-            allStudents.forEach(s => { if (s.document) byDoc[s.document] = s; });
-            const pendingIndividual = records.filter(r => r.pointsAwarded !== true && r.studentDoc);
-            let individualFixed = 0;
-            for (const r of pendingIndividual) {
-                const student = byDoc[r.studentDoc];
-                if (!student) continue;
-                try {
-                    await awardLevelPoints(student.id, 1, 'repair');
-                    await updateDoc(doc(db, "attendance", r.id), { pointsAwarded: true });
-                    cacheUpdateAttendance(r.id, { pointsAwarded: true });
-                    individualFixed++;
-                } catch(e) {}
-            }
-
-            const parts = [];
-            if (tribeFixed > 0) parts.push(`${tribeFixed} tribu(s) asignada(s)`);
-            if (ptsFixed > 0) parts.push(`${ptsFixed} punto(s) de tribu aplicado(s)`);
-            if (individualFixed > 0) parts.push(`${individualFixed} punto(s) individual(es) aplicado(s)`);
-
-            // Guardar registro visible de la última reparación (automática o manual),
-            // para que no dependa de ver el toast en el momento exacto en que ocurre.
-            const summaryText = parts.length > 0 ? parts.join(', ') : 'sin cambios pendientes';
-            localStorage.setItem('ethykos_lastRepair', JSON.stringify({
-                when: new Date().toISOString(),
-                summary: summaryText,
-                hadFixes: parts.length > 0
-            }));
-            renderLastRepairInfo();
-
-            if (parts.length > 0) {
-                showToast('🔧 Reparación: ' + parts.join(', '), 'success');
-                await renderTribes(); await renderChart();
+            // Notificar solo si hubo cambios (o siempre, si se pidió explícitamente)
+            if (tribeFixed > 0 || ptsFixed > 0) {
+                let msg = 'Auto-reparación: ';
+                const parts = [];
+                if (tribeFixed > 0) parts.push(`${tribeFixed} registro(s) con tribu asignada`);
+                if (ptsFixed > 0) parts.push(`${ptsFixed} punto(s) de tribu aplicado(s)`);
+                msg += parts.join(', ');
+                showToast('🔧 ' + msg, 'success');
+                await renderTribes();
+                await renderChart();
             } else if (forceNotify) {
                 showToast('✅ Todo en orden, no había nada pendiente por reparar', 'success');
             }
@@ -2051,19 +2073,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 scheduleRepair();
             }
         }
-    }
-
-    function renderLastRepairInfo() {
-        const el = document.getElementById('lastRepairInfo');
-        if (!el) return;
-        const raw = localStorage.getItem('ethykos_lastRepair');
-        if (!raw) { el.textContent = 'Aún no se ha ejecutado ninguna reparación en este navegador.'; return; }
-        try {
-            const info = JSON.parse(raw);
-            const when = new Date(info.when).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
-            const icon = info.hadFixes ? '🔧' : '✅';
-            el.innerHTML = `${icon} Última reparación: <strong>${when}</strong> — ${escapeHtml(info.summary)}`;
-        } catch(e) { el.textContent = ''; }
     }
 
     document.getElementById("closeHistoryFilterTypeBtn").onclick = () => closeModal("historyFilterTypeModal");
@@ -2574,6 +2583,44 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
             </div>`).join('');
     }
 
+    // ===== AUTO-REFRESCO GENÉRICO (para vistas abiertas con datos que pueden cambiar) =====
+    // Se pausa solo si la pestaña no está visible (Page Visibility API) y se detiene
+    // por completo al cerrar la vista correspondiente. Al volver a la pestaña, refresca
+    // de inmediato y retoma el ciclo.
+    function createAutoRefresh(modalId, intervalMs, refreshFn) {
+        let interval = null;
+        function isOpen() {
+            const el = document.getElementById(modalId);
+            return !!el && el.style.display === 'flex';
+        }
+        function start() {
+            stop();
+            interval = setInterval(() => { if (!document.hidden && isOpen()) refreshFn(); }, intervalMs);
+        }
+        function stop() {
+            if (interval) { clearInterval(interval); interval = null; }
+        }
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && isOpen() && interval) refreshFn();
+        });
+        return { start, stop };
+    }
+
+    // Lectura compartida: solo estudiantes y tribus (lo que usan ranking, lista de
+    // estudiantes y la vista principal). NO relee asistencia (colección más pesada).
+    async function refreshCoreData() {
+        try {
+            const [studentsSnap, tribesSnap] = await Promise.all([
+                getDocs(collection(db, "students")),
+                getDocs(collection(db, "tribes"))
+            ]);
+            dataCache.students = studentsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            dataCache.tribes = tribesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            saveCacheToLocal();
+            return true;
+        } catch(e) { console.error('Error en refreshCoreData:', e); return false; }
+    }
+
     // ===== RANKING =====
     let rankingCurrentCourse = 'all';
     let rankingAllStudents = [];
@@ -2582,8 +2629,30 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     document.getElementById('rankingSectionBtn').onclick = async () => {
         openModal('rankingModal');
         await loadRanking();
+        rankingAutoRefresh.start();
     };
-    document.getElementById('closeRankingBtn').onclick = () => closeModal('rankingModal');
+    document.getElementById('closeRankingBtn').onclick = () => {
+        closeModal('rankingModal');
+        rankingAutoRefresh.stop();
+    };
+
+    async function refreshRankingLive() {
+        const ok = await refreshCoreData();
+        if (!ok) return;
+        rankingAllStudents = getCachedStudents();
+        rankingTribesMap = {};
+        dataCache.tribes.forEach(t => {
+            (t.members || []).forEach(m => {
+                if (m.studentId) rankingTribesMap[m.studentId] = t.name;
+                else if (m.name) {
+                    const match = rankingAllStudents.find(s => s.name === m.name);
+                    if (match) rankingTribesMap[match.id] = t.name;
+                }
+            });
+        });
+        renderRanking();
+    }
+    const rankingAutoRefresh = createAutoRefresh('rankingModal', 90 * 1000, refreshRankingLive);
 
     // ── Resultados de Cuestionarios ──────────────────────────
     let quizAllResults = [];
@@ -2713,28 +2782,21 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     });
 
     async function loadRanking() {
+        // Forzar lectura fresca desde Firestore para evitar que el caché
+        // desactualizado muestre tribus vacías o estudiantes sin tribu asignada
         await loadAllData(true);
         rankingAllStudents = getCachedStudents();
         rankingTribesMap = {};
         dataCache.tribes.forEach(t => {
             (t.members || []).forEach(m => {
                 if (m.studentId) rankingTribesMap[m.studentId] = t.name;
+                // Fallback: si el miembro no tiene studentId, intentar vincular por nombre
                 else if (m.name) {
                     const match = rankingAllStudents.find(s => s.name === m.name);
                     if (match) rankingTribesMap[match.id] = t.name;
                 }
             });
         });
-
-        // Diagnóstico: mostrar distribución de estudiantes por curso en consola
-        const cursoCount = {};
-        rankingAllStudents.forEach(s => {
-            const c = String(s.course || 'sin_curso');
-            cursoCount[c] = (cursoCount[c] || 0) + 1;
-        });
-        console.log('[Ranking] Estudiantes por curso:', cursoCount);
-        console.log('[Ranking] Total estudiantes:', rankingAllStudents.length);
-
         renderRanking();
     }
 
@@ -2811,4 +2873,25 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         await renderChart();
         // Auto-reparar asistencia en segundo plano (silencioso, sin intervención del usuario)
         autoRepairAttendance();
+        startMainViewAutoRefresh();
     }
+
+    // Vista principal (tribus) — siempre visible mientras el dashboard esté abierto.
+    // Se pausa igual que las demás si la pestaña no está visible.
+    let mainViewRefreshInterval = null;
+    function startMainViewAutoRefresh() {
+        if (mainViewRefreshInterval) clearInterval(mainViewRefreshInterval);
+        mainViewRefreshInterval = setInterval(async () => {
+            if (document.hidden) return;
+            const ok = await refreshCoreData();
+            if (!ok) return;
+            await renderTribes();
+            await renderChart();
+        }, 90 * 1000);
+    }
+    document.addEventListener('visibilitychange', async () => {
+        if (!document.hidden && mainViewRefreshInterval) {
+            const ok = await refreshCoreData();
+            if (ok) { await renderTribes(); await renderChart(); }
+        }
+    });
