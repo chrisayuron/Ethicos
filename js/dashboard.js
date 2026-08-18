@@ -359,9 +359,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         if (!student) return null;
         const current = student.individualPoints || 0;
         const updated = Math.max(0, current + delta);
+        const nowIso = new Date().toISOString();
         student.individualPoints = updated;
+        student.pointsUpdatedAt = nowIso;
         saveCacheToLocal();
-        await updateDoc(doc(db, "students", studentId), { individualPoints: updated });
+        await updateDoc(doc(db, "students", studentId), { individualPoints: updated, pointsUpdatedAt: serverTimestamp() });
         logPointsChange('individual', studentId, student.name, delta, updated, 'backfill');
         return updated;
     }
@@ -372,6 +374,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
      * de nivel como resultado, se agrega además un bono de monedas = nivel × 10
      * por cada nivel alcanzado (ej. llegar a nivel 3 = +30 monedas de bono).
      * No existe ningún mecanismo para gastar monedas y acelerar el nivel.
+     *
+     * También registra `pointsUpdatedAt`: la fecha/hora exacta en que el
+     * estudiante alcanzó su puntaje actual. El ranking usa este campo para
+     * desempatar de forma justa entre estudiantes con el mismo puntaje
+     * (quien llegó primero a ese número queda mejor posicionado, en vez de
+     * usar el orden alfabético).
      */
     async function awardLevelPoints(studentId, delta, source) {
         const student = dataCache.students.find(s => s.id === studentId);
@@ -392,10 +400,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
             afterCoins += bonusCoins;
         }
 
+        const nowIso = new Date().toISOString();
         student.individualPoints = afterPoints;
         student.rewardPoints = afterCoins;
+        student.pointsUpdatedAt = nowIso;
         saveCacheToLocal();
-        await updateDoc(doc(db, "students", studentId), { individualPoints: afterPoints, rewardPoints: afterCoins });
+        await updateDoc(doc(db, "students", studentId), {
+            individualPoints: afterPoints,
+            rewardPoints: afterCoins,
+            pointsUpdatedAt: serverTimestamp()
+        });
         logPointsChange('individual', studentId, student.name, delta, afterPoints, source || 'manual');
         if (afterCoins !== beforeCoins) {
             logPointsChange('coins', studentId, student.name, afterCoins - beforeCoins, afterCoins, (source || 'manual') + (bonusCoins ? '+level_bonus' : ''));
@@ -2258,6 +2272,47 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         }
     };
 
+    document.getElementById('hf-backfillDatesBtn').onclick = async () => {
+        const btn = document.getElementById('hf-backfillDatesBtn');
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Revisando...';
+        try {
+            const studentsSnap = await getDocs(collection(db, "students"));
+            const missing = studentsSnap.docs.filter(d => !d.data().pointsUpdatedAt && (d.data().individualPoints || 0) > 0);
+            if (!missing.length) {
+                showToast('✅ Todos los estudiantes con puntos ya tienen fecha registrada', 'success');
+                return;
+            }
+            if (!confirm(`Se encontraron ${missing.length} estudiante(s) con puntos pero sin fecha de "cuándo lo alcanzaron" (necesaria para el desempate justo del ranking).\n\nSe usará como aproximación su registro más reciente en el Log de puntos. Si un estudiante no tiene ningún registro en el log (puntos muy antiguos, antes de esa función), quedará sin fecha y se desempatará alfabéticamente como hasta ahora.\n\n¿Continuar?`)) return;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Completando...';
+            const logSnap = await getDocs(collection(db, "pointsLog"));
+            const allLogs = logSnap.docs.map(d => d.data());
+
+            let fixed = 0, noData = 0;
+            for (const d of missing) {
+                const studentId = d.id;
+                const logsForStudent = allLogs
+                    .filter(l => l.type === 'individual' && l.targetId === studentId && l.timestamp)
+                    .sort((a,b) => (b.timestamp.seconds||0) - (a.timestamp.seconds||0));
+                if (!logsForStudent.length) { noData++; continue; }
+                const mostRecent = logsForStudent[0];
+                const iso = new Date(mostRecent.timestamp.seconds * 1000).toISOString();
+                await updateDoc(doc(db, "students", studentId), { pointsUpdatedAt: iso });
+                cacheUpdateStudent(studentId, { pointsUpdatedAt: iso });
+                fixed++;
+            }
+            showToast(`✅ Fecha completada para ${fixed} estudiante(s)${noData ? ` · ${noData} sin registro en el log (quedan con desempate alfabético)` : ''}`, 'success');
+        } catch(e) {
+            console.error(e);
+            showToast('Error al completar fechas', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
+    };
+
     document.getElementById('hf-resetTribePtsBtn').onclick = async () => {
         if (!confirm('Esto pondrá en 0 los puntos de TODAS las tribus, sin borrar ningún registro de asistencia. Luego puedes usar "Reparar asistencia/puntos de tribu ahora" para recalcularlos correctamente. ¿Continuar?')) return;
         if (!confirm('Confirma: se resetean a 0 los puntos de todas las tribus. ¿Estás seguro?')) return;
@@ -2805,14 +2860,26 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
             ? rankingAllStudents
             : rankingAllStudents.filter(s => String(s.course) === rankingCurrentCourse);
 
-        // Orden: puntos desc, y como desempate secundario (solo visual, no de mérito) el nombre
-        const sorted = [...filtered].sort((a, b) => (b.individualPoints||0) - (a.individualPoints||0) || a.name.localeCompare(b.name));
+        // Orden: puntos desc → quien llegó PRIMERO a ese puntaje (pointsUpdatedAt asc)
+        // → nombre solo como último recurso si no hay fecha registrada para ninguno de los dos
+        const sorted = [...filtered].sort((a, b) => {
+            const ptsDiff = (b.individualPoints||0) - (a.individualPoints||0);
+            if (ptsDiff !== 0) return ptsDiff;
+            const aTime = a.pointsUpdatedAt ? new Date(a.pointsUpdatedAt).getTime() : Infinity;
+            const bTime = b.pointsUpdatedAt ? new Date(b.pointsUpdatedAt).getTime() : Infinity;
+            if (aTime !== bTime) return aTime - bTime; // llegó antes = mejor posición
+            return a.name.localeCompare(b.name);
+        });
 
-        // Posición "1224": empatados comparten posición; sin puntos (0) no hay posición de mérito
-        let currentRank = 0, prevPoints = null;
+        // Posición: secuencial según el orden de arriba. Dos estudiantes solo comparten
+        // posición si tienen los mismos puntos Y llegaron exactamente al mismo tiempo
+        // (en la práctica, casi nunca) — así el desempate por fecha resuelve los "empates"
+        // de puntos de forma justa en vez de repartir la misma posición a todos.
+        let currentRank = 0, prevKey = null;
         const ranked = sorted.map((s, i) => {
             const pts = s.individualPoints || 0;
-            if (pts !== prevPoints) { currentRank = i + 1; prevPoints = pts; }
+            const key = pts + '|' + (s.pointsUpdatedAt || '');
+            if (key !== prevKey) { currentRank = i + 1; prevKey = key; }
             return { ...s, _rank: pts > 0 ? currentRank : null };
         });
 
@@ -2850,10 +2917,16 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
             const pos = s._rank;
             const posClass = pos === 1 ? 'gold' : pos === 2 ? 'silver' : pos === 3 ? 'bronze' : 'normal';
             const posLabel = pos === null ? '—' : (pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos);
+            let posTitle = '';
+            if (pos !== null) {
+                posTitle = s.pointsUpdatedAt
+                    ? `Alcanzó ${s.individualPoints||0} pts el ${new Date(s.pointsUpdatedAt).toLocaleString('es-CO',{dateStyle:'short',timeStyle:'short'})}`
+                    : 'Sin fecha registrada de cuándo alcanzó este puntaje (dato anterior a esta función)';
+            }
             const lvl = getLevelInfo(s.individualPoints);
             const tribe = rankingTribesMap[s.id] || '—';
             return `<tr>
-                <td><div class="rank-pos ${posClass}">${posLabel}</div></td>
+                <td><div class="rank-pos ${posClass}" title="${escapeHtml(posTitle)}">${posLabel}</div></td>
                 <td style="font-weight:600;">${escapeHtml(s.name)}</td>
                 <td>${courseNames[s.course]||s.course}</td>
                 <td class="rank-tribe">${escapeHtml(tribe)}</td>

@@ -199,8 +199,10 @@ service cloud.firestore {
 | # | Tarea | Prioridad |
 |---|---|---|
 | 1 | Verificar ranking todos los cursos tras ejecutar reparación | Media |
+| 2 | Correr "Completar fechas para desempate de ranking" una vez (backfill pointsUpdatedAt) | Media |
 
 ## Última sesión — completado
+- Ranking: desempate justo por quién llegó primero al puntaje (`pointsUpdatedAt`) en vez de alfabético. Campo se guarda en `awardLevelPoints()` y `updateStudentPoints()` cada vez que cambian los puntos de nivel. Tooltip en la posición muestra la fecha exacta. Nuevo botón "Completar fechas para desempate de ranking" en Historial de Asistencia hace backfill desde `pointsLog` para estudiantes con puntos previos a este cambio.
 - Deshacer entrega de Syllabus: badge "entregado" ahora es clicable (resta 10pts/10🪙 con confirmación). Confirmación agregada también antes de asignar por primera vez. Limitación conocida: bono de monedas por nivel no se revierte automáticamente en el undo.
 - Auto-refresco extendido con patrón reutilizable `createAutoRefresh()` + `refreshCoreData()` (solo students+tribes, no attendance) a: vista principal de tribus (90s, siempre activa), Gestión de estudiantes (90s), Log de puntos (120s), Ranking (90s, ya existía). Todas se pausan con Page Visibility API cuando la pestaña no está visible, y refrescan al instante al volver.
 - Sesión por pestaña (browserSessionPersistence) — cerrar sesión en una pestaña no afecta a las demás
