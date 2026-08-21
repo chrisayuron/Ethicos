@@ -1,15 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getAuth, setPersistence, browserSessionPersistence, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, addDoc, setDoc, query, where, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { getAuth, setPersistence, browserLocalPersistence, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, onSnapshot, updateDoc, deleteDoc, addDoc, setDoc, query, where, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     const app = initializeApp(window.firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Persistencia por pestaña (ver index.js para el detalle completo):
-    // permite tener varias pestañas del dashboard abiertas sin que una
-    // sesión cerrada en una afecte a las demás.
-    await setPersistence(auth, browserSessionPersistence);
+    // Persistencia compartida entre pestañas (ver index.js): iniciar sesión una
+    // vez es válido para todas las pestañas/ventanas del dashboard, proyector,
+    // etc. abiertas en el mismo navegador.
+    await setPersistence(auth, browserLocalPersistence);
 
     const courseNames = { 6:"6°", 7:"7°", 8:"8°", 9:"9°", 10:"10°", 11:"11°" };
     const rolesDisponibles = ["Líder","Comunicador","Artesano","Guardián","Explorador","Guerrero"];
@@ -22,10 +22,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     let scannedToday = new Set();
     let assigningStudent = null;
 
-    // ===== CACHE DE DATOS (evita lecturas excesivas a Firestore) =====
-    // Todas las lecturas pasan por la caché. Solo se lee Firestore al iniciar o al sincronizar.
-    const CACHE_KEY = 'ethykos_dataCache';
-    const CACHE_TTL = 10 * 60 * 1000; // 10 minutos: después de esto se considera obsoleta
+    // ===== DATOS EN VIVO (sincronizados en tiempo real vía Firestore onSnapshot) =====
+    // Antes: caché en localStorage con TTL de 10 min, compartida entre todas las
+    // pestañas del navegador a través de la misma clave. Eso causaba el bug de
+    // "asistencia duplicada falsa": si dos pestañas del dashboard estaban abiertas
+    // a la vez, cada una podía sobrescribir en localStorage la copia de la otra,
+    // así que una pestaña podía no enterarse de inmediato de una asistencia
+    // recién registrada en la otra (o mostrarla de golpe cuando por fin refrescaba).
+    //
+    // Ahora: cada pestaña mantiene su propia conexión en vivo a Firestore
+    // (onSnapshot) para tribes/students/attendance. Cualquier cambio —lo hagas tú
+    // en esta pestaña, en otra, o en otro dispositivo— se refleja aquí en
+    // cuestión de milisegundos, sin depender de localStorage ni de refrescos
+    // manuales por temporizador.
     let dataCache = {
         tribes: [],
         students: [],
@@ -33,52 +42,91 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         lastSync: 0
     };
 
-    function saveCacheToLocal() {
-        try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(dataCache));
-        } catch(e) {}
-    }
-    function loadCacheFromLocal() {
-        try {
-            const raw = localStorage.getItem(CACHE_KEY);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (parsed && parsed.tribes && parsed.students) {
-                    dataCache = parsed;
-                    return true;
-                }
-            }
-        } catch(e) {}
-        return false;
-    }
-    function isCacheStale() {
-        return (Date.now() - (dataCache.lastSync || 0)) > CACHE_TTL;
-    }
+    // Se conserva esta función por compatibilidad: varios puntos del código todavía
+    // la llaman después de modificar el caché local de forma optimista. Ya no hace
+    // falta (dataCache siempre queda al día vía onSnapshot), así que ahora es un
+    // no-op inofensivo.
+    function saveCacheToLocal() {}
 
-    // Carga TODO desde Firestore una sola vez (al inicio o al sincronizar)
-    async function loadAllData(forceFresh) {
-        if (!forceFresh && loadCacheFromLocal() && !isCacheStale()) {
-            return; // Caché local todavía es válida
+    let realtimeListenersStarted = false;
+    let realtimeReadyResolvers = { tribes: null, students: null, attendance: null };
+    let realtimeReadyPromise = null;
+
+    function startRealtimeListeners() {
+        if (realtimeListenersStarted) return realtimeReadyPromise;
+        realtimeListenersStarted = true;
+
+        realtimeReadyPromise = Promise.all(['tribes', 'students', 'attendance'].map(name => new Promise((resolve) => {
+            realtimeReadyResolvers[name] = resolve;
+        })));
+
+        function resolveOnce(name) {
+            if (realtimeReadyResolvers[name]) { realtimeReadyResolvers[name](); realtimeReadyResolvers[name] = null; }
         }
-        const [tribesSnap, studentsSnap, attSnap] = await Promise.all([
-            getDocs(collection(db, "tribes")),
-            getDocs(collection(db, "students")),
-            getDocs(collection(db, "attendance"))
-        ]);
-        dataCache.tribes = [];
-        tribesSnap.forEach(d => dataCache.tribes.push({ id: d.id, ...d.data() }));
-        dataCache.students = [];
-        studentsSnap.forEach(d => dataCache.students.push({ id: d.id, ...d.data() }));
-        dataCache.attendance = [];
-        attSnap.forEach(d => dataCache.attendance.push({ id: d.id, ...d.data() }));
-        dataCache.lastSync = Date.now();
-        saveCacheToLocal();
+
+        onSnapshot(collection(db, "tribes"), (snap) => {
+            dataCache.tribes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            dataCache.lastSync = Date.now();
+            const wasReady = !realtimeReadyResolvers.tribes;
+            resolveOnce('tribes');
+            if (wasReady) onLiveDataChanged('tribes');
+        }, (err) => { console.error('Error escuchando tribes en vivo:', err); resolveOnce('tribes'); });
+
+        onSnapshot(collection(db, "students"), (snap) => {
+            dataCache.students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            dataCache.lastSync = Date.now();
+            const wasReady = !realtimeReadyResolvers.students;
+            resolveOnce('students');
+            if (wasReady) onLiveDataChanged('students');
+        }, (err) => { console.error('Error escuchando students en vivo:', err); resolveOnce('students'); });
+
+        onSnapshot(collection(db, "attendance"), (snap) => {
+            dataCache.attendance = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            dataCache.lastSync = Date.now();
+            const wasReady = !realtimeReadyResolvers.attendance;
+            resolveOnce('attendance');
+            if (wasReady) onLiveDataChanged('attendance');
+        }, (err) => { console.error('Error escuchando attendance en vivo:', err); resolveOnce('attendance'); });
+
+        return realtimeReadyPromise;
     }
 
-    // Nota: cada función cacheAdd*/cacheUpdate*/cacheDelete* de más abajo ya actualiza
-    // localStorage Y Firestore directamente (escritura real vía updateDoc/addDoc/deleteDoc
-    // en el punto donde se usa). No existe una cola de sincronización diferida: todo cambio
-    // se escribe de inmediato a Firestore, el caché local solo evita tener que releerlo.
+    function isModalOpen(modalId) {
+        const el = document.getElementById(modalId);
+        return !!el && el.style.display === 'flex';
+    }
+
+    // Se dispara cada vez que Firestore empuja un cambio real (de esta pestaña,
+    // de otra pestaña, o de otro dispositivo). Solo re-renderiza las vistas que
+    // están efectivamente abiertas en este momento, para no hacer trabajo de más.
+    function onLiveDataChanged(source) {
+        renderTribes();
+        renderChart();
+        if (source === 'attendance' && isModalOpen('attendanceModal')) {
+            loadAttendanceLog();
+        }
+        if (isModalOpen('studentsModal')) {
+            refreshStudentsListLive();
+        }
+        if (isModalOpen('rankingModal')) {
+            refreshRankingLive();
+        }
+    }
+
+    // Garantiza que los listeners en vivo estén activos y que ya haya llegado al
+    // menos una lectura inicial de cada colección. El parámetro forceFresh se
+    // conserva por compatibilidad con las llamadas existentes, pero ya no aplica:
+    // los datos siempre están al día, no hay nada que "refrescar a la fuerza".
+    async function loadAllData(forceFresh) {
+        await startRealtimeListeners();
+    }
+
+    // Nota: cada función cacheAdd*/cacheUpdate*/cacheDelete* de más abajo actualiza
+    // el caché local de forma optimista justo después de escribir a Firestore, para
+    // que la interfaz responda al instante. El listener en vivo (onSnapshot) llega
+    // muy poco después y confirma/corrige esa misma copia con el dato real — no hay
+    // riesgo de duplicados porque cada evento de Firestore reemplaza el arreglo
+    // completo en vez de agregarle encima.
 
     // Lecturas desde caché (reemplazan getTribes y getStudents)
     function getCachedTribes(grade) {
@@ -215,6 +263,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     // ===== AUTH =====
+    // ===== MODO OSCURO =====
+    const DARK_KEY = 'ethykos_darkMode';
+    function applyDarkMode(dark) {
+        document.body.classList.toggle('dark', dark);
+        const icon = document.getElementById('darkModeIcon');
+        if (icon) icon.className = dark ? 'fas fa-sun' : 'fas fa-moon';
+        localStorage.setItem(DARK_KEY, dark ? '1' : '0');
+    }
+    applyDarkMode(localStorage.getItem(DARK_KEY) === '1');
+    document.getElementById('darkModeBtn').onclick = () => {
+        applyDarkMode(!document.body.classList.contains('dark'));
+    };
+
     const AUTHORIZED_EMAILS = ["rrnewball@gmail.com", "ronald.rojas@bethshalom.edu.co"];
 
     // --- Cierre de sesión por inactividad (30 min) ---
@@ -2661,19 +2722,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         return { start, stop };
     }
 
-    // Lectura compartida: solo estudiantes y tribus (lo que usan ranking, lista de
-    // estudiantes y la vista principal). NO relee asistencia (colección más pesada).
+    // Antes releía estudiantes y tribus manualmente cada vez que se llamaba.
+    // Ahora dataCache.students/tribes ya se mantienen al día en todo momento vía
+    // onSnapshot (ver startRealtimeListeners), así que esta función se conserva
+    // solo por compatibilidad con el código existente que la invoca antes de
+    // volver a renderizar — ya no necesita leer nada de Firestore.
     async function refreshCoreData() {
-        try {
-            const [studentsSnap, tribesSnap] = await Promise.all([
-                getDocs(collection(db, "students")),
-                getDocs(collection(db, "tribes"))
-            ]);
-            dataCache.students = studentsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            dataCache.tribes = tribesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            saveCacheToLocal();
-            return true;
-        } catch(e) { console.error('Error en refreshCoreData:', e); return false; }
+        return true;
     }
 
     // ===== RANKING =====
@@ -2950,7 +3005,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     }
 
     // Vista principal (tribus) — siempre visible mientras el dashboard esté abierto.
-    // Se pausa igual que las demás si la pestaña no está visible.
+    // Ya no hace falta este temporizador para mantener los datos al día (eso lo
+    // hace onLiveDataChanged al instante vía onSnapshot); se conserva como red de
+    // seguridad silenciosa que simplemente vuelve a renderizar cada 90s con lo que
+    // ya está en dataCache, sin leer Firestore de nuevo.
     let mainViewRefreshInterval = null;
     function startMainViewAutoRefresh() {
         if (mainViewRefreshInterval) clearInterval(mainViewRefreshInterval);
