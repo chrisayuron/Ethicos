@@ -12,32 +12,57 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
 
     const AUTHORIZED_EMAILS = ["rrnewball@gmail.com", "ronald.rojas@bethshalom.edu.co"];
 
-    // Antes: si ya había sesión, esta página redirigía automáticamente a
-    // dashboard.html, lo que hacía imposible mostrar el index (con los juegos
-    // y cuestionarios de la parte inferior) mientras el profesor tenía sesión
-    // iniciada. Ahora el index se muestra siempre; si ya hay sesión activa,
-    // se reemplaza el formulario de login por un aviso con acceso directo al
-    // dashboard, sin tocar el resto del contenido de la página.
-    onAuthStateChanged(auth, (user) => {
-        const loginError = document.getElementById("loginError");
-        const loginForm = document.getElementById("loginEmail")?.closest("form") || null;
+    // El login vive dentro de un modal oculto (#loginModal) que solo se abre al
+    // hacer clic en el botón "Acceso Docente" (#mostrarLoginBtn) — el resto de la
+    // página (juegos, cuestionarios, etc.) siempre está visible sin importar la
+    // sesión. Antes, esta página redirigía sola a dashboard.html apenas detectaba
+    // sesión activa, lo que la volvía inútil para mostrarla a los estudiantes si
+    // el profesor tenía sesión abierta en otra pestaña. Ahora nunca redirige sola:
+    // en vez de eso, el botón "Acceso Docente" cambia de comportamiento según si
+    // ya hay sesión.
+    const mostrarLoginBtn = document.getElementById("mostrarLoginBtn");
+    const originalLoginBtnHTML = mostrarLoginBtn ? mostrarLoginBtn.innerHTML : "";
 
+    function openLoginModal() {
+        const loginModal = document.getElementById("loginModal");
+        const loginError = document.getElementById("loginError");
+        const loginPassword = document.getElementById("loginPassword");
+        const togglePasswordBtn = document.getElementById("togglePasswordBtn");
+        if (loginModal) loginModal.style.display = "flex";
+        if (loginError) { loginError.textContent = ""; loginError.style.color = ""; }
+        if (loginPassword) { loginPassword.value = ""; loginPassword.setAttribute("type", "password"); }
+        if (togglePasswordBtn) { const icon = togglePasswordBtn.querySelector("i"); if (icon) icon.className = "fas fa-eye"; }
+    }
+
+    function setLoggedInButton() {
+        if (!mostrarLoginBtn) return;
+        mostrarLoginBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Ir al Dashboard';
+        mostrarLoginBtn.onclick = function() { window.location.href = "dashboard.html"; };
+    }
+    function setLoggedOutButton() {
+        if (!mostrarLoginBtn) return;
+        mostrarLoginBtn.innerHTML = originalLoginBtnHTML;
+        mostrarLoginBtn.onclick = openLoginModal;
+    }
+
+    onAuthStateChanged(auth, (user) => {
         if (user && AUTHORIZED_EMAILS.includes(user.email)) {
             localStorage.setItem("ethykos_lastActive", Date.now().toString());
-            if (loginForm) loginForm.style.display = "none";
-            if (loginError) {
-                loginError.innerHTML = '✅ Ya tienes sesión iniciada como profesor. <a href="dashboard.html" style="color:#2563EB;font-weight:600;text-decoration:underline;">Ir al Dashboard →</a>';
-                loginError.style.color = "#059669";
-            }
+            setLoggedInButton();
         } else {
             // Sin sesión, o sesión no autorizada (ej. anónima de un estudiante
-            // en otra pestaña): se muestra el formulario de login normalmente.
-            if (loginForm) loginForm.style.display = "";
+            // abierta en otra pestaña): el botón abre el login normalmente.
+            setLoggedOutButton();
         }
     });
 
-    // Aviso si venimos de un cierre de sesión automático por inactividad
+    // Aviso si venimos de un cierre de sesión automático por inactividad.
+    // Se abre el modal de login directamente para que el aviso sea visible
+    // (antes el mensaje quedaba escrito dentro del modal, pero como este
+    // permanece cerrado hasta que el profesor hace clic en "Acceso Docente",
+    // nunca llegaba a verse).
     if (new URLSearchParams(window.location.search).get("expired") === "1") {
+        openLoginModal();
         const loginError = document.getElementById("loginError");
         if (loginError) {
             loginError.textContent = "Tu sesión se cerró por inactividad (30 min). Vuelve a iniciar sesión.";

@@ -324,6 +324,8 @@
             <p id="scoreText"></p>
             <div id="feedbackText"></div>
             <button type="button" id="sendResultsBtn">Enviar mis resultados</button>
+            <p id="autoRedirectMsg" class="hidden" style="margin-top:14px;font-size:13px;color:#888;">Volviendo al inicio en <span id="autoRedirectCount">6</span>s...</p>
+            <button type="button" id="goHomeBtn" class="hidden">Volver al inicio ahora</button>
         </div>
     </div>
 
@@ -872,11 +874,40 @@
                 try {
                     await window.submitQuizResult(resultsData);
                     showModal("¡Tus resultados han sido enviados y guardados con éxito!");
+                    sendResultsBtn.classList.add('hidden');
+                    document.getElementById('autoRedirectMsg').classList.remove('hidden');
+                    document.getElementById('goHomeBtn').classList.remove('hidden');
+                    startAutoRedirect();
                 } catch (error) {
                     console.error('Error:', error);
                     showModal('No se pudo guardar tu resultado. Verifica tu conexión a internet e inténtalo de nuevo.');
                 }
             }
+
+            // Redirige automáticamente al index unos segundos después de enviar los
+            // resultados con éxito, para que el estudiante no se quede "atrapado" en
+            // la pantalla de resultados. El botón "Volver al inicio ahora" permite
+            // salir de inmediato.
+            let autoRedirectTimer = null;
+            function startAutoRedirect(seconds = 6) {
+                const countEl = document.getElementById('autoRedirectCount');
+                let remaining = seconds;
+                if (countEl) countEl.textContent = remaining;
+                if (autoRedirectTimer) clearInterval(autoRedirectTimer);
+                autoRedirectTimer = setInterval(() => {
+                    remaining--;
+                    if (countEl) countEl.textContent = remaining;
+                    if (remaining <= 0) {
+                        clearInterval(autoRedirectTimer);
+                        window.location.href = '../index.html';
+                    }
+                }, 1000);
+            }
+
+            document.getElementById('goHomeBtn').addEventListener('click', () => {
+                if (autoRedirectTimer) clearInterval(autoRedirectTimer);
+                window.location.href = '../index.html';
+            });
 
             submitBtn.addEventListener('click', calculateResults);
             sendResultsBtn.addEventListener('click', sendResultsToServer);

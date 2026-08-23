@@ -211,8 +211,9 @@
             <h2 class="text-3xl font-bold text-green-600 mb-6">¡Descubre tus Talentos!</h2>
             <div id="results-breakdown" class="text-left space-y-8">
                 </div>
+            <p id="autoRedirectMsg" class="hidden text-sm text-gray-500 mt-2">Volviendo al inicio en <span id="autoRedirectCount">6</span>s...</p>
             <div class="flex justify-center mt-8">
-                <button onclick="window.location.href='/'" class="btn btn-secondary">Volver al inicio</button>
+                <button id="goHomeBtn" onclick="window.location.href='../index.html'" class="btn btn-secondary">Volver al inicio</button>
             </div>
         </div>
     </div>
@@ -391,6 +392,26 @@
             
             function hideModal() { modal.classList.add('hidden'); }
 
+            // Redirige automáticamente al index unos segundos después de guardar
+            // los resultados con éxito, para que el estudiante no se quede
+            // "atrapado" en la pantalla de resultados. El botón "Volver al inicio"
+            // permite salir de inmediato.
+            let autoRedirectTimer = null;
+            function startAutoRedirect(seconds = 6) {
+                const countEl = document.getElementById('autoRedirectCount');
+                let remaining = seconds;
+                if (countEl) countEl.textContent = remaining;
+                if (autoRedirectTimer) clearInterval(autoRedirectTimer);
+                autoRedirectTimer = setInterval(() => {
+                    remaining--;
+                    if (countEl) countEl.textContent = remaining;
+                    if (remaining <= 0) {
+                        clearInterval(autoRedirectTimer);
+                        window.location.href = '../index.html';
+                    }
+                }, 1000);
+            }
+
             function renderQuestions() {
                 questions.forEach(q => {
                     const questionCard = document.createElement('div');
@@ -537,6 +558,8 @@
                     await window.submitQuizResult(dataToSend);
 
                     console.log('Resultados guardados con éxito en Firestore.');
+                    document.getElementById('autoRedirectMsg').classList.remove('hidden');
+                    startAutoRedirect();
 
                 } catch (error) {
                     showModal(`Hubo un problema al procesar o guardar los resultados. Por favor, inténtalo de nuevo. Error: ${error.message}`, 'Error');

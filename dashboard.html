@@ -211,6 +211,7 @@
             <strong style="font-size:14px;">Asistencias hoy:</strong>
             <span id="attCount" class="att-count">0</span>
         </div>
+        <div id="attCourseBreakdown" class="att-course-breakdown"></div>
         <div id="attendanceLog" class="attendance-log" style="margin-top:8px;"></div>
 
         <!-- Generador de QR de estudiantes -->
@@ -365,6 +366,15 @@
             <div class="history-filter-field">
                 <label>📅 Hasta</label>
                 <input type="date" id="plog-date-to">
+            </div>
+            <div class="history-filter-field">
+                <label>🎓 Curso</label>
+                <select id="plog-course">
+                    <option value="">Todos</option>
+                    <option value="6">6°</option><option value="7">7°</option>
+                    <option value="8">8°</option><option value="9">9°</option>
+                    <option value="10">10°</option><option value="11">11°</option>
+                </select>
             </div>
             <div class="history-filter-field" style="flex:1;min-width:180px;">
                 <label>🔎 Buscar nombre</label>

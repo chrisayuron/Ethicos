@@ -1072,6 +1072,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 renderCoursesNav();
                 document.getElementById("selectedGrade").textContent = courseNames[currentGrade];
                 renderTribes(); renderChart();
+                // Si el modal de asistencia está abierto, refrescar también el
+                // desglose por curso para que resalte el curso recién seleccionado.
+                if (isModalOpen('attendanceModal')) loadAttendanceLog();
             });
         });
     }
@@ -1183,9 +1186,26 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         }
     }
 
+    // Determina el curso de un registro del log de puntos, usado por el filtro
+    // de curso: para puntos de tribu, mira el curso de la tribu (targetId); para
+    // puntos individuales/monedas, mira el curso del estudiante (targetId).
+    function getPointsLogEntryCourse(l) {
+        if (!l.targetId) return null;
+        if (l.type === 'tribe') {
+            const t = dataCache.tribes.find(x => x.id === l.targetId);
+            if (!t) return null;
+            if (t.grade !== undefined) return String(t.grade).trim();
+            if (t.course !== undefined) return String(t.course).trim();
+            return null;
+        }
+        const s = dataCache.students.find(x => x.id === l.targetId);
+        return s && s.course !== undefined ? String(s.course).trim() : null;
+    }
+
     function renderPointsLog() {
         const typeFilter = document.getElementById('plog-type').value;
         const sourceFilter = document.getElementById('plog-source').value;
+        const courseFilter = document.getElementById('plog-course').value;
         const search = document.getElementById('plog-search').value.toLowerCase().trim();
         const dateFrom = document.getElementById('plog-date-from').value; // 'YYYY-MM-DD'
         const dateTo = document.getElementById('plog-date-to').value;
@@ -1193,6 +1213,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         let filtered = plogCache;
         if (typeFilter) filtered = filtered.filter(l => l.type === typeFilter);
         if (sourceFilter) filtered = filtered.filter(l => (l.source || '').startsWith(sourceFilter));
+        if (courseFilter) filtered = filtered.filter(l => getPointsLogEntryCourse(l) === courseFilter);
         if (search) filtered = filtered.filter(l => (l.targetName||'').toLowerCase().includes(search));
         if (dateFrom) filtered = filtered.filter(l => {
             try { return new Date(l.timestamp.seconds*1000) >= new Date(dateFrom); } catch(e) { return true; }
@@ -1236,12 +1257,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     document.getElementById('plog-clearBtn').onclick = () => {
         document.getElementById('plog-type').value = '';
         document.getElementById('plog-source').value = '';
+        document.getElementById('plog-course').value = '';
         document.getElementById('plog-search').value = '';
         document.getElementById('plog-date-from').value = '';
         document.getElementById('plog-date-to').value = '';
         renderPointsLog();
     };
-    ['plog-type','plog-source','plog-date-from','plog-date-to'].forEach(id =>
+    ['plog-type','plog-source','plog-course','plog-date-from','plog-date-to'].forEach(id =>
         document.getElementById(id).addEventListener('change', renderPointsLog)
     );
     document.getElementById('plog-search').addEventListener('input', renderPointsLog);
@@ -1541,6 +1563,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     }
     function renderAttendanceLog(records) {
         document.getElementById("attCount").textContent = records.length;
+        renderAttendanceCourseBreakdown(records);
         const log = document.getElementById("attendanceLog");
         if (!records.length) { log.innerHTML='<div style="color:#94A3B8;text-align:center;padding:15px;font-size:13px;">Nadie registrado aún hoy</div>'; return; }
         log.innerHTML = records.sort((a,b)=>b.timestamp?.seconds-a.timestamp?.seconds||0).map(r=>`
@@ -1549,6 +1572,31 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 <div class="att-time">${r.date}</div>
             </div>`).join('');
     }
+
+    // Desglose de asistencia del día POR CURSO (además del total del día que ya
+    // existía). Muestra "X/Y registrados" por curso, comparando contra la cantidad
+    // real de estudiantes matriculados en ese curso (getCachedStudents). El curso
+    // actualmente seleccionado en la barra superior (currentGrade) siempre aparece
+    // resaltado y visible aunque todavía tenga 0 registros, para poder seguir el
+    // avance desde el inicio de la clase. Un curso con ✓ significa que ya se
+    // registró a todos sus estudiantes matriculados.
+    function renderAttendanceCourseBreakdown(records) {
+        const breakdownEl = document.getElementById('attCourseBreakdown');
+        if (!breakdownEl) return;
+        const byCourse = {};
+        records.forEach(r => { const c = String(r.course != null ? r.course : ''); if (c) byCourse[c] = (byCourse[c]||0) + 1; });
+        const courseKeys = Object.keys(courseNames).filter(c => byCourse[c] || String(c) === String(currentGrade));
+        if (!courseKeys.length) { breakdownEl.innerHTML = ''; return; }
+        breakdownEl.innerHTML = courseKeys.map(c => {
+            const count = byCourse[c] || 0;
+            const total = getCachedStudents(c).length;
+            const isCurrent = String(c) === String(currentGrade);
+            const complete = total > 0 && count >= total;
+            const cls = 'att-course-chip' + (isCurrent ? ' current' : (complete ? ' complete' : ''));
+            return `<span class="${cls}" title="${courseNames[c]||c}° — registrados hoy">${courseNames[c]||c}°: ${count}${total?`/${total}`:''}${complete?' ✓':''}</span>`;
+        }).join('');
+    }
+
 
     // QR Scanner
     let qrCanvas = document.createElement('canvas');
