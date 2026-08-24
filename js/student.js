@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getAuth, signInAnonymously, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
 const app = initializeApp(window.firebaseConfig);
 const db = getFirestore(app);
@@ -9,9 +9,19 @@ const auth = getAuth(app);
 // Autenticación anónima e invisible para el estudiante: no pide nada,
 // solo permite que las reglas de Firestore exijan "request.auth != null"
 // y así bloqueen lecturas que no pasen por esta aplicación.
-let authReady = signInAnonymously(auth).catch(err => {
-    console.error('No se pudo iniciar sesión anónima:', err);
-});
+//
+// IMPORTANTE: se usa inMemoryPersistence (en vez de la persistencia local
+// por defecto de Firebase) para que esta sesión anónima viva únicamente en
+// esta pestaña. Firebase Auth guarda su sesión persistida en un solo lugar
+// compartido por origen+proyecto — si esta sesión anónima usara persistencia
+// local (como el dashboard del profesor), abrir el portal del estudiante o
+// el proyector en otra pestaña sobrescribiría la sesión del profesor en
+// TODAS sus pestañas abiertas. Con inMemoryPersistence eso ya no ocurre.
+let authReady = setPersistence(auth, inMemoryPersistence)
+    .then(() => signInAnonymously(auth))
+    .catch(err => {
+        console.error('No se pudo iniciar sesión anónima:', err);
+    });
 
 // ── CONSTANTS ───────────────────────────────────────────────
 const ETHICS_LEVELS = [
@@ -451,7 +461,7 @@ boot();
 /* === BLOQUE 2 === */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getAuth, signInAnonymously, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
 const app = initializeApp(window.firebaseConfig);
 const db = getFirestore(app);
@@ -460,9 +470,14 @@ const auth = getAuth(app);
 // Autenticación anónima e invisible para el estudiante: no pide nada,
 // solo permite que las reglas de Firestore exijan "request.auth != null"
 // y así bloqueen lecturas que no pasen por esta aplicación.
-let authReady = signInAnonymously(auth).catch(err => {
-    console.error('No se pudo iniciar sesión anónima:', err);
-});
+//
+// IMPORTANTE: se usa inMemoryPersistence (ver BLOQUE 1 arriba para el
+// detalle completo) para no pisar la sesión compartida del profesor.
+let authReady = setPersistence(auth, inMemoryPersistence)
+    .then(() => signInAnonymously(auth))
+    .catch(err => {
+        console.error('No se pudo iniciar sesión anónima:', err);
+    });
 
 // ── CONSTANTS ───────────────────────────────────────────────
 const ETHICS_LEVELS = [

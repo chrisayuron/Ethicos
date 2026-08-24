@@ -1054,6 +1054,67 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         });
         mc.querySelector('#cancelEditMember').addEventListener('click', () => overlay.remove());
     };
+
+    // ===== REPARAR VÍNCULOS DE INTEGRANTES =====
+    // Un integrante de tribu queda "sin vínculo" cuando su studentId está
+    // ausente o apunta a un documento de /students que ya no existe (por
+    // ejemplo, si el estudiante fue eliminado y reimportado con un ID nuevo).
+    // Sin ese vínculo, el dashboard no puede mostrarle nivel ni permitirle
+    // asignar puntos individuales/monedas — el botón de medalla aparece
+    // deshabilitado. Esta herramienta busca, dentro del MISMO curso de la
+    // tribu, un estudiante cuyo nombre coincida (ignorando mayúsculas, tildes
+    // y espacios de más) y solo relinkea cuando hay EXACTAMENTE una
+    // coincidencia; si hay cero o varias, lo reporta para revisión manual en
+    // vez de adivinar.
+    function normalizeName(s) {
+        return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+    }
+    window.repairMemberLinks = async () => {
+        if (!confirm("Esto revisará todas las tribus en busca de integrantes sin vínculo válido a un estudiante, e intentará repararlos por coincidencia de nombre. ¿Continuar?")) return;
+        await loadAllData(true);
+        const tribes = dataCache.tribes;
+        const students = dataCache.students;
+        const studentsById = {};
+        students.forEach(s => { studentsById[s.id] = s; });
+
+        const fixed = [];
+        const unresolved = [];
+
+        for (const tribe of tribes) {
+            const members = tribe.members || [];
+            let changed = false;
+            const targetGrade = tribe.grade !== undefined ? tribe.grade : tribe.course;
+            const newMembers = members.map(m => {
+                if (m.studentId && studentsById[m.studentId]) return m; // vínculo ya válido
+                const candidates = students.filter(s =>
+                    String(s.course) === String(targetGrade) &&
+                    normalizeName(s.name) === normalizeName(m.name)
+                );
+                if (candidates.length === 1) {
+                    changed = true;
+                    fixed.push({ tribe: tribe.name, member: m.name, studentId: candidates[0].id });
+                    return { ...m, studentId: candidates[0].id };
+                }
+                unresolved.push({ tribe: tribe.name, member: m.name, reason: candidates.length === 0 ? 'sin coincidencia por nombre/curso' : `${candidates.length} coincidencias — revisar a mano` });
+                return m;
+            });
+            if (changed) {
+                await updateMember(tribe.id, newMembers);
+                cacheUpdateTribe(tribe.id, { members: newMembers });
+            }
+        }
+
+        await renderTribes(); await renderChart();
+
+        let msg = '';
+        if (fixed.length) msg += `✅ Reparados (${fixed.length}):\n` + fixed.map(f => `• ${f.member} → ${f.tribe}`).join('\n');
+        if (unresolved.length) msg += (msg ? '\n\n' : '') + `⚠️ Sin resolver (${unresolved.length}):\n` + unresolved.map(u => `• ${u.member} (${u.tribe}) — ${u.reason}`).join('\n');
+        if (!fixed.length && !unresolved.length) msg = 'No se encontraron integrantes sin vínculo. Todo está en orden ✅';
+        alert(msg);
+        showToast(fixed.length ? `${fixed.length} integrante(s) reparado(s) ✅` : 'Revisión completada', fixed.length ? 'success' : '');
+    };
+    document.getElementById('repairLinksBtn').onclick = window.repairMemberLinks;
+
     window.openEditTribeModal = async (tribeId) => {
         const tribes = await getTribes(currentGrade);
         const tribe = tribes.find(t=>t.id===tribeId);
