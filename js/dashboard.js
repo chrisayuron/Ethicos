@@ -295,8 +295,23 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
     // Revisa cada minuto si la sesión sigue vigente (cubre el caso de dejar la pestaña abierta)
     setInterval(() => { if (isSessionExpired()) forceLogoutExpired(); }, 60 * 1000);
 
+    // Redirige a index.html cuando de verdad no hay sesión. Con la sesión
+    // compartida entre pestañas (browserLocalPersistence), iniciar sesión en una
+    // pestaña puede generar un parpadeo momentáneo de "sin usuario" en las demás
+    // mientras Firebase sincroniza el estado — sin este margen de espera, ese
+    // parpadeo pasajero sacaría del dashboard a una pestaña que en realidad
+    // nunca perdió la sesión. Se espera un instante y se vuelve a comprobar
+    // auth.currentUser antes de redirigir de verdad.
+    let logoutRedirectTimer = null;
     onAuthStateChanged(auth, (user) => {
-        if (!user) { window.location.href = "index.html"; return; }
+        if (!user) {
+            if (logoutRedirectTimer) clearTimeout(logoutRedirectTimer);
+            logoutRedirectTimer = setTimeout(() => {
+                if (!auth.currentUser) window.location.href = "index.html";
+            }, 800);
+            return;
+        }
+        if (logoutRedirectTimer) { clearTimeout(logoutRedirectTimer); logoutRedirectTimer = null; }
         if (!AUTHORIZED_EMAILS.includes(user.email)) {
             // Sesión colada (anónima u otra cuenta): cerrarla y mandar al login
             signOut(auth).finally(() => { window.location.href = "index.html"; });
