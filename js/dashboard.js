@@ -308,7 +308,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
             if (logoutRedirectTimer) clearTimeout(logoutRedirectTimer);
             logoutRedirectTimer = setTimeout(() => {
                 if (!auth.currentUser) window.location.href = "index.html";
-            }, 800);
+            }, 1500);
             return;
         }
         if (logoutRedirectTimer) { clearTimeout(logoutRedirectTimer); logoutRedirectTimer = null; }

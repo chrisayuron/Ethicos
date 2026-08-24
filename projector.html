@@ -318,8 +318,22 @@ function generateStars() {
 }
 
 // ── AUTH ─────────────────────────────────────────────────────
+// Igual que en dashboard.js: con la sesión del profesor compartida entre
+// pestañas (browserLocalPersistence), abrir una pestaña nueva (otro
+// dashboard, este proyector, etc.) puede generar un parpadeo momentáneo de
+// "sin usuario" mientras Firebase sincroniza el estado entre pestañas vía
+// IndexedDB. Sin este margen de espera, ese parpadeo pasajero sacaría al
+// proyector aunque la sesión del profesor nunca se haya cerrado de verdad.
+let logoutRedirectTimer = null;
 onAuthStateChanged(auth, user => {
-    if (!user) { window.location.href='index.html'; return; }
+    if (!user) {
+        if (logoutRedirectTimer) clearTimeout(logoutRedirectTimer);
+        logoutRedirectTimer = setTimeout(() => {
+            if (!auth.currentUser) window.location.href = 'index.html';
+        }, 1500);
+        return;
+    }
+    if (logoutRedirectTimer) { clearTimeout(logoutRedirectTimer); logoutRedirectTimer = null; }
     init();
 });
 
