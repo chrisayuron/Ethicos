@@ -260,11 +260,20 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
 const app = initializeApp(window.firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Debe usar EXACTAMENTE el mismo tipo de persistencia que dashboard.js e
+// index.js (browserLocalPersistence). Si esta página se queda con el valor
+// por defecto de Firebase (indexedDBLocalPersistence en esta versión del
+// SDK), termina usando un backend de almacenamiento distinto al de las
+// demás páginas — y varias pestañas del mismo origen usando persistencias
+// distintas "pelean" por la sesión, causando cierres de sesión cruzados
+// entre pestañas como los que se veían al abrir el proyector.
+await setPersistence(auth, browserLocalPersistence);
 
 // ── CONSTANTS ────────────────────────────────────────────────
 const COURSE_NAMES = {6:'6°',7:'7°',8:'8°',9:'9°',10:'10°',11:'11°'};
