@@ -188,6 +188,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         if (idx >= 0) Object.assign(dataCache.attendance[idx], data);
         saveCacheToLocal();
     }
+    function cacheDeleteAttendance(id) {
+        dataCache.attendance = dataCache.attendance.filter(r => r.id !== id);
+        saveCacheToLocal();
+    }
 
     // Auto-reparación con debounce: se ejecuta después de cambios en tribus
     // para reparar asistencia huérfana sin intervención del usuario
@@ -522,6 +526,52 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         const today = new Date().toISOString().slice(0, 10);
         return dataCache.attendance.filter(r => r.date === today);
     }
+
+    /**
+     * Deshace un registro de asistencia hecho por error (QR duplicado, estudiante
+     * equivocado, etc.): elimina el registro y revierte exactamente los puntos que
+     * ese registro otorgó — -1 punto de tribu (si aplica) y -1 punto individual +
+     * -1 moneda (si aplica), siguiendo el mismo patrón que "Deshacer entrega de
+     * Syllabus". Funciona tanto para registros de hoy (en el modal de asistencia
+     * en vivo) como para registros pasados (en Historial de Asistencia) — la
+     * corrección no tiene por qué notarse el mismo día.
+     *
+     * Limitación conocida (igual que en el undo de Syllabus): si el registro
+     * hizo que el estudiante subiera de nivel, el bono de monedas por ese cambio
+     * de nivel no se revierte automáticamente.
+     */
+    window.undoAttendanceRecord = async (recordId) => {
+        const record = dataCache.attendance.find(r => r.id === recordId);
+        if (!record) { showToast('Registro no encontrado (puede que ya se haya actualizado)', 'error'); return; }
+
+        const label = `${record.studentName || 'Estudiante'} — ${record.date || ''}${record.tribeName ? ' · ' + record.tribeName : ''}`;
+        if (!confirm(`¿Deshacer este registro de asistencia?\n\n${label}\n\nSe eliminará el registro y se restarán los puntos que otorgó (-1pt individual${record.pointsAwarded ? ' · -1🪙' : ''}${record.tribeId ? ' · -1pt a ' + record.tribeName : ''}).\n\nNota: si este registro hizo que el estudiante subiera de nivel, el bono de monedas por ese cambio de nivel NO se revierte automáticamente — revísalo en "📜 Log de puntos" si hace falta ajustarlo.`)) return;
+
+        try {
+            await deleteDoc(doc(db, "attendance", recordId));
+            cacheDeleteAttendance(recordId);
+
+            if (record.tribeId && record.tribePointsAwarded) {
+                await updatePoints(record.tribeId, -1, 'attendance_undo');
+            }
+            if (record.pointsAwarded) {
+                const student = dataCache.students.find(s => s.document === record.studentDoc);
+                if (student) await awardLevelPoints(student.id, -1, 'attendance_undo');
+            }
+
+            // Si el registro era de hoy, liberar la marca de "ya escaneado" para
+            // permitir volver a registrar al estudiante correctamente.
+            const today = new Date().toISOString().slice(0, 10);
+            if (record.date === today) scannedToday.delete(`${record.studentDoc}_${record.date}`);
+
+            showToast(`↩️ Registro de asistencia deshecho para "${record.studentName}"`, '');
+            if (isModalOpen('attendanceModal')) await loadAttendanceLog();
+            if (isModalOpen('historyResultsModal') && typeof runHistoryQuery === 'function') runHistoryQuery();
+        } catch (e) {
+            console.error(e);
+            showToast('Error al deshacer el registro', 'error');
+        }
+    };
     async function getAttendanceHistory(filters) {
         // filters: { studentDoc, dateFrom, dateTo, course }
         try {
@@ -1645,7 +1695,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         log.innerHTML = records.sort((a,b)=>b.timestamp?.seconds-a.timestamp?.seconds||0).map(r=>`
             <div class="att-entry">
                 <div><div class="att-name">${escapeHtml(r.studentName)}</div><div class="att-tribe">🏹 ${escapeHtml(r.tribeName||'Sin tribu')}</div></div>
-                <div class="att-time">${r.date}</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="att-time">${r.date}</div>
+                    <button onclick="undoAttendanceRecord('${r.id}')" title="Deshacer este registro" style="background:none;border:none;cursor:pointer;color:#DC2626;font-size:14px;padding:2px 4px;">↩️</button>
+                </div>
             </div>`).join('');
     }
 
@@ -2342,14 +2395,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
         }
 
         const tbody = document.getElementById('historyTableBody');
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#94A3B8;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94A3B8;"><i class="fas fa-spinner fa-pulse"></i> Cargando...</td></tr>';
 
         const records = await getAttendanceHistory(filters);
 
         document.getElementById('historyResultsCount').textContent = `${records.length} registro${records.length===1?'':'s'} encontrado${records.length===1?'':'s'}`;
 
         if (!records.length) {
-            tbody.innerHTML = '<tr><td colspan="5"><div class="history-empty-msg"><i class="fas fa-inbox" style="font-size:24px;display:block;margin-bottom:8px;"></i>No hay registros con estos filtros</div></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6"><div class="history-empty-msg"><i class="fas fa-inbox" style="font-size:24px;display:block;margin-bottom:8px;"></i>No hay registros con estos filtros</div></td></tr>';
             return;
         }
 
@@ -2360,6 +2413,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
                 <td>${escapeHtml(r.studentDoc||'')}</td>
                 <td>${r.course?courseNames[r.course]||r.course:'<span class="ht-empty">—</span>'}</td>
                 <td>${r.tribeName?`<span class="ht-tribe">🏹 ${escapeHtml(r.tribeName)}</span>`:'<span class="ht-empty">Sin tribu</span>'}</td>
+                <td><button onclick="undoAttendanceRecord('${r.id}')" title="Deshacer este registro" style="background:none;border:none;cursor:pointer;color:#DC2626;font-size:13px;">↩️ Deshacer</button></td>
             </tr>`).join('');
     }
 
