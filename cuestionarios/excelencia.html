@@ -5,290 +5,148 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cuestionario de Excelencia</title>
     <style>
-        /* Estilos CSS integrados */
         body {
-            font-family: 'Inter', Arial, sans-serif; /* Usando Inter como fuente principal */
-            background-color: #f0f2f5; /* Color de fondo suave */
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px; /* Añadir padding para pantallas pequeñas */
-            padding-top: 80px; /* Espacio para la barra de progreso fija */
-            box-sizing: border-box; /* Incluir padding en el ancho total */
+            padding: 20px;
+            padding-top: 80px;
+            box-sizing: border-box;
         }
 
         .container {
             background-color: #ffffff;
             padding: 30px;
-            border-radius: 12px; /* Esquinas más redondeadas */
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Sombra más pronunciada */
-            width: 95%; /* Ajuste para mayor fluidez en móviles */
-            max-width: 750px; /* Ancho máximo para desktop */
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            width: 95%;
+            max-width: 750px;
             text-align: center;
             border: 1px solid #e0e0e0;
-            margin-top: 20px; /* Ajuste para que no quede pegado al top si hay scroll */
-            margin-bottom: 20px; /* Espacio inferior */
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
-        h1 {
-            color: #2c3e50; /* Color de título más oscuro */
-            margin-bottom: 30px;
-            font-size: 2.2em; /* Tamaño de fuente más grande */
-        }
+        h1 { color: #2c3e50; margin-bottom: 30px; font-size: 2.2em; }
 
-        /* Sección de instrucciones */
         .instructions {
-            background-color: #e6f7ff; /* Fondo azul claro */
-            border: 1px solid #91d5ff; /* Borde azul */
+            background-color: #e6f7ff;
+            border: 1px solid #91d5ff;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 30px;
             text-align: left;
         }
+        .instructions h2 { color: #0056b3; margin-top: 0; margin-bottom: 15px; font-size: 1.5em; }
+        .instructions p, .instructions ul { color: #333; font-size: 1em; line-height: 1.6; }
+        .instructions ul { list-style-type: disc; margin-left: 20px; padding-left: 0; }
+        .instructions li { margin-bottom: 8px; }
 
-        .instructions h2 {
-            color: #0056b3; /* Azul oscuro para el título */
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-
-        .instructions p, .instructions ul {
-            color: #333;
-            font-size: 1em;
-            line-height: 1.6;
-        }
-
-        .instructions ul {
-            list-style-type: disc;
-            margin-left: 20px;
-            padding-left: 0;
-        }
-
-        .instructions li {
-            margin-bottom: 8px;
-        }
-
-        /* Progress Bar */
         .progress-indicator {
-            position: fixed; /* Barra flotante */
-            top: 0; /* Pegada a la parte superior */
-            left: 0;
-            width: 100%;
-            background-color: #e0e0e0;
-            height: 40px; /* Aumentar altura para el texto */
-            overflow: hidden;
-            z-index: 100; /* Asegura que esté por encima de otros elementos */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #333;
-            font-weight: bold;
-            font-size: 0.95em;
-            padding: 0 15px; /* Padding para el texto */
-            box-sizing: border-box;
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: #e0e0e0; height: 40px; overflow: hidden;
+            z-index: 100; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            color: #333; font-weight: bold; font-size: 0.95em;
+            padding: 0 15px; box-sizing: border-box;
+        }
+        .progress-bar {
+            position: absolute; bottom: 0; left: 0; height: 10px; width: 0%;
+            background-color: #007bff; transition: width 0.4s ease-in-out;
+            border-radius: 0 0 5px 5px;
         }
 
-        .progress-bar {
-            position: absolute; /* Posicionar la barra de color debajo del texto */
-            bottom: 0;
-            left: 0;
-            height: 10px; /* Altura de la barra de color */
-            width: 0%;
-            background-color: #007bff; /* Azul para la excelencia */
-            transition: width 0.4s ease-in-out;
-            border-radius: 0 0 5px 5px; /* Esquinas redondeadas solo abajo */
+        .category-heading {
+            text-align: left;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #0056b3;
+            margin: 35px 0 10px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #cfe6fb;
         }
+        .category-heading:first-of-type { margin-top: 10px; }
 
         .question-block {
-            margin-bottom: 25px;
-            text-align: left;
-            padding: 20px;
-            border: 1px solid #dcdcdc;
-            border-radius: 8px;
+            margin-bottom: 25px; text-align: left; padding: 20px;
+            border: 1px solid #dcdcdc; border-radius: 8px;
             background-color: #fdfdfd;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
+        .question-block:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
+        .question-block p { font-weight: 600; margin-bottom: 15px; color: #34495e; font-size: 1.1em; }
 
-        .question-block:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        .question-block input[type="text"],
+        .question-block select {
+            width: calc(100% - 24px); padding: 12px; margin-top: 5px; margin-bottom: 10px;
+            border: 1px solid #ccc; border-radius: 6px;
+            font-family: 'Inter', Arial, sans-serif; font-size: 1em; box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-
-        .question-block p {
-            font-weight: 600; /* Fuente un poco más negrita */
-            margin-bottom: 15px;
-            color: #34495e;
-            font-size: 1.1em;
+        .question-block input[type="text"]:focus,
+        .question-block select:focus {
+            border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); outline: none;
         }
 
         .options label {
-            display: flex; /* Usar flexbox para alinear radio y texto */
-            align-items: center;
-            margin-bottom: 10px;
-            cursor: pointer;
-            padding: 12px;
-            border-radius: 6px;
+            display: flex; align-items: center; margin-bottom: 10px; cursor: pointer;
+            padding: 12px; border-radius: 6px;
             transition: background-color 0.2s, border-color 0.2s;
             border: 1px solid #e9e9e9;
         }
-
-        .options label:hover {
-            background-color: #f5f5f5;
-            border-color: #c0c0c0;
-        }
-
-        .options input[type="radio"] {
-            margin-right: 12px;
-            accent-color: #007bff; /* Color del radio button */
-            transform: scale(1.2); /* Agrandar un poco el radio button */
-        }
-
-        /* Estilos para campos de texto y select */
-        .question-block input[type="text"],
-        .question-block select {
-            width: calc(100% - 24px);
-            padding: 12px;
-            margin-top: 5px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-family: 'Inter', Arial, sans-serif;
-            font-size: 1em;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .question-block input[type="text"]:focus,
-        .question-block select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-            outline: none;
-        }
-
+        .options label:hover { background-color: #f5f5f5; border-color: #c0c0c0; }
+        .options input[type="radio"] { margin-right: 12px; accent-color: #007bff; transform: scale(1.2); }
 
         button {
-            background-color: #007bff; /* Azul vibrante para excelencia */
-            color: white;
-            padding: 14px 30px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-top: 25px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            background-color: #007bff; color: white; padding: 14px 30px; border: none;
+            border-radius: 8px; cursor: pointer; font-size: 1.1em; font-weight: bold;
+            margin-top: 25px; transition: background-color 0.3s ease, transform 0.2s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
+        button:hover { background-color: #0056b3; transform: translateY(-2px); }
+        button:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
 
-        button:hover {
-            background-color: #0056b3; /* Azul más oscuro al pasar el ratón */
-            transform: translateY(-2px);
+        #results { margin-top: 35px; padding-top: 25px; border-top: 1px solid #e0e0e0; text-align: left; }
+        #results h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.8em; text-align: center; }
+        #scoreText { font-size: 1.3em; font-weight: bold; color: #007bff; text-align: center; margin-bottom: 15px; }
+
+        #feedbackText { margin-top: 20px; line-height: 1.7; color: #555; font-size: 1.05em; }
+        #feedbackText h3 { color: #007bff; margin-bottom: 6px; font-size: 1.35em; }
+        #feedbackText h4 { color: #34495e; margin-top: 22px; margin-bottom: 8px; font-size: 1.15em; }
+        #feedbackText ul { list-style-type: disc; margin-left: 25px; padding-left: 0; }
+        #feedbackText li { margin-bottom: 6px; }
+
+        .category-result {
+            border: 1px solid #e0e0e0; border-radius: 8px;
+            padding: 14px 18px; margin-bottom: 14px; background-color: #fafbfd;
         }
+        .category-result-title { font-weight: 700; color: #2c3e50; margin-bottom: 6px; }
+        .category-bar-bg { background-color: #e0e0e0; border-radius: 9999px; height: 10px; overflow: hidden; }
+        .category-bar-fill { height: 100%; background-color: #007bff; border-radius: 9999px; transition: width 0.6s ease-in-out; }
+        .category-pct { font-size: 0.85em; color: #666; margin-top: 4px; }
 
-        button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
+        .hidden { display: none; }
 
-        #results {
-            margin-top: 35px;
-            padding-top: 25px;
-            border-top: 1px solid #e0e0e0;
-            text-align: left; /* Alinear texto de resultados a la izquierda */
-        }
-
-        #results h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            text-align: center;
-        }
-
-        #scoreText {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #28a745; /* Verde para el puntaje */
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        #feedbackText {
-            margin-top: 20px;
-            line-height: 1.7;
-            color: #555;
-            font-size: 1.05em;
-        }
-
-        #feedbackText h3 {
-            color: #007bff; /* Azul para el título del feedback */
-            margin-bottom: 10px;
-            font-size: 1.4em;
-        }
-
-        #feedbackText h4 {
-            color: #34495e;
-            margin-top: 20px;
-            margin-bottom: 8px;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-        }
-
-        #feedbackText h4 svg {
-            margin-right: 8px;
-        }
-
-        #feedbackText ul {
-            list-style-type: disc;
-            margin-left: 25px;
-            padding-left: 0;
-        }
-
-        #feedbackText li {
-            margin-bottom: 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Score Visualization Canvas */
         #scoreCanvas {
-            display: block;
-            margin: 20px auto;
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 50%; /* Make it circular */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: block; margin: 20px auto; max-width: 200px; max-height: 200px;
+            border-radius: 50%; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* Modal Styles */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); display: flex;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); text-align: center;
+            max-width: 400px; width: 90%; font-family: 'Inter', Arial, sans-serif;
         }
 
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            font-family: 'Inter', Arial, sans-serif;
-        }
+        #autoRedirectMsg { margin-top: 14px; font-size: 13px; color: #888; text-align: center; }
     </style>
 </head>
 <body>
@@ -305,284 +163,315 @@
             <h3>Instrucciones:</h3>
             <ul>
                 <li>Completa tus datos (nombres, apellidos y curso).</li>
-                <li>Lee cada pregunta con mucha atención.</li>
-                <li>Selecciona la opción que mejor describa lo que harías o cómo te sientes en cada situación.</li>
-                <li>Recuerda que no hay respuestas 'correctas' o 'incorrectas' absolutas, ¡lo importante es que seas honesto/a contigo mismo/a!</li>
-                <li>Una vez que respondas todas las preguntas, haz clic en el botón "Ver resultados".</li>
-                <li>Después de ver tus resultados, podrás enviarlos a tu profesor/a haciendo clic en "Enviar mis resultados".</li>
-                <li>¡Diviértete y aprende mucho sobre la excelencia!</li>
+                <li>Lee cada pregunta con atención y responde pensando en lo que realmente sueles hacer, no en lo que crees que "deberías" responder.</li>
+                <li>No hay respuestas correctas o incorrectas: lo valioso es tu honestidad.</li>
+                <li>Al terminar, tus resultados se guardan automáticamente para tu profesor(a).</li>
             </ul>
         </div>
 
         <form id="excellenceForm">
             <!-- Los campos de estudiante y las preguntas se cargarán aquí con JavaScript -->
         </form>
-        <button type="button" id="submitBtn">Ver resultados</button>
+        <button type="button" id="submitBtn">Ver y Enviar Resultados</button>
         <div id="results" class="hidden">
             <h2>Tus Resultados</h2>
             <canvas id="scoreCanvas" width="200" height="200"></canvas>
             <p id="scoreText"></p>
+            <div id="categoryResults"></div>
             <div id="feedbackText"></div>
-            <button type="button" id="sendResultsBtn">Enviar mis resultados</button>
-            <p id="autoRedirectMsg" class="hidden" style="margin-top:14px;font-size:13px;color:#888;">Volviendo al inicio en <span id="autoRedirectCount">6</span>s...</p>
-            <button type="button" id="goHomeBtn" class="hidden">Volver al inicio ahora</button>
+            <p id="autoRedirectMsg" class="hidden">Volviendo al inicio en <span id="autoRedirectCount">6</span>s...</p>
+            <button type="button" id="goHomeBtn">Volver al inicio ahora</button>
         </div>
     </div>
 
     <script>
-        // JavaScript integrado
         document.addEventListener('DOMContentLoaded', () => {
+            // Cada pregunta pertenece a una de tres categorías de excelencia.
+            // Las opciones se redactaron para reducir el contraste moralizante
+            // entre "la mejor" y "la peor" respuesta.
             const questions = [
+                // ---- Calidad y atención al detalle ----
                 {
+                    category: "calidad",
                     question: "¿Con qué frecuencia te esfuerzas por hacer tu mejor trabajo, incluso en tareas pequeñas o que no te gustan mucho?",
                     options: [
-                        { text: "Casi nunca", score: 1 },
-                        { text: "A veces", score: 2 },
-                        { text: "Frecuentemente", score: 3 },
-                        { text: "Siempre", score: 4 }
+                        { text: "Rara vez, en esas prefiero salir del paso rápido", score: 1 },
+                        { text: "A veces, según cuánto me importe el resultado", score: 2 },
+                        { text: "Frecuentemente, aunque no sea mi tarea favorita", score: 3 },
+                        { text: "Casi siempre trato de dar lo mejor de mí", score: 4 }
                     ]
                 },
                 {
-                    question: "Cuando cometes un error en una tarea o actividad, ¿qué haces?",
+                    category: "calidad",
+                    question: "¿Qué tan atento(a) eres a los detalles cuando haces un trabajo escolar o un proyecto?",
                     options: [
-                        { text: "Intento ocultarlo o culpo a otros.", score: 1 },
-                        { text: "Me siento mal, pero no hago mucho para corregirlo.", score: 2 },
-                        { text: "Lo reconozco y trato de corregirlo si es fácil.", score: 3 },
-                        { text: "Lo reconozco, pido ayuda si la necesito y me esfuerzo al máximo para corregirlo y aprender de él.", score: 4 }
+                        { text: "Me enfoco más en terminar que en los detalles", score: 1 },
+                        { text: "Reviso algunas cosas, pero no a fondo", score: 2 },
+                        { text: "Intento revisar los detalles que me parecen importantes", score: 3 },
+                        { text: "Reviso con cuidado para que todo quede bien", score: 4 }
                     ]
                 },
                 {
-                    question: "¿Qué tan atento(a) eres a los detalles cuando realizas un trabajo escolar o un proyecto?",
+                    category: "calidad",
+                    question: "Estás haciendo un dibujo o trabajo manual para una exposición y notas un pequeño error. ¿Qué haces?",
                     options: [
-                        { text: "No me fijo mucho en los detalles, solo quiero terminar.", score: 1 },
-                        { text: "Reviso un poco, pero no a fondo.", score: 2 },
-                        { text: "Intento revisar los detalles importantes.", score: 3 },
-                        { text: "Reviso cuidadosamente cada detalle para asegurarme de que todo esté perfecto.", score: 4 }
+                        { text: "Lo dejo así, probablemente nadie lo note", score: 1 },
+                        { text: "Lo corrijo solo si es muy visible", score: 2 },
+                        { text: "Me tomo un momento para corregirlo", score: 3 },
+                        { text: "Prefiero corregir cualquier detalle, por pequeño que sea", score: 4 }
                     ]
                 },
                 {
-                    question: "Si te asignan una tarea nueva y no sabes cómo hacerla, ¿qué haces?",
+                    category: "calidad",
+                    question: "En un trabajo en equipo, ¿qué tanto te fijas en que la parte de todos quede bien hecha, no solo la tuya?",
                     options: [
-                        { text: "Me rindo rápido o pido que me la hagan.", score: 1 },
-                        { text: "Hago lo que puedo, aunque no esté seguro(a) de que sea correcto.", score: 2 },
-                        { text: "Busco un poco de información o pido ayuda una vez.", score: 3 },
-                        { text: "Investigo, pregunto, y me esfuerzo por entenderla a fondo para hacerla lo mejor posible.", score: 4 }
+                        { text: "Me concentro sobre todo en mi propia parte", score: 1 },
+                        { text: "Reviso la mía y le doy una mirada rápida a la de otros", score: 2 },
+                        { text: "Reviso que el trabajo de todos se vea bien en conjunto", score: 3 },
+                        { text: "Me aseguro de que todas las partes queden bien antes de entregar", score: 4 }
                     ]
                 },
                 {
-                    question: "¿Con qué frecuencia cumples tus promesas y compromisos (con amigos, familia, maestros)?",
+                    category: "calidad",
+                    question: "Estás aprendiendo una receta nueva. ¿Qué tan fiel eres a las instrucciones?",
                     options: [
-                        { text: "Casi nunca", score: 1 },
-                        { text: "A veces", score: 2 },
-                        { text: "Frecuentemente", score: 3 },
-                        { text: "Siempre", score: 4 }
+                        { text: "Cocino más por intuición que siguiendo los pasos", score: 1 },
+                        { text: "Leo las instrucciones por encima antes de empezar", score: 2 },
+                        { text: "Sigo la mayoría de los pasos con cuidado", score: 3 },
+                        { text: "Sigo cada paso con precisión para que salga bien", score: 4 }
                     ]
                 },
                 {
-                    question: "Cuando aprendes algo nuevo en clase, ¿qué tan curioso(a) eres para investigar más allá de lo que te enseñan?",
+                    category: "calidad",
+                    question: "¿Qué tan importante es para ti que las cosas que haces tengan buena calidad?",
                     options: [
-                        { text: "No me interesa investigar más.", score: 1 },
-                        { text: "A veces, si el tema es muy interesante.", score: 2 },
-                        { text: "Me gusta aprender más, busco información extra ocasionalmente.", score: 3 },
-                        { text: "Siempre busco más información, hago preguntas y me encanta aprender a fondo.", score: 4 }
+                        { text: "Con que quede hecho, me basta", score: 1 },
+                        { text: "Me importa, aunque no es lo primero que priorizo", score: 2 },
+                        { text: "Me importa bastante hacer las cosas bien", score: 3 },
+                        { text: "Es algo fundamental para mí en todo lo que hago", score: 4 }
                     ]
                 },
                 {
-                    question: "Si ves que un compañero está haciendo trampa o no se está esforzando en un trabajo en equipo, ¿qué haces?",
+                    category: "calidad",
+                    question: "Cuando terminas una actividad o tarea, ¿qué tan rápido la entregas o la guardas en su lugar?",
                     options: [
-                        { text: "No digo nada, no quiero problemas.", score: 1 },
-                        { text: "Lo ignoro, es su decisión.", score: 2 },
-                        { text: "Le sugiero que se esfuerce más, pero no insisto.", score: 3 },
-                        { text: "Hablo con él/ella en privado para animarlo(a) a participar y hacer su mejor esfuerzo por el bien del equipo.", score: 4 }
+                        { text: "Suelo dejarla por ahí y ocuparme después", score: 1 },
+                        { text: "La guardo o entrego cuando me acuerdo", score: 2 },
+                        { text: "Intento hacerlo pronto para no olvidarlo", score: 3 },
+                        { text: "La entrego o guardo de inmediato en su lugar", score: 4 }
                     ]
                 },
                 {
-                    question: "¿Qué tan organizado(a) eres con tus materiales escolares, tareas y tiempo de estudio?",
-                    options: [
-                        { text: "Soy muy desordenado(a) y a menudo pierdo cosas.", score: 1 },
-                        { text: "A veces me organizo, pero no siempre.", score: 2 },
-                        { text: "Intento ser organizado(a) la mayoría del tiempo.", score: 3 },
-                        { text: "Soy muy organizado(a), tengo un lugar para todo y planeo mi tiempo de estudio.", score: 4 }
-                    ]
-                },
-                {
-                    question: "Cuando recibes una crítica o sugerencia para mejorar, ¿cómo reaccionas?",
-                    options: [
-                        { text: "Me enojo o me pongo a la defensiva.", score: 1 },
-                        { text: "La escucho, pero no siempre la tomo en cuenta.", score: 2 },
-                        { text: "La escucho y trato de entenderla.", score: 3 },
-                        { text: "La escucho con atención, agradezco la oportunidad de mejorar y la pongo en práctica.", score: 4 }
-                    ]
-                },
-                {
-                    question: "¿Con qué frecuencia te pones metas para ti mismo(a) (ej. mejorar en algo, aprender algo nuevo) y trabajas para lograrlas?",
-                    options: [
-                        { text: "Casi nunca, no me pongo metas.", score: 1 },
-                        { text: "A veces me pongo metas, pero no siempre las sigo.", score: 2 },
-                        { text: "Me gusta ponerme metas y trabajo para ellas, aunque a veces me desanimo.", score: 3 },
-                        { text: "Siempre me pongo metas claras y me esfuerzo con disciplina para alcanzarlas.", score: 4 }
-                    ]
-                },
-                {
+                    category: "calidad",
                     question: "Si tienes que presentar un trabajo frente a la clase, ¿qué tan bien te preparas?",
                     options: [
-                        { text: "No me preparo mucho, improviso.", score: 1 },
-                        { text: "Leo un poco antes de presentar.", score: 2 },
-                        { text: "Me preparo lo suficiente para no equivocarme.", score: 3 },
-                        { text: "Practico varias veces, me aseguro de entender todo y preparo materiales extra para que sea excelente.", score: 4 }
+                        { text: "Prefiero improvisar en el momento", score: 1 },
+                        { text: "Leo un poco antes de presentar", score: 2 },
+                        { text: "Me preparo lo suficiente para sentirme seguro(a)", score: 3 },
+                        { text: "Practico varias veces y preparo material extra", score: 4 }
                     ]
                 },
+
+                // ---- Constancia y disciplina ----
                 {
-                    question: "Cuando un juego o actividad se pone difícil, ¿qué haces?",
+                    category: "constancia",
+                    question: "¿Con qué frecuencia cumples tus promesas y compromisos (con amigos, familia, maestros)?",
                     options: [
-                        { text: "Me rindo y busco algo más fácil.", score: 1 },
-                        { text: "Me frustro y me quejo, pero sigo un poco.", score: 2 },
-                        { text: "Intento un par de veces más antes de rendirme.", score: 3 },
-                        { text: "Persisto, busco estrategias, pido ayuda si la necesito y no me rindo hasta superarlo.", score: 4 }
+                        { text: "Me cuesta cumplir siempre lo que digo", score: 1 },
+                        { text: "A veces se me dificulta, según la situación", score: 2 },
+                        { text: "Frecuentemente cumplo lo que prometo", score: 3 },
+                        { text: "Casi siempre cumplo, aunque me cueste algo de esfuerzo", score: 4 }
                     ]
                 },
                 {
-                    question: "¿Qué tan importante es para ti hacer las cosas bien y con calidad?",
+                    category: "constancia",
+                    question: "¿Qué tan organizado(a) eres con tus materiales escolares, tareas y tiempo de estudio?",
                     options: [
-                        { text: "No es muy importante, con que esté hecho basta.", score: 1 },
-                        { text: "Es algo importante, pero no lo principal.", score: 2 },
-                        { text: "Es importante hacer las cosas bien.", score: 3 },
-                        { text: "Es fundamental para mí hacer las cosas con la mejor calidad posible.", score: 4 }
+                        { text: "Suelo perder cosas o dejar todo para último momento", score: 1 },
+                        { text: "A veces me organizo, pero no siempre lo logro", score: 2 },
+                        { text: "Intento ser organizado(a) la mayoría del tiempo", score: 3 },
+                        { text: "Tengo un sistema que me funciona bien para organizarme", score: 4 }
                     ]
                 },
                 {
-                    question: "Si tienes tiempo libre, ¿qué tan probable es que lo uses para aprender algo nuevo o mejorar una habilidad?",
+                    category: "constancia",
+                    question: "Cuando un juego o actividad se pone difícil, ¿qué sueles hacer?",
                     options: [
-                        { text: "Prefiero no hacer nada o solo jugar.", score: 1 },
-                        { text: "A veces, si me lo piden o me aburro mucho.", score: 2 },
-                        { text: "Me gusta aprender cosas nuevas, lo hago de vez en cuando.", score: 3 },
-                        { text: "Siempre busco oportunidades para aprender, leer o practicar algo que me haga mejor.", score: 4 }
+                        { text: "Prefiero pasar a algo más sencillo", score: 1 },
+                        { text: "Me frustro, pero sigo intentando un poco más", score: 2 },
+                        { text: "Insisto un par de veces más antes de rendirme", score: 3 },
+                        { text: "Busco distintas estrategias hasta lograrlo", score: 4 }
                     ]
                 },
                 {
-                    question: "¿Con qué frecuencia reflexionas sobre cómo podrías mejorar tu rendimiento en la escuela o en tus actividades?",
+                    category: "constancia",
+                    question: "¿Con qué frecuencia te pones metas propias (mejorar en algo, aprender algo nuevo) y trabajas para lograrlas?",
                     options: [
-                        { text: "Casi nunca, no pienso en eso.", score: 1 },
-                        { text: "A veces, si algo sale muy mal.", score: 2 },
-                        { text: "Frecuentemente, pienso en cómo mejorar.", score: 3 },
-                        { text: "Siempre, analizo mis acciones para encontrar maneras de ser mejor.", score: 4 }
+                        { text: "No suelo ponerme metas concretas", score: 1 },
+                        { text: "A veces me pongo metas, pero no siempre las sigo", score: 2 },
+                        { text: "Me gusta ponerme metas, aunque a veces me desanimo", score: 3 },
+                        { text: "Suelo mantenerme constante hasta alcanzar mis metas", score: 4 }
                     ]
                 },
-                // Nuevas 5 preguntas de escenario
                 {
-                    question: "Estás haciendo un dibujo para una exposición escolar y te das cuenta de que hay un pequeño error. ¿Qué haces?",
+                    category: "constancia",
+                    question: "Estás practicando un deporte o instrumento musical y hay una parte que se te dificulta bastante. ¿Qué haces?",
                     options: [
-                        { text: "Lo dejo así, nadie se dará cuenta.", score: 1 },
-                        { text: "Lo corrijo si es muy obvio, si no, lo dejo.", score: 2 },
-                        { text: "Me tomo el tiempo para corregirlo, aunque sea pequeño.", score: 3 },
-                        { text: "Me aseguro de que el dibujo esté impecable, corrigiendo cualquier detalle por pequeño que sea.", score: 4 }
+                        { text: "Prefiero pasar a otra parte que me salga mejor", score: 1 },
+                        { text: "Lo intento un par de veces y lo dejo por ese día", score: 2 },
+                        { text: "Sigo practicando hasta mejorar un poco", score: 3 },
+                        { text: "Practico esa parte repetidamente hasta dominarla", score: 4 }
                     ]
                 },
                 {
-                    question: "Tu maestra te da una tarea con instrucciones un poco confusas. ¿Qué haces?",
-                    options: [
-                        { text: "Hago lo que creo entender, sin preguntar.", score: 1 },
-                        { text: "Le pregunto a un compañero, pero si él tampoco sabe, lo dejo así.", score: 2 },
-                        { text: "Intento resolverlo y, si no puedo, le pregunto a la maestra.", score: 3 },
-                        { text: "Leo las instrucciones varias veces, intento comprender, y si aún tengo dudas, pregunto a la maestra para asegurarme de hacerla bien.", score: 4 }
-                    ]
-                },
-                {
-                    question: "Estás practicando un deporte o un instrumento musical y te cuesta mucho una parte. ¿Qué haces?",
-                    options: [
-                        { text: "Me rindo en esa parte y paso a otra cosa.", score: 1 },
-                        { text: "Lo intento un par de veces y si no sale, lo dejo por ese día.", score: 2 },
-                        { text: "Sigo practicando hasta que me salga un poco mejor.", score: 3 },
-                        { text: "Practico esa parte una y otra vez, buscando diferentes formas de mejorar hasta dominarla.", score: 4 }
-                    ]
-                },
-                {
-                    question: "Cuando presentas un trabajo en equipo, ¿qué tan bien te aseguras de que la parte de todos esté lista y sea de calidad?",
-                    options: [
-                        { text: "Solo me preocupo por mi parte.", score: 1 },
-                        { text: "Reviso mi parte y un poco la de los demás.", score: 2 },
-                        { text: "Reviso que todos hayan hecho su parte y que se vea bien.", score: 3 },
-                        { text: "Me aseguro de que todas las partes del trabajo en equipo estén bien hechas y que el resultado final sea excelente para todos.", score: 4 }
-                    ]
-                },
-                {
+                    category: "constancia",
                     question: "Si tienes que estudiar para un examen importante, ¿cómo organizas tu tiempo?",
                     options: [
-                        { text: "Estudio un poco el día antes del examen.", score: 1 },
-                        { text: "Estudio cuando tengo ganas, sin un plan fijo.", score: 2 },
-                        { text: "Hago un plan de estudio, pero no siempre lo sigo al pie de la letra.", score: 3 },
-                        { text: "Organizo mi tiempo con anticipación, creo un horario de estudio y me esfuerzo por seguirlo para estar bien preparado(a).", score: 4 }
-                    ]
-                },
-                // Nuevas 5 preguntas de escenario para un total de 25
-                {
-                    question: "Estás aprendiendo a cocinar una receta nueva. ¿Qué tan fiel eres a las instrucciones?",
-                    options: [
-                        { text: "No sigo las instrucciones, hago lo que me parece.", score: 1 },
-                        { text: "Leo las instrucciones por encima y cocino.", score: 2 },
-                        { text: "Intento seguir la mayoría de los pasos.", score: 3 },
-                        { text: "Sigo cada paso cuidadosamente, mido los ingredientes con precisión para que la receta salga perfecta.", score: 4 }
+                        { text: "Suelo estudiar el día anterior", score: 1 },
+                        { text: "Estudio cuando tengo ganas, sin un plan fijo", score: 2 },
+                        { text: "Hago un plan, aunque no siempre lo sigo al pie de la letra", score: 3 },
+                        { text: "Organizo mi tiempo con anticipación y sigo un horario de estudio", score: 4 }
                     ]
                 },
                 {
-                    question: "Si te piden que ayudes a un compañero con algo que ya sabes hacer muy bien, ¿cómo lo haces?",
+                    category: "constancia",
+                    question: "Te asignan una tarea nueva y no sabes bien cómo hacerla. ¿Qué haces?",
                     options: [
-                        { text: "Lo hago por él/ella para terminar rápido.", score: 1 },
-                        { text: "Le doy la respuesta sin explicarle cómo llegué a ella.", score: 2 },
-                        { text: "Le explico cómo hacerlo, pero si no entiende rápido, me canso.", score: 3 },
-                        { text: "Le explico con paciencia, le muestro los pasos y me aseguro de que entienda para que pueda hacerlo por sí mismo(a) la próxima vez.", score: 4 }
+                        { text: "Prefiero que alguien más se encargue de esa parte", score: 1 },
+                        { text: "Hago lo que puedo, aunque no esté seguro(a) de que esté bien", score: 2 },
+                        { text: "Busco algo de información o pido ayuda una vez", score: 3 },
+                        { text: "Investigo y pregunto hasta entenderla a fondo", score: 4 }
                     ]
                 },
                 {
-                    question: "Cuando terminas una actividad, ¿qué tan rápido la entregas o la guardas en su lugar?",
+                    category: "constancia",
+                    question: "Si tienes tiempo libre, ¿qué tan probable es que lo uses para aprender algo nuevo o mejorar una habilidad?",
                     options: [
-                        { text: "La dejo por ahí, no me importa si se pierde o se daña.", score: 1 },
-                        { text: "La entrego o guardo cuando me acuerdo o me lo piden.", score: 2 },
-                        { text: "Intento entregarla o guardarla pronto para no olvidarme.", score: 3 },
-                        { text: "La entrego o guardo de inmediato en el lugar correcto, manteniendo todo organizado y listo para la próxima vez.", score: 4 }
+                        { text: "Prefiero usarlo para descansar o distraerme", score: 1 },
+                        { text: "A veces, si me lo piden o me aburro un poco", score: 2 },
+                        { text: "De vez en cuando aprovecho para aprender algo", score: 3 },
+                        { text: "Suelo buscar oportunidades para aprender o practicar algo", score: 4 }
+                    ]
+                },
+
+                // ---- Apertura a mejorar ----
+                {
+                    category: "apertura",
+                    question: "Cuando cometes un error en una tarea o actividad, ¿qué sueles hacer?",
+                    options: [
+                        { text: "Prefiero que no se note demasiado", score: 1 },
+                        { text: "Me siento mal, pero no siempre hago algo al respecto", score: 2 },
+                        { text: "Lo reconozco y trato de corregirlo si es sencillo", score: 3 },
+                        { text: "Lo reconozco, pido ayuda si la necesito y busco corregirlo bien", score: 4 }
                     ]
                 },
                 {
-                    question: "Si tienes que hacer un trabajo de investigación, ¿qué tan diversas son tus fuentes de información?",
+                    category: "apertura",
+                    question: "Cuando aprendes algo nuevo en clase, ¿qué tan curioso(a) eres por investigar más allá de lo enseñado?",
                     options: [
-                        { text: "Solo uso la primera fuente que encuentro.", score: 1 },
-                        { text: "Uso un par de fuentes, pero no las comparo.", score: 2 },
-                        { text: "Busco varias fuentes para tener más información.", score: 3 },
-                        { text: "Consulto diversas fuentes (libros, internet, personas) y comparo la información para asegurar que mi investigación sea completa y precisa.", score: 4 }
+                        { text: "Con lo visto en clase me es suficiente", score: 1 },
+                        { text: "A veces, si el tema me llama mucho la atención", score: 2 },
+                        { text: "Me gusta indagar un poco más de vez en cuando", score: 3 },
+                        { text: "Suelo buscar información extra con frecuencia", score: 4 }
                     ]
                 },
                 {
-                    question: "¿Con qué frecuencia buscas retroalimentación (preguntar 'cómo lo hice' o 'qué puedo mejorar') después de una actividad?",
+                    category: "apertura",
+                    question: "Cuando recibes una crítica o sugerencia para mejorar, ¿cómo reaccionas normalmente?",
                     options: [
-                        { text: "Casi nunca, no me gusta que me critiquen.", score: 1 },
-                        { text: "A veces, si me siento inseguro(a).", score: 2 },
-                        { text: "Frecuentemente, me gusta saber cómo mejorar.", score: 3 },
-                        { text: "Siempre, valoro mucho la retroalimentación para seguir creciendo y mejorando continuamente.", score: 4 }
+                        { text: "Me cuesta recibirla bien en el momento", score: 1 },
+                        { text: "La escucho, aunque no siempre la tengo en cuenta", score: 2 },
+                        { text: "La escucho e intento entenderla", score: 3 },
+                        { text: "La recibo con apertura y busco ponerla en práctica", score: 4 }
+                    ]
+                },
+                {
+                    category: "apertura",
+                    question: "¿Con qué frecuencia buscas retroalimentación (preguntar cómo lo hiciste o qué puedes mejorar) después de una actividad?",
+                    options: [
+                        { text: "Prefiero no preguntar demasiado sobre eso", score: 1 },
+                        { text: "A veces, si me siento inseguro(a) del resultado", score: 2 },
+                        { text: "Frecuentemente, me interesa saber cómo mejorar", score: 3 },
+                        { text: "Casi siempre la busco, me ayuda a seguir creciendo", score: 4 }
+                    ]
+                },
+                {
+                    category: "apertura",
+                    question: "Si tienes que hacer un trabajo de investigación, ¿qué tan variadas suelen ser tus fuentes de información?",
+                    options: [
+                        { text: "Suelo usar la primera fuente que encuentro", score: 1 },
+                        { text: "Reviso un par de fuentes, sin comparar mucho", score: 2 },
+                        { text: "Busco varias fuentes para tener más información", score: 3 },
+                        { text: "Comparo distintas fuentes para asegurar que la información sea completa", score: 4 }
+                    ]
+                },
+                {
+                    category: "apertura",
+                    question: "Si ves que un compañero de equipo no se está esforzando en un trabajo grupal, ¿qué haces?",
+                    options: [
+                        { text: "Prefiero no decir nada al respecto", score: 1 },
+                        { text: "Lo noto, pero pienso que es su decisión", score: 2 },
+                        { text: "Le sugiero que se esfuerce más, sin insistir demasiado", score: 3 },
+                        { text: "Hablo con él/ella para animarlo(a) a participar más", score: 4 }
+                    ]
+                },
+                {
+                    category: "apertura",
+                    question: "Tu maestra te da instrucciones un poco confusas para una tarea. ¿Qué haces?",
+                    options: [
+                        { text: "Hago lo que creo entender, sin preguntar", score: 1 },
+                        { text: "Le pregunto a un compañero, y si tampoco sabe, lo dejo así", score: 2 },
+                        { text: "Intento resolverlo y, si no puedo, pregunto a la maestra", score: 3 },
+                        { text: "Leo varias veces y, si aún tengo dudas, pregunto para asegurarme de hacerlo bien", score: 4 }
+                    ]
+                },
+                {
+                    category: "apertura",
+                    question: "Si te piden ayudar a un compañero con algo que ya sabes hacer bien, ¿cómo sueles ayudarlo?",
+                    options: [
+                        { text: "Prefiero hacerlo yo mismo(a) para que quede rápido", score: 1 },
+                        { text: "Le doy la respuesta sin explicar mucho el proceso", score: 2 },
+                        { text: "Le explico cómo hacerlo, aunque a veces pierdo la paciencia", score: 3 },
+                        { text: "Le explico con calma y me aseguro de que entienda", score: 4 }
+                    ]
+                },
+                {
+                    category: "apertura",
+                    question: "¿Con qué frecuencia reflexionas sobre cómo podrías mejorar tu rendimiento en la escuela o tus actividades?",
+                    options: [
+                        { text: "Casi nunca pienso en eso de forma consciente", score: 1 },
+                        { text: "A veces, sobre todo si algo sale mal", score: 2 },
+                        { text: "Frecuentemente pienso en cómo mejorar", score: 3 },
+                        { text: "Suelo analizar mis acciones para seguir creciendo", score: 4 }
                     ]
                 }
             ];
+
+            const categoryInfo = {
+                calidad: { title: "Calidad y atención al detalle", color: "#007bff" },
+                constancia: { title: "Constancia y disciplina", color: "#6f42c1" },
+                apertura: { title: "Apertura a mejorar", color: "#17a2b8" }
+            };
 
             const form = document.getElementById('excellenceForm');
             const submitBtn = document.getElementById('submitBtn');
             const resultsDiv = document.getElementById('results');
             const scoreText = document.getElementById('scoreText');
             const feedbackText = document.getElementById('feedbackText');
-            const sendResultsBtn = document.getElementById('sendResultsBtn');
+            const categoryResultsDiv = document.getElementById('categoryResults');
+            const goHomeBtn = document.getElementById('goHomeBtn');
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
             const scoreCanvas = document.getElementById('scoreCanvas');
             const ctx = scoreCanvas.getContext('2d');
 
-            let currentScore = 0;
-            let currentFeedback = "";
             let studentFirstName = '';
             let studentLastName = '';
             let studentCourse = '';
 
             function loadQuestions() {
-                form.innerHTML = ''; // Limpiar formulario
+                form.innerHTML = '';
 
-                // *** INICIO DE LA MODIFICACIÓN: Añadir campos de estudiante ***
                 form.insertAdjacentHTML('beforeend', `
                     <div class="question-block">
                         <p>Nombres</p>
@@ -597,29 +486,31 @@
                         <select id="studentCourse" name="studentCourse" required>
                             <option value="">Selecciona tu curso</option>
                             <option value="T">Transición</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
+                            <option value="1">1</option><option value="2">2</option>
+                            <option value="3">3</option><option value="4">4</option>
+                            <option value="5">5</option><option value="6">6</option>
+                            <option value="7">7</option><option value="8">8</option>
+                            <option value="9">9</option><option value="10">10</option>
                             <option value="11">11</option>
                         </select>
                     </div>
                 `);
-                // *** FIN DE LA MODIFICACIÓN ***
 
+                let lastCategory = null;
                 questions.forEach((q, index) => {
+                    if (q.category !== lastCategory) {
+                        const heading = document.createElement('div');
+                        heading.className = 'category-heading';
+                        heading.textContent = categoryInfo[q.category].title;
+                        form.appendChild(heading);
+                        lastCategory = q.category;
+                    }
                     const questionBlock = document.createElement('div');
                     questionBlock.classList.add('question-block');
                     questionBlock.innerHTML = `
                         <p>${index + 1}. ${q.question}</p>
                         <div class="options">
-                            ${q.options.map((option, optIndex) => `
+                            ${q.options.map(option => `
                                 <label>
                                     <input type="radio" name="question${index}" value="${option.score}" required>
                                     ${option.text}
@@ -636,8 +527,7 @@
                 const totalQuestions = questions.length;
                 let answeredQuestions = 0;
                 questions.forEach((q, index) => {
-                    const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-                    if (selectedOption) {
+                    if (document.querySelector(`input[name="question${index}"]:checked`)) {
                         answeredQuestions++;
                     }
                 });
@@ -654,7 +544,6 @@
                 const radius = Math.min(centerX, centerY) - 10;
 
                 ctx.clearRect(0, 0, scoreCanvas.width, scoreCanvas.height);
-
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
                 ctx.strokeStyle = '#e0e0e0';
@@ -664,7 +553,7 @@
                 const endAngle = (score / maxScore) * 2 * Math.PI;
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle - Math.PI / 2);
-                ctx.strokeStyle = '#007bff'; /* Azul para excelencia */
+                ctx.strokeStyle = '#007bff';
                 ctx.lineWidth = 15;
                 ctx.stroke();
 
@@ -675,126 +564,40 @@
                 ctx.fillText(`${Math.round((score / maxScore) * 100)}%`, centerX, centerY);
             }
 
-            function calculateResults() {
-                // *** INICIO DE LA MODIFICACIÓN: Validación de campos de estudiante ***
-                studentFirstName = document.getElementById('studentFirstName').value.trim();
-                studentLastName = document.getElementById('studentLastName').value.trim();
-                studentCourse = document.getElementById('studentCourse').value;
-
-                if (!studentFirstName || !studentLastName) {
-                    showModal("Por favor, ingresa tus nombres y apellidos.");
-                    return;
+            function getGlobalFeedback(scorePercentage) {
+                if (scorePercentage >= 80) {
+                    return { headline: "Demuestras una gran orientación hacia la excelencia.", closing: "Sigue cultivando esta actitud de mejora constante; es un motor muy valioso para lo que hagas en el futuro." };
+                } else if (scorePercentage >= 60) {
+                    return { headline: "Tienes una buena inclinación hacia la excelencia.", closing: "Con un poco más de constancia en los detalles pequeños, esta actitud se fortalece todavía más." };
+                } else if (scorePercentage >= 40) {
+                    return { headline: "Estás en camino de desarrollar tu excelencia.", closing: "Ir mejorando de a pasos pequeños y sostenidos suele funcionar mejor que buscar cambios grandes de golpe." };
+                } else {
+                    return { headline: "Es un buen momento para reflexionar sobre tu excelencia.", closing: "Nadie logra la excelencia de un día para otro; identificar un solo hábito para trabajar ya es un buen comienzo." };
                 }
-                if (!studentCourse) {
-                    showModal("Por favor, selecciona tu curso.");
-                    return;
-                }
-                // *** FIN DE LA MODIFICACIÓN ***
-
-                let totalScore = 0;
-                let allAnswered = true;
-
-                questions.forEach((q, index) => {
-                    const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-                    if (selectedOption) {
-                        totalScore += parseInt(selectedOption.value);
-                    } else {
-                        allAnswered = false;
-                    }
-                });
-
-                if (!allAnswered) {
-                    showModal('Por favor, responde todas las preguntas antes de ver los resultados.');
-                    return;
-                }
-
-                const maxScore = questions.length * 4;
-                currentScore = totalScore;
-                currentFeedback = getFeedback(totalScore, maxScore);
-
-                scoreText.textContent = `Tu puntuación es: ${totalScore} de ${maxScore} puntos.`;
-                feedbackText.innerHTML = currentFeedback;
-                drawScoreVisualization(totalScore, maxScore);
-
-                form.classList.add('hidden');
-                submitBtn.classList.add('hidden');
-                resultsDiv.classList.remove('hidden');
             }
 
-            function getFeedback(score, maxScore) {
-                const scorePercentage = (score / maxScore) * 100;
-                let feedback = "";
-                let strengths = [];
-                let opportunities = [];
-
-                if (scorePercentage >= 80) {
-                    feedback = "¡Felicidades! **Demuestras una gran excelencia.**";
-                    strengths.push("Siempre te esfuerzas por hacer tu mejor trabajo, prestando atención a los detalles.");
-                    strengths.push("Aprendes de tus errores y buscas corregirlos activamente.");
-                    strengths.push("Eres muy organizado(a) y cumples tus compromisos con disciplina.");
-                    strengths.push("Tienes una gran curiosidad y siempre buscas aprender más y mejorar tus habilidades.");
-                    strengths.push("Eres proactivo(a) en el trabajo en equipo y te aseguras de la calidad del trabajo de todos.");
-                    strengths.push("Manejas bien las críticas, viéndolas como oportunidades para crecer.");
-                    strengths.push("Te pones metas claras y trabajas con persistencia para alcanzarlas.");
-                    strengths.push("Tienes una excelente capacidad para seguir instrucciones detalladas y para explicar a otros con paciencia.");
-                    strengths.push("Eres muy responsable al entregar y organizar tus materiales.");
-                    strengths.push("Buscas activamente retroalimentación para la mejora continua.");
-                    opportunities.push("Sigue cultivando esta actitud de mejora constante, ¡es tu superpoder!");
-                } else if (scorePercentage >= 60) {
-                    feedback = "¡Muy bien! **Tienes una buena inclinación hacia la excelencia.**";
-                    strengths.push("Te esfuerzas por hacer un buen trabajo la mayoría del tiempo.");
-                    strengths.push("Reconoces tus errores y tienes la intención de corregirlos.");
-                    strengths.push("Generalmente eres organizado(a) y cumples tus compromisos.");
-                    strengths.push("Te gusta aprender cosas nuevas y mejorar tus habilidades.");
-                    strengths.push("Participas en el trabajo en equipo y te preocupas por el resultado.");
-                    opportunities.push("Puedes ser más constante en la atención a los detalles en todas tus tareas.");
-                    opportunities.push("Busca más activamente la retroalimentación para identificar áreas de mejora.");
-                    opportunities.push("Practica la persistencia cuando las cosas se ponen difíciles; no te rindas fácilmente.");
-                    opportunities.push("Intenta ser más proactivo(a) al organizar tu tiempo de estudio y tus materiales.");
-                    opportunities.push("Anímate a ir más allá de lo básico en tus investigaciones y proyectos.");
-                } else if (scorePercentage >= 40) {
-                    feedback = "Estás en el camino. **Puedes mejorar tu excelencia.**";
-                    strengths.push("Tienes potencial para desarrollar una actitud más excelente.");
-                    strengths.push("Reconoces la importancia de hacer las cosas bien.");
-                    strengths.push("Estás dispuesto(a) a aprender y crecer en tus habilidades.");
-                    opportunities.push("Necesitas poner más atención a los detalles en tus trabajos y tareas.");
-                    opportunities.push("Es importante que reconozcas tus errores y te esfuerces por corregirlos, no solo por terminar.");
-                    opportunities.push("Trabaja en tu organización y en cumplir tus promesas de manera más consistente.");
-                    opportunities.push("Anímate a investigar más y a ir más allá de lo que te piden en tus estudios.");
-                    opportunities.push("Practica la paciencia y la persistencia cuando te enfrentes a desafíos.");
-                    opportunities.push("Busca activamente la retroalimentación para saber cómo puedes mejorar.");
-                } else {
-                    feedback = "Es un buen momento para **reflexionar sobre la excelencia.**";
-                    strengths.push("Reconoces que hay espacio para mejorar en tu forma de hacer las cosas.");
-                    opportunities.push("Necesitas esforzarte más en todas tus tareas, no solo en las que te gustan.");
-                    opportunities.push("Aprende a aceptar tus errores y a buscar soluciones en lugar de culpar o esconder.");
-                    opportunities.push("Trabaja en tu organización y en la importancia de los detalles para lograr mejores resultados.");
-                    opportunities.push("Desarrolla la curiosidad y la iniciativa para aprender por ti mismo(a).");
-                    opportunities.push("La persistencia es clave; no te rindas cuando las cosas se pongan difíciles.");
-                    opportunities.push("Abre tu mente a la retroalimentación; es una herramienta valiosa para tu crecimiento.");
-                    opportunities.push("Establece metas pequeñas y trabaja para cumplirlas, esto te ayudará a construir disciplina.");
+            const categoryFeedback = {
+                calidad: {
+                    high: "Prestas atención genuina a los detalles y te importa que el resultado quede bien hecho.",
+                    mid: "Te importa la calidad del trabajo, aunque no siempre revisas los detalles a fondo.",
+                    low: "Sueles priorizar terminar rápido sobre revisar los detalles; es un área donde puedes ganar mucho con práctica."
+                },
+                constancia: {
+                    high: "Eres constante: te organizas, te pones metas y sigues intentando cuando algo se pone difícil.",
+                    mid: "Tienes disciplina en algunos momentos, pero te cuesta sostenerla siempre.",
+                    low: "Mantener la constancia (organización, persistencia, metas) es todavía un reto para ti."
+                },
+                apertura: {
+                    high: "Recibes bien la retroalimentación y buscas activamente formas de mejorar y aprender más.",
+                    mid: "Aceptas la crítica cuando llega, aunque no siempre la buscas por iniciativa propia.",
+                    low: "Recibir críticas o buscar mejorar activamente es un área que puedes desarrollar más."
                 }
+            };
 
-                let feedbackHtml = `<h3>${feedback}</h3>`;
-                if (strengths.length > 0) {
-                    feedbackHtml += `<h4>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-thumbs-up"><path d="M7 10v12c0 1.1.9 2 2 2h3V10H7z"/><path d="M10 10V2.1L14 10h7l-3 7 3 7H10z"/></svg>
-                        Fortalezas:
-                    </h4><ul>`;
-                    strengths.forEach(s => feedbackHtml += `<li>${s}</li>`);
-                    feedbackHtml += "</ul>";
-                }
-                if (opportunities.length > 0) {
-                    feedbackHtml += `<h4>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lightbulb"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 3c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M11 17h2"/><path d="M12 18v4"/></svg>
-                        Oportunidades de mejora:
-                    </h4><ul>`;
-                    opportunities.forEach(w => feedbackHtml += `<li>${w}</li>`);
-                    feedbackHtml += "</ul>";
-                }
-                feedbackHtml += "<p>Recuerda que la excelencia es un camino de mejora continua.</p>";
-
-                return feedbackHtml;
+            function categoryLevel(pct) {
+                if (pct >= 70) return 'high';
+                if (pct >= 45) return 'mid';
+                return 'low';
             }
 
             function showModal(message) {
@@ -806,27 +609,13 @@
 
                 const messageParagraph = document.createElement('p');
                 messageParagraph.textContent = message;
-                messageParagraph.style.cssText = `
-                    font-size: 1.1em;
-                    margin-bottom: 20px;
-                    color: #333;
-                `;
+                messageParagraph.style.cssText = `font-size: 1.1em; margin-bottom: 20px; color: #333;`;
 
                 const closeButton = document.createElement('button');
                 closeButton.textContent = 'Entendido';
-                closeButton.style.cssText = `
-                    background-color: #007bff;
-                    color: white;
-                    padding: 10px 20px;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 1em;
-                    transition: background-color 0.3s ease;
-                `;
+                closeButton.style.cssText = `background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease;`;
                 closeButton.onmouseover = () => closeButton.style.backgroundColor = '#0056b3';
                 closeButton.onmouseout = () => closeButton.style.backgroundColor = '#007bff';
-
                 closeButton.addEventListener('click', () => {
                     document.body.removeChild(modalOverlay);
                 });
@@ -837,59 +626,56 @@
                 document.body.appendChild(modalOverlay);
             }
 
-            async function sendResultsToServer() {
-                // *** INICIO DE LA MODIFICACIÓN: Datos de estudiante ya validados ***
-                if (!studentFirstName || !studentLastName || !studentCourse) {
-                    showModal("No se pueden enviar los resultados. Faltan datos del estudiante.");
-                    return;
-                }
-                // *** FIN DE LA MODIFICACIÓN ***
+            function displayResults(scoreData) {
+                scoreText.textContent = `Tu puntuación es: ${scoreData.totalScore} de ${scoreData.maxScore} puntos.`;
 
-                const detailedAnswers = {};
-                questions.forEach((q, index) => {
-                    const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-                    if (selectedOption) {
-                        detailedAnswers[`Pregunta ${index + 1}`] = {
-                            pregunta: q.question,
-                            respuesta: q.options.find(opt => opt.score === parseInt(selectedOption.value)).text,
-                            puntaje: parseInt(selectedOption.value)
-                        };
-                    }
+                const globalPct = (scoreData.totalScore / scoreData.maxScore) * 100;
+                const global = getGlobalFeedback(globalPct);
+
+                let categoryHtml = '';
+                Object.keys(categoryInfo).forEach(cat => {
+                    const info = categoryInfo[cat];
+                    const catData = scoreData.categoryScores[cat];
+                    const pct = (catData.score / catData.max) * 100;
+                    const level = categoryLevel(pct);
+                    categoryHtml += `
+                        <div class="category-result">
+                            <div class="category-result-title">${info.title}</div>
+                            <div class="category-bar-bg"><div class="category-bar-fill" style="width:${pct}%; background-color:${info.color};"></div></div>
+                            <div class="category-pct">${Math.round(pct)}% — ${categoryFeedback[cat][level]}</div>
+                        </div>
+                    `;
                 });
+                categoryResultsDiv.innerHTML = categoryHtml;
 
-                const resultsData = {
-                    // *** INICIO DE LA MODIFICACIÓN: Usar campos estandarizados ***
-                    studentFirstName: studentFirstName,
-                    studentLastName: studentLastName,
-                    course: studentCourse,
-                    // *** FIN DE LA MODIFICACIÓN ***
-                    score: currentScore,
-                    maxScore: questions.length * 4,
-                    feedback: currentFeedback,
-                    timestamp: new Date().toISOString(),
-                    detailedAnswers: detailedAnswers,
-                    quizType: "Excelencia"
-                };
+                const sortedCats = Object.keys(categoryInfo).map(cat => {
+                    const catData = scoreData.categoryScores[cat];
+                    return { cat, pct: (catData.score / catData.max) * 100 };
+                }).sort((a, b) => b.pct - a.pct);
+                const strongestCat = sortedCats[0];
+                const weakestCat = sortedCats[sortedCats.length - 1];
 
-                try {
-                    await window.submitQuizResult(resultsData);
-                    showModal("¡Tus resultados han sido enviados y guardados con éxito!");
-                    sendResultsBtn.classList.add('hidden');
-                    document.getElementById('autoRedirectMsg').classList.remove('hidden');
-                    document.getElementById('goHomeBtn').classList.remove('hidden');
-                    startAutoRedirect();
-                } catch (error) {
-                    console.error('Error:', error);
-                    showModal('No se pudo guardar tu resultado. Verifica tu conexión a internet e inténtalo de nuevo.');
+                let feedbackHtml = `<h3>${global.headline}</h3>`;
+                feedbackHtml += `<p>Tu punto más fuerte está en <strong>${categoryInfo[strongestCat.cat].title.toLowerCase()}</strong>. `;
+                if (strongestCat.pct - weakestCat.pct >= 15) {
+                    feedbackHtml += `Donde tienes más margen de crecimiento es en <strong>${categoryInfo[weakestCat.cat].title.toLowerCase()}</strong> — trabajar ahí probablemente tenga el mayor impacto en tu excelencia general.</p>`;
+                } else {
+                    feedbackHtml += `Tus tres áreas están bastante parejas, lo cual muestra una actitud equilibrada frente a la excelencia.</p>`;
                 }
+                feedbackHtml += `<p>${global.closing}</p>`;
+
+                feedbackText.innerHTML = feedbackHtml;
+                drawScoreVisualization(scoreData.totalScore, scoreData.maxScore);
+
+                form.classList.add('hidden');
+                submitBtn.classList.add('hidden');
+                resultsDiv.classList.remove('hidden');
+                document.getElementById('autoRedirectMsg').classList.remove('hidden');
+                startAutoRedirect();
             }
 
-            // Redirige automáticamente al index unos segundos después de enviar los
-            // resultados con éxito, para que el estudiante no se quede "atrapado" en
-            // la pantalla de resultados. El botón "Volver al inicio ahora" permite
-            // salir de inmediato.
             let autoRedirectTimer = null;
-            function startAutoRedirect(seconds = 6) {
+            function startAutoRedirect(seconds = 8) {
                 const countEl = document.getElementById('autoRedirectCount');
                 let remaining = seconds;
                 if (countEl) countEl.textContent = remaining;
@@ -904,13 +690,81 @@
                 }, 1000);
             }
 
-            document.getElementById('goHomeBtn').addEventListener('click', () => {
+            async function calculateAndSendResults() {
+                studentFirstName = document.getElementById('studentFirstName').value.trim();
+                studentLastName = document.getElementById('studentLastName').value.trim();
+                studentCourse = document.getElementById('studentCourse').value;
+
+                if (!studentFirstName || !studentLastName) {
+                    showModal("Por favor, ingresa tus nombres y apellidos.");
+                    return;
+                }
+                if (!studentCourse) {
+                    showModal("Por favor, selecciona tu curso.");
+                    return;
+                }
+
+                let totalScore = 0;
+                let allAnswered = true;
+                const detailedAnswers = {};
+                const categoryScores = {
+                    calidad: { score: 0, max: 0 },
+                    constancia: { score: 0, max: 0 },
+                    apertura: { score: 0, max: 0 }
+                };
+
+                questions.forEach((q, index) => {
+                    categoryScores[q.category].max += 4;
+                    const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                    if (selectedOption) {
+                        const scoreValue = parseInt(selectedOption.value);
+                        totalScore += scoreValue;
+                        categoryScores[q.category].score += scoreValue;
+                        detailedAnswers[`Pregunta ${index + 1}`] = {
+                            pregunta: q.question,
+                            categoria: categoryInfo[q.category].title,
+                            respuesta: q.options.find(opt => opt.score === scoreValue).text,
+                            puntaje: scoreValue
+                        };
+                    } else {
+                        allAnswered = false;
+                    }
+                });
+
+                if (!allAnswered) {
+                    showModal('Por favor, responde todas las preguntas antes de continuar.');
+                    return;
+                }
+
+                const maxScore = questions.length * 4;
+
+                const resultsData = {
+                    studentFirstName: studentFirstName,
+                    studentLastName: studentLastName,
+                    course: studentCourse,
+                    score: totalScore,
+                    maxScore: maxScore,
+                    categoryScores: categoryScores,
+                    timestamp: new Date().toISOString(),
+                    detailedAnswers: detailedAnswers,
+                    quizType: "Excelencia"
+                };
+
+                try {
+                    await window.submitQuizResult(resultsData);
+                    displayResults({ totalScore, maxScore, categoryScores });
+                } catch (error) {
+                    console.error('Error:', error);
+                    showModal('No se pudo guardar tu resultado. Verifica tu conexión a internet e inténtalo de nuevo.');
+                }
+            }
+
+            submitBtn.addEventListener('click', calculateAndSendResults);
+
+            goHomeBtn.addEventListener('click', () => {
                 if (autoRedirectTimer) clearInterval(autoRedirectTimer);
                 window.location.href = '../index.html';
             });
-
-            submitBtn.addEventListener('click', calculateResults);
-            sendResultsBtn.addEventListener('click', sendResultsToServer);
 
             loadQuestions();
         });
@@ -934,17 +788,10 @@
     const app = initializeApp(firebaseConfig);
     const db  = getFirestore(app);
     const auth = getAuth(app);
-
-    // Inicia sesión anónima al cargar (silencioso, el estudiante no nota nada).
-    // Esto permite que la regla de Firestore "allow create: if request.auth != null"
-    // se cumpla sin que el estudiante tenga que registrarse.
     signInAnonymously(auth).catch(e => console.warn('Auth anónima fallida:', e));
 
     window.submitQuizResult = async function (data) {
-        // Si por algún motivo aún no hay sesión, intentar de nuevo antes de guardar
-        if (!auth.currentUser) {
-            await signInAnonymously(auth);
-        }
+        if (!auth.currentUser) { await signInAnonymously(auth); }
         await addDoc(collection(db, "quizResults"), {
             ...data,
             createdAt: serverTimestamp()
